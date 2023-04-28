@@ -8,7 +8,7 @@ const Input = styled(({label, ...props})=>{
         </Stack>
     )
 })(({theme})=>({
-    "& .MuiInputBase-root.MuiOutlinedInput-root":{
+   "& .MuiInputBase-root.MuiOutlinedInput-root":{
         backgroundColor:"#1d1d1d",
         color:"#fff",
        

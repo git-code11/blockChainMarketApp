@@ -18,7 +18,7 @@ export default ()=>{
     const {address} = useAccount();
 
     const { data, isError, isLoading } = useBalance({address});
-
+    
     return (
         address?
             (
@@ -28,7 +28,7 @@ export default ()=>{
                     <Box>
                         <Typography fontWeight="bold" color="#fff">
                             {isError?"---":(
-                                isLoading?<Skeleton sx={{backgroundColor:"#ffffff4d"}} width={80}/>:`${data?.formatted??""} ${data?.symbol??""}`
+                                isLoading?<Skeleton sx={{backgroundColor:"#ffffff4d"}} width={80}/>:`${data?.formatted?(+data?.formatted).toFixed(3):""} ${data?.symbol??""}`
                             )}
                             </Typography>
                         <ElTypography maxWidth="15ch" variant="body2" fontStyle="italic" color="#fff">{address}</ElTypography>                            

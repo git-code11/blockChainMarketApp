@@ -9,16 +9,16 @@ import Stack from "@mui/material/Stack";
 
 import { useAccount, useDisconnect } from 'wagmi';
 
-import useUserToken from "../context/hook/useUserToken";
+import useToken from "../context/hook/user/useToken";
 
 import CircularProgress from "@mui/material/CircularProgress";
 
 import Alert from "@mui/material/Alert";
 
 export default ()=>{
-    const {isConnected } = useAccount();
+    const {isConnected} = useAccount();
     const {disconnect} = useDisconnect();
-    const {data, error, isLoading, refresh} = useUserToken();
+    const {data, error, isLoading, refresh} = useToken();
     //console.log("verifyWallet", data, isConnected);
     const open = useMemo(()=>isConnected && !data,[isConnected, data]);
     

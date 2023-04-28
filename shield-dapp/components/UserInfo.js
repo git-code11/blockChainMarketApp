@@ -1,17 +1,20 @@
-
+import Link from "next/link";
 import { Button, Typography } from "@mui/material";
 
 import { Container, Box, Stack, Avatar, Paper} from "@mui/material";
 
 import ElTypography from "./ElTypography";
 
-import useUserId from "../context/hook/useUserId";
+import useUserId from "../context/hook/user/useId";
+
+import { useProfile } from "../context/hook/user/profile";
 
 import {temp_c, temp_p} from "../temp";
 
 export default ()=>{
 
     const {isMe, uid} = useUserId();
+    const {data:profile} = useProfile(uid);
 
     return (
         <Box>
@@ -23,12 +26,12 @@ export default ()=>{
             </Stack>
             <Container sx={{mt:"48px", mb:3}}>
                 <Stack alignItems="center">
-                    <Typography fontWeight="bold" variant="h6">@Perixxonru35</Typography>
+                    <Typography fontWeight="bold" variant="h6">@{profile?.userName}</Typography>
                     <ElTypography sx={{maxWidth:"15ch"}} variant="subtitle1">{uid}</ElTypography>
                 </Stack>
 
                 {isMe?<Stack alignItems="center" my={2}>
-                    <Button variant="outlined">EDIT PROFILE</Button>
+                    <Button variant="outlined" component={Link} href="/user_update">EDIT PROFILE</Button>
                 </Stack>:<Box/>}
             </Container>
         </Box>

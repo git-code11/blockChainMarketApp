@@ -10,7 +10,7 @@ import WalletOutlined from '@mui/icons-material/WalletOutlined';
 
 import { useAccount, useDisconnect, useConnect } from 'wagmi';
 
-import useUserToken from "../context/hook/useUserToken";
+import useToken from "../context/hook/user/useToken";
 
 import {hardhat} from 'wagmi/chains';
 
@@ -19,7 +19,7 @@ export default ()=>{
     //const { isOpen, open} = useWeb3Modal();
     const {connect, connectors} = useConnect();
     
-    const {data, error, isLoading, clear} = useUserToken();
+    const {data, clear} = useToken();
     const { status, isConnected } = useAccount({onDisconnect:clear});
     const {disconnect} = useDisconnect();
 

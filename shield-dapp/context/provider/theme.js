@@ -22,7 +22,7 @@ export default ({children})=>{
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline enableColorScheme={true}/>
-            <Box sx={{backgroundColor:"background.paper", color:"text.primary", minHeight:"100vh", boxSizing:"border-box"}}>
+            <Box sx={{backgroundColor:"background.paper", color:"text.primary", minHeight:"100vh", boxSizing:"border-box", "& a":{textDecoration:"none"}}}>
                 {children}
             </Box>
         </ThemeProvider>

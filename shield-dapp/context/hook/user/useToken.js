@@ -1,42 +1,37 @@
 import {useCallback} from "react";
 import useSWRImmutable from 'swr/immutable';
 import useSWRMutation from 'swr/mutation';
-import {client} from '../provider/http';
-import { bscTestnet } from "wagmi/chains";
-import {fetchSigner, getAccount} from "wagmi/actions";
+import {client} from '../../lib/http';
+import {getAccount, signMessage, getNetwork} from "wagmi/actions";
+import {getCacheToken, setCacheToken} from '../../lib/token';
+import { getMessage } from "../../../services/lib/siwes";
 
 const tokenFetcher = async(key)=>{
 
-    const account = getAccount();
-    if(!account.isConnected)
+    const {address, isDisconnected} = getAccount();
+    const {chain} = getNetwork();
+
+    if(isDisconnected)
         throw Error("Not Connected");
 
-    let user;
-    let address;
-
-    try{
-        user = await fetchSigner();
-        address = account.address//await user.getAddress();
-    }catch(e){
-        throw Error(`Can't get signer:${e.message}`);
-    }
-
-    if(!(address && user))
+    if(!address)
         throw Error('need address and user');
 
-    let response = await client.get(`/auth/create/${address}`);
+    let response = await client.get(`/auth?uid=${address}`);
+
+    const message = getMessage(address, response.data.nonce, chain.id);
 
     //sign the message
     let signature;
 
     try{
-        signature = await user.signMessage(response.data.msg);
+        signature = await signMessage({message:message.prepareMessage()});
     }catch(e){
         throw Error('signing failed')
     }
 
     //get verified by server
-    response = await client.post(`/auth/verify`,{sig:signature});
+    response = await client.post(`/auth`,{message, signature});
     setCacheToken(response.data.token);
    
     return response.data.token;
@@ -44,7 +39,7 @@ const tokenFetcher = async(key)=>{
 
 const TOKEN_SWR_KEY = "/myToken";
 
-const useUserToken = ()=>{
+export default ()=>{
     const {data, mutate:_mutate} = useSWRImmutable(TOKEN_SWR_KEY, getCacheToken);
     const {error, isMutating:isLoading, trigger, reset} = useSWRMutation(TOKEN_SWR_KEY, tokenFetcher);
     
@@ -72,11 +67,3 @@ const useUserToken = ()=>{
 
     return {data, error, isLoading, refresh, clear};
 }
-
-
-const cache_token_key = "app_key_token";
-
-const getCacheToken = ()=>localStorage.getItem(cache_token_key);
-const setCacheToken = (data)=>localStorage.setItem(cache_token_key, data);
-
-export default useUserToken;

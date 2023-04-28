@@ -2,6 +2,9 @@
 import { Typography, Box, styled} from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 
+import Sal,{useSal} from "./SalBox";
+
+
 const FaqData = [
     {
         text1:"Set Up Your Wallet",
@@ -54,15 +57,18 @@ const FaqBox = ({text1, text2, text0, icon})=>{
 
 
 const DisplayFaq = ()=>{
+    useSal();
 
     return (
         <Box px={{lg:4}}>
             <Grid container spacing={{xs:4, lg:8}} justifyContent="center">
                 {FaqData.map((d, i)=>
                     <Grid xs={12} md={4} key={d.text1}>
-                        <FaqBox text0={`STEP-0${i+1}`}
-                            {...d}
-                        />
+                        <Sal>
+                            <FaqBox text0={`STEP-0${i+1}`}
+                                {...d}
+                            />
+                        </Sal>
                     </Grid>
                 )}
             </Grid>
