@@ -8,34 +8,31 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import LazyScroll from './LazyScroll';
 
-import Item from "./Item/Price";
+import Item from "./Item/Neutral";
 
 import { useContractRead, useContractReads } from 'wagmi';
 
-import useCurrency from '../context/hook/useCurrency';
-
-import saleAbi from '../contract/Sale.sol/MarketSales.json';
 import nftAbi from '../contract/NFT.sol/NFT.json';
 import _contract from '../contract/address.json';
 
 import { useIpfsData } from '../context/lib/ipfs';
 
 
-const ListPriceSection = ()=>{
+const ListAllSection = ()=>{
 
     const {isReady} = useRouter();
 
     const {data, isLoading} = useContractRead({
-        abi:saleAbi.abi,
-        address:_contract.sale,
-        functionName:"allSize",
+        abi:nftAbi.abi,
+        address:_contract.nft,
+        functionName:"totalSupply",
         enabled:isReady
     });
 
 
     return (
         <Box>
-            <Typography variant="h4" mb={4} fontWeight="bold">Available for Sale</Typography>
+            <Typography variant="h4" mb={4} fontWeight="bold">All Available Items</Typography>
 
             {(!isReady || isLoading) &&
                 <Stack py={10} alignItems="center">
@@ -48,7 +45,7 @@ const ListPriceSection = ()=>{
                 Parent={({children})=><Grid container spacing={2} rowSpacing={3} children={children}/>}
                 >
                 {({index})=>
-                   <ItemContainer index={index}/>
+                   <ItemContainer tokenId={index+1}/>
                 }
             </LazyScroll>
         </Box>
@@ -56,14 +53,7 @@ const ListPriceSection = ()=>{
 }
 
 
-const ItemContainer  = ({index})=>{
-
-    const {data:tokenId, ...readProps} = useContractRead({
-        abi:saleAbi.abi,
-        address:_contract.sale,
-        functionName:"queryAllByIndex",
-        args:[index]
-    });
+const ItemContainer  = ({tokenId})=>{
 
     const {data, isLoading} = useContractReads({
         contracts:[
@@ -80,25 +70,23 @@ const ItemContainer  = ({index})=>{
                 args:[tokenId]
             },
             {
-                abi:saleAbi.abi,
-                address:_contract.sale,
-                functionName:"ItemForSale",
+                abi:nftAbi.abi,
+                address:_contract.nft,
+                functionName:"ownerOf",
                 args:[tokenId]
             }
-        ],
-        enabled:readProps.isSuccess
+        ]
     });
 
-    const {data:currency, ...tokenOpt} = useCurrency(data?.[2].currency);
    
     const {data:idata, ...ipfs} = useIpfsData(data?.[0]);
     
-    const loading = readProps.isLoading  || isLoading || ipfs.isLoading || tokenOpt.isLoading;
+    const loading = isLoading || ipfs.isLoading
     
     return (
-        <Grid key={index} xs={12} sm={6} md={4} lg={3} justifyContent="space-evenly">
+        <Grid key={tokenId} xs={12} sm={6} md={4} lg={3} justifyContent="space-evenly">
             <Item tokenId={tokenId} loading={loading}
-                sale={data?.[2]} currency={currency}
+                owner={data?.[2]}
                 creator={data?.[1]}
                 {...idata}
             />
@@ -107,4 +95,4 @@ const ItemContainer  = ({index})=>{
 }
 
 
-export default ListPriceSection;
+export default ListAllSection;

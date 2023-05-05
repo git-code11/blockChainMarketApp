@@ -1,3 +1,4 @@
+import {useState} from 'react';
 import { NFTStorage } from 'nft.storage';
 import useSWRImmutable from 'swr/immutable';
 import useSWRMutation from 'swr/mutation';
@@ -21,9 +22,15 @@ const _store = async (key, {arg})=>{
 const store = data=>_store('', data);
 
 const useIpfsStore = (onSuccess, onError)=>{
-    const {isMutating:isLoading, ...methods} =  useSWRMutation("/ipfsStoreSave", _store, {onSuccess, onError});
+    const [status, setStatus] = useState({});
+    const {isMutating:isLoading,...methods} =  useSWRMutation("/ipfsStoreSave", _store, 
+        {
+            onSuccess:()=>setStatus({isSuccess:true}), 
+            onError:()=>setStatus({isError:true})
+        }
+    );
 
-    return {isLoading, ...methods};
+    return {isLoading, ...status, ...methods};
 }
 
 const fetcher = async ([_,cid])=>{

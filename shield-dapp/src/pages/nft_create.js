@@ -1,226 +1,66 @@
-import {useState, useEffect, useCallback, useRef, useMemo} from "react";
-
-import { Button, Paper, Container, Stack, Typography, Checkbox, Box} from "@mui/material";
-
+import {useState, useEffect, useCallback} from "react";
+import { Button, Paper, Container, Stack, Typography, Checkbox, Box, MenuItem} from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
-
 import UploadFileOutlined from "@mui/icons-material/UploadFileOutlined";
-
 import TextInput from "../../components/ControlledInput";
-
 import { FormProvider, useFormContext } from "react-hook-form";
-
-const DEMO_TEXT =  "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Error aperiam, dolor nesciunt dicta.";
-
 import {temp_p} from "../../temp";
-
 import Overlay from "../../components/Overlay";
-
 import { useForm } from "react-hook-form";
-
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 
+import _contract from "../../contract/address.json";
 
-//import {useMemo, useCallback} from 'react';
-//import Typography from "@mui/material/Typography";
-//import Stack from "@mui/material/Stack";
-import Dialog from "@mui/material/Dialog";
-//import Button from "@mui/material/Button";
-import Link from "@mui/material/Link";
-import Alert from "@mui/material/Alert";
-
-import { StepImage, StepSection } from "../../components/StepProcess";
-
-import {useIpfsStore} from "../../context/lib/ipfs";;
+import NFTCreateDialog from '../../components/dialog/createItem';
+import Provider, { useDataContext } from "../../components/dialog/context";
+import { constants } from "ethers";
+import exchangeCurrency from'../../currency-list';
 
 
-import _addr from "../../contract/address.json";
-import nftAbi from "../../contract/NFT.sol/NFT.json";
-import saleAbi from "../../contract/Sale.sol/MarketSales.json";
+import Collapse from "@mui/material/Collapse";
 
-
-import {constants} from "ethers";
-
-import { prepareWriteContract, writeContract, getAccount, watchContractEvent } from "wagmi/actions";
-
-import { useRouter } from "next/router";
-
-
-const NFTCreateDialog =  ({getData, open, setOpen})=>{
-
-    const router = useRouter();
-
-    const [gData, setData] = useState({});
-
-    const [_market, updateMarket] = useState({});
-
-    const [_approve, updateApprove] = useState({});
-
-    const {trigger, ..._ipfs} = useIpfsStore(d=>onAddMarket(d));
-
-    const onUpload = useCallback(async ()=>{
-        const data = await getData();
-        trigger(data);
-    },[trigger, getData]);
-
-    const onApprove = useCallback(async (data)=>{
-        updateApprove({isLoading:true});
-        setData(d=>({...d, market:data}));
-        try{
-            const config = await prepareWriteContract({
-                address:_addr.nft,
-                abi:nftAbi.abi,
-                functionName:"approve",
-                args:[_addr.sale, data]
-            });
-            const result = await writeContract(config);
-            const reciept = await result.wait()
-            updateApprove({isSuccess:true});
-        }catch(err){
-            updateApprove({error:err, isError:true});
-        }
-
-    },[setData, updateApprove]);
-
-    const onAddMarket = useCallback(async (data)=>{
-        updateMarket({isLoading:true});
-        setData(d=>({...d, ipfs:data}));
-        try{
-            const {address:userAddress} = getAccount();
-            
-            const config = await prepareWriteContract({
-                address:_addr.sale,
-                abi:saleAbi.abi,
-                functionName:"createItem",
-                args:[userAddress, userAddress, data?.ipnft, 0, constants.AddressZero, 0]
-            });
-            
-            const result = await writeContract(config);
-            
-            let unwatch;
-            unwatch = watchContractEvent({
-                address:_addr.nft,
-                abi:nftAbi.abi,
-                eventName:"Transfer",
-            },(from, to, itemId, ...args)=>{
-                updateMarket({isSuccess:true});
-                if(from === constants.AddressZero && to === userAddress){
-                    unwatch();
-                    onApprove(itemId);
-                }
-            });
-            const reciept = await result.wait();
-        }catch(err){
-            updateMarket({error:err, isError:true});
-        }
-
-    },[updateMarket, setData, onApprove]);
-
-
-    const hasLoading = _ipfs.isLoading  || _market.isLoading || _approve.isLoading;
-
-
-    return (
-        <Dialog open={open} onClose={()=>hasLoading || _approve.isSuccess || setOpen(false)} fullWidth>
-            <Stack p={2.5} spacing={2}>
-                <Stack>
-                    <StepSection>
-                        <StepImage
-                            loading={_ipfs.isLoading}
-                            status={(_ipfs.data&&"success") || (_ipfs.error && "error")}
-                        />
-                        <Stack>
-                            <Typography>Upload to server</Typography>
-                            {_ipfs.error && 
-                                <>
-                                    <Alert severity="error">{_ipfs.error?.message}</Alert>
-                                    <Typography component={Link} onClick={onUpload} variant="caption">Retry Uploading to server</Typography>
-                                </>
-                            }
-                        </Stack>
-                    </StepSection>
-
-                    <StepSection>
-                        <StepImage
-                            loading={_market.isLoading}
-                            status={(_market.isSuccess&&"success") || (_market.isError && "error")}
-                        />
-                        <Stack>
-                            <Typography>Add To market</Typography>
-                            {_market.isError &&
-                                <>
-                                    <Alert severity="error">{_market.error?.message}</Alert>
-                                    <Typography component={Link} onClick={()=>onAddMarket(gData.ipfs)} variant="caption">retry</Typography>
-                                </>
-                            }
-                        </Stack>
-                    </StepSection>
-
-                    <StepSection>
-                        <StepImage
-                            loading={_approve.isLoading}
-                            status={(_approve.isSuccess &&"success") || (_approve.isError && "error")}
-                        />
-                        <Stack>
-                            <Typography>Give Market Permission</Typography>
-                            {_approve.isError &&
-                                    <>
-                                        <Alert severity="error">{_approve.error?.message}</Alert>
-                                        <Typography component={Link} onClick={()=>onApprove(gData.market?.toString())} variant="caption">retry</Typography>
-                                    </>
-                            }
-                            </Stack>
-                    </StepSection>
-                </Stack>
-                {_approve.isSuccess?<Button variant="outlined" onClick={()=>router.replace(`/item/${gData.market?.toString()}`)}>Preview</Button>:
-                <Button disabled={!!(_ipfs.data || _ipfs.isLoading)} variant="outlined" onClick={onUpload}>Proceed</Button>}
-            </Stack>
-        </Dialog>
-     )
-}
-
-//import NFTCreateDialog from "../../components/NFTCreateDialog";
-
-
-const schema1 = yup.object({
-  name: yup.string().required(),
-  description: yup.string().required(),
-  file:yup.string().required(),
-  properties:yup.object({
-    size:yup.number().positive().integer().required(),
-    more:yup.string().required()
-  })
+const schema = yup.object({
+    name: yup.string().required("Name field required"),
+    description:yup.string().required("Description field required"),
+    file:yup.mixed().test({
+        name:"File Test",
+        test:value=>{
+            return value?.length > 0;
+        },
+        message:"File needed"
+    }),
+    sale:yup.object({
+        price:yup.number().required(),
+        currency:yup.string().required(),
+    }).required(),
 }).required();
 
-const schema = yup.object({});
-
 const UploadSection = ()=>{
-    const {setValue, register, clearErrors} = useFormContext();
-
-    useEffect(()=>{
-        register('file');
-    },[]);
+    const {register} = useFormContext();
 
     const [imageUrl, setImage] = useState(temp_p[4]);
 
-    const onFileChange = (e)=>{
+    const setImageBlob = (e)=>{
         if(e.target.files[0]){
             URL.revokeObjectURL(imageUrl);
             setImage(URL.createObjectURL(e.target.files[0]));
-            
-            clearErrors('file');
-            setValue('file', e.target.value);
         }
     }
+
+    const opts = register('file', {
+            onChange:(e)=>{
+                setImageBlob(e);
+            }
+        });
 
     return (
         <Stack justifyContent="center" alignItems="center" position="relative"
             sx={{border:"dashed 2px #575767", borderRadius:2, overflow:"hidden"}}
         >
-            <input hidden type="file" name="file" id="___upload_file_input__" onChange={onFileChange}/>
+            <input hidden  type="file" id="___upload_file_input__" {...opts}/>
             <Overlay component="img"  src={imageUrl} width="100%" height={300} bgcolor="#cb3"/>
-            <Stack component="label" 
+            <Stack component="label"  
                     htmlFor="___upload_file_input__"
                     spacing={1}
                     sx={{
@@ -247,38 +87,24 @@ const UploadSection = ()=>{
     );
 }
 
-export default ()=>{
-
-    const [dialogOpen, setDialogOpen] = useState(false);
-
-    const formRef = useRef();
-    const methods = useForm({
-        resolver: yupResolver(schema)
-    });
-
+const ContainerWrapper =  ()=>{    
+    const {show} = useDataContext();
+    const methods = useFormContext();
     
-    //const {data:_data} = useIpfsData('bafyreifvh77tyggjtsnk66atzhpmm2kgtjxmqwp6s3grhfzbqk4nh5vt6q')
-    //console.log("data", _data);
-
-    const onSubmit = useCallback((_, e)=>{
+    const [forSale, setForSale] = useState(false);
+    
+    const onSubmit = useCallback((e)=>{
         e.preventDefault();
-        setDialogOpen(true);
-    },[setDialogOpen]);
-
-    const getData = useCallback(()=>new Promise((_func)=>{
-        methods.handleSubmit((_data)=>{
-            const data = {..._data};
-            data.image = formRef.current.elements.file.files[0];
-            _func(data);
-        })();
-    }),[methods.handleSubmit, formRef.current]);
+        if(methods.trigger())
+            show("createItem");
+    },[]);
 
     return (
 
         <Container>
             <Box mb={3}/>
             <FormProvider {...methods}>
-                <form ref={formRef} onSubmit={methods.handleSubmit(onSubmit)}>
+                <form onSubmit={onSubmit}>
                     <Grid container spacing={3}>
                     
                         <Grid xs={12} md={3} mdOffset={1}>
@@ -291,36 +117,88 @@ export default ()=>{
                             </Stack>
                         </Grid>
 
-                        <Grid xs={12} md={7}>
-                            <Paper sx={{p:3, bgcolor:"#111111", color:"#fff"}}>
-                                <Stack spacing={3}>
-                                    <TextInput label="Product Name" name="name"/>
-                                    <TextInput multiline rows={3}  label="Description" name="description"/>
-                                    <Stack direction={{sm:"row"}} rowGap={3} columnGap={2} justifyContent="stretch">
-                                        <TextInput label="Item Price" fullWidth name="price"/>
-                                        <TextInput label="Item Size" fullWidth name="properties.size"/>
-                                        <TextInput label="Item Properties" fullWidth name="properties.more"/>
-                                    </Stack>
-                                    <TextInput label="Royalty" name="royalty"/>     
-                                    <Typography component={Stack} alignItems="center" direction="row"><Checkbox color="secondary"/> on Purchase Mint</Typography>
-                                    <Button type="submit" sx={{
-                                            color:"#fff",
-                                            borderColor:"#fff",
-                                            "&:hover":{
-                                                borderColor:"#fff",
-                                                
-                                            }}} variant="outlined" size="large">Create</Button>
-                                </Stack>
-                            </Paper>
-                        </Grid>
+                        <Grid component={Paper} md={7} sx={{bgcolor:"#111111", color:"#fff"}}>
+                            <Grid>
+                                <TextInput label="Product Name" name="name"/>
+                            </Grid>
+                            
+                            <Grid>
+                                <TextInput multiline rows={3}  label="Description" name="description"/>
+                            </Grid>
+                            
+                            <Grid container>
+                                <Grid md={6}>
+                                    <TextInput label="Item Size" fullWidth name="properties.size"/>
+                                </Grid>
+                                <Grid md={6}>
+                                    <TextInput label="Item Properties" fullWidth name="properties.more"/>
+                                </Grid>
+                            </Grid>
+                            
+                            <Collapse in={forSale} unmountOnExit>
+                                <Grid container>
+                                    <Grid md={6}>
+                                        <TextInput label="Price" fullWidth name="sale.price"/>
+                                    </Grid>
+                                    <Grid md={6}>
+                                        <TextInput label="Currency" select fullWidth name="sale.currency">
+                                            {Object.entries(exchangeCurrency).map(([key, value])=><MenuItem key={value} value={value}>{key}</MenuItem>)}
+                                        </TextInput>
+                                    </Grid>  
+                                </Grid>
+                            </Collapse>
 
+                            <Grid>
+                                <Typography component={Stack} alignItems="center" direction="row">
+                                    <Checkbox color="secondary" onChange={()=>{
+                                        setForSale(d=>!d);
+                                    }}/>show price
+                                </Typography>
+                            </Grid>
+
+                            <Grid>
+                                <Button 
+                                    disabled={!(methods.formState.isDirty && methods.formState.isValid)}
+                                    type="submit" 
+                                    sx={{
+                                        color:"#fff",
+                                        borderColor:"#fff",  
+                                        "&:hover":{
+                                            borderColor:"#fff",
+                                            
+                                    }}} variant="outlined" size="large">Create</Button>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </form>
             </FormProvider>
-            
-            <NFTCreateDialog getData={getData} setOpen={setDialogOpen} open={dialogOpen}/>
 
         </Container>
 
     );
+}
+
+
+export default ()=>{
+    const methods = useForm({
+        mode:"onChange",
+        resolver: yupResolver(schema),
+        defaultValues:{
+            sale:{
+                currency:constants.AddressZero,
+                price:0,
+            }
+        }
+    });
+
+    return (
+    <Container>
+        <Provider globalData={{getData:methods.getValues}}>
+            <FormProvider {...methods}>
+                <ContainerWrapper/>
+                <NFTCreateDialog id="createItem"/>
+            </FormProvider>
+        </Provider>
+    </Container>
+    )
 }

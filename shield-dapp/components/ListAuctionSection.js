@@ -1,3 +1,4 @@
+
 import {useRouter} from 'next/router';
 
 import Typography from '@mui/material/Typography';
@@ -5,37 +6,34 @@ import Grid from "@mui/material/Unstable_Grid2";
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useContractRead, useContractReads } from 'wagmi';
+import useCurrency from '../context/hook/useCurrency';
+import { useIpfsData } from '../context/lib/ipfs';
 
 import LazyScroll from './LazyScroll';
+import Item from "./Item/Auction";
 
-import Item from "./Item/Price";
-
-import { useContractRead, useContractReads } from 'wagmi';
-
-import useCurrency from '../context/hook/useCurrency';
-
-import saleAbi from '../contract/Sale.sol/MarketSales.json';
+import auctionAbi from '../contract/Auction.sol/MarketAuction.json';
 import nftAbi from '../contract/NFT.sol/NFT.json';
 import _contract from '../contract/address.json';
 
-import { useIpfsData } from '../context/lib/ipfs';
 
 
-const ListPriceSection = ()=>{
+const ListAuctionSection = ({min})=>{
 
     const {isReady} = useRouter();
-
+    
     const {data, isLoading} = useContractRead({
-        abi:saleAbi.abi,
-        address:_contract.sale,
+        abi:auctionAbi.abi,
+        address:_contract.auction,
         functionName:"allSize",
         enabled:isReady
     });
 
-
+        
     return (
         <Box>
-            <Typography variant="h4" mb={4} fontWeight="bold">Available for Sale</Typography>
+            <Typography variant="h4" mb={4} fontWeight="bold">Available Auction</Typography>
 
             {(!isReady || isLoading) &&
                 <Stack py={10} alignItems="center">
@@ -44,13 +42,15 @@ const ListPriceSection = ()=>{
             }
             
 
+            {
             <LazyScroll end={data}
-                Parent={({children})=><Grid container spacing={2} rowSpacing={3} children={children}/>}
+                Parent={({children})=><Grid container spacing={2} children={children}/>}
                 >
                 {({index})=>
                    <ItemContainer index={index}/>
                 }
-            </LazyScroll>
+            </LazyScroll>}
+
         </Box>
     );
 }
@@ -59,8 +59,8 @@ const ListPriceSection = ()=>{
 const ItemContainer  = ({index})=>{
 
     const {data:tokenId, ...readProps} = useContractRead({
-        abi:saleAbi.abi,
-        address:_contract.sale,
+        abi:auctionAbi.abi,
+        address:_contract.auction,
         functionName:"queryAllByIndex",
         args:[index]
     });
@@ -80,25 +80,26 @@ const ItemContainer  = ({index})=>{
                 args:[tokenId]
             },
             {
-                abi:saleAbi.abi,
-                address:_contract.sale,
-                functionName:"ItemForSale",
+                abi:auctionAbi.abi,
+                address:_contract.auction,
+                functionName:"auctions",
                 args:[tokenId]
             }
         ],
         enabled:readProps.isSuccess
     });
 
-    const {data:currency, ...tokenOpt} = useCurrency(data?.[2].currency);
+    const {data:token, ...tokenOpt} = useCurrency();
    
     const {data:idata, ...ipfs} = useIpfsData(data?.[0]);
     
     const loading = readProps.isLoading  || isLoading || ipfs.isLoading || tokenOpt.isLoading;
     
+
     return (
         <Grid key={index} xs={12} sm={6} md={4} lg={3} justifyContent="space-evenly">
             <Item tokenId={tokenId} loading={loading}
-                sale={data?.[2]} currency={currency}
+                auction={data?.[2]} currency={token}
                 creator={data?.[1]}
                 {...idata}
             />
@@ -106,5 +107,4 @@ const ItemContainer  = ({index})=>{
     )
 }
 
-
-export default ListPriceSection;
+export default ListAuctionSection;

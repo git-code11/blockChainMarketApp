@@ -27,7 +27,7 @@ export default ()=>{
     },[disconnect]);
 
     return (
-        <Dialog open={open}>
+        open?<Dialog open={open}>
             <DialogContent>
                 <Stack spacing={2}>
                     <Stack direction="row" alignItems="center" spacing={1}>
@@ -42,6 +42,6 @@ export default ()=>{
                     <Button onClick={_disconnect} disabled={isLoading}>Disconnect</Button>
                 </Stack>
             </DialogContent>
-        </Dialog>
+        </Dialog>:<></>
     )
 }

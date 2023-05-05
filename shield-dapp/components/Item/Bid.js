@@ -3,9 +3,10 @@ import {Image as ScalableImage, Box as ScalableBox} from "../../components/Scala
 import ElTypography from "../../components/ElTypography";
 import BlurDarkBox from "../BlurBlackBox";
 
-export default ({title, image, creatorName, currentBidBase, last3TopBiddersImage, noOfBidPlaced})=>{
+import {temp_c} from "../temp";
 
-    const loading = true&&false;
+export default ({loading, title, image, creatorName, currentBidBase, last3TopBiddersImage, noOfBidPlaced})=>{
+
     return (
         <ScalableBox height="100%">
             <Paper component={Stack} sx={{p:1.5, pb:2, borderRadius:2, height:"100%"}} spacing={1}>

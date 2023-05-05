@@ -25,7 +25,7 @@ export default ()=>{
         enabled:isReady
     });
 
-    if(isLoading){
+    if(isLoading || !isReady){
         return <Stack py={5} alignItems="center">
             <CircularProgress/>
         </Stack>

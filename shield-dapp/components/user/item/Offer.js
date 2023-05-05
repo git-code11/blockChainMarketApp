@@ -1,6 +1,6 @@
 
 
-const ItemOffer = ({name, image, isOfferFrom, addr})=>{
+export default ({name, image, isOfferFrom, addr})=>{
 
     return (
         <Paper component={Stack} direction="row" sx={{p:.5}} spacing={1}>

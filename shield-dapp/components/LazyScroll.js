@@ -5,7 +5,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 export default ({loading, start, end, step, children:ItemCreator, Parent:_parent, keyCreator})=>{
     const _start = start || 0;
-    const _end = end - 1;
+    const _end = end;
+    //const _length = end;
     const _step = step || 4;
 
     const [pos, setPos] = useState(_start);
@@ -15,7 +16,9 @@ export default ({loading, start, end, step, children:ItemCreator, Parent:_parent
     },[_step, _end]);
 
     const Parent = _parent || (d=>d);
+
     return (
+    Boolean(+_end)?
     <InfiniteScroll
         loadMore={loading || loadMore}
         hasMore={pos<_end}
@@ -27,6 +30,6 @@ export default ({loading, start, end, step, children:ItemCreator, Parent:_parent
         <Parent>
             {Array(pos).fill(0).map((_,i)=><ItemCreator key={keyCreator?keyCreator(i):i} index={i}/>)}
         </Parent>
-    </InfiniteScroll>
+    </InfiniteScroll>:<div></div>
     )
 }

@@ -2,7 +2,7 @@ import {TextField, styled, Typography, Stack} from "@mui/material";
 
 const Input = styled(({label, ...props})=>{
     return (
-        <Stack spacing={0.5}>
+        <Stack spacing={0.5} sx={{width:"100%"}}>
             <Typography>{label}</Typography>
             <TextField {...props}/>
         </Stack>

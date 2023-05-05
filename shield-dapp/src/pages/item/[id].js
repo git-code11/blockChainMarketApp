@@ -1,49 +1,60 @@
-import {useState, useContext, createContext, useCallback, useEffect, useMemo} from "react";
-
+import {useState, useEffect, useCallback} from 'react';
 import {useRouter} from "next/router";
 
-import { TableContainer, Table, TableBody, TableRow, TableCell, TextField, DialogContentText, MenuItem, CircularProgress } from "@mui/material";
-import { Dialog, DialogActions, DialogTitle, DialogContent } from "@mui/material";
+import { TableContainer, Table, TableBody, TableRow, TableCell, CircularProgress } from "@mui/material";
+
 import Button from "@mui/material/Button";
 import { Typography, Fab } from "@mui/material";
-import { Container, Box, Chip, Stack, Avatar, Paper, Tabs, Tab, styled, Modal, Alert, IconButton} from "@mui/material";
+import { Container, Box, Chip, Stack, Avatar, Paper} from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
-import {Check, Info, Error, Warning, WalletOutlined, Close, CloseRounded, MenuRounded} from "@mui/icons-material"
 
 import Divider from "@mui/material/Divider";
 import Skeleton from "@mui/material/Skeleton";
 
-import {useContractRead, useContractReads} from "wagmi";
+import {useAccount, useContractRead, useContractReads,  useNetwork, useToken} from "wagmi";
 import nftAbi from "../../../contract/NFT.sol/NFT.json";
+import saleAbi from "../../../contract/Sale.sol/MarketSales.json";
+import auctionAbi from "../../../contract/Auction.sol/MarketAuction.json";
 import _contract from "../../../contract/address.json";
 
 import { useIpfsData } from "../../../context/lib/ipfs";
+import useCurrency from "../../../context/hook/useCurrency";
 
-const DEMO_TEXT =  "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Error aperiam, dolor nesciunt dicta.";
+import {temp_c} from "../../../temp";
+import { formatEther } from "ethers/lib/utils.js";
 
-import {temp_c, temp_p} from "../../../temp";
+import Provider,{useDataContext} from '../../../components/dialog/context';
+import DialogPurchase from '../../../components/dialog/purchase';
+import DialogRemoveFromSale from '../../../components/dialog/removeFromSale';
+import DialogAddToSale from '../../../components/dialog/addToSale';
+import DialogCreationAuction from '../../../components/dialog/createAuction';
+import DialogMakeBid from '../../../components/dialog/makeBid';
+import DialogCloseAuction from '../../../components/dialog/closeAuction';
+import DialogExtendAuction from '../../../components/dialog/extendAuction';
+
+import e_msg from "../../../context/lib/e_msg";
+import { constants } from "ethers";
+
+import useSetTimeout from '../../../context/hook/useSetTimeout';
+
+import Backdrop from '@mui/material/Backdrop';
+
+import TimeBox from '../../../components/TimeBox';
 
 
-const dialogContext = createContext();
+const ContainerWrapper =  ()=>{
+    
+    const {globalData, show} = useDataContext();
+    const {tokenId} = globalData;
+    const {address:userAddress} = useAccount();
 
-const useDialog = ()=>useContext(dialogContext); 
-
-const initDialogState = {offer:false, purchase:false, bid:false, process:false};
-
-
-export default ()=>{
-    const router = useRouter();
-
-    const [state, update] = useState(initDialogState);
-
-    const {data:uri, error, isLoading, isError, refetch} = useContractRead({
+    const {data:uri, error, isLoading, refetch} = useContractRead({
         abi:nftAbi.abi,
         address:_contract.nft,
         functionName:"tokenURI",
-        args:[+router.query.id],
-        enabled:router.isReady
+        args:[tokenId],
+        enabled:!!tokenId
     });
-
 
     const {data:idata, ...info} = useContractReads({
         contracts:[
@@ -51,387 +62,232 @@ export default ()=>{
                 abi:nftAbi.abi,
                 address:_contract.nft,
                 functionName:"itemCreator",
-                args:[+router.query.id]
+                args:[tokenId]
             },
             {
                 abi:nftAbi.abi,
                 address:_contract.nft,
                 functionName:"ownerOf",
-                args:[+router.query.id]
+                args:[tokenId]
             },
+            {
+                abi:saleAbi.abi,
+                address:_contract.sale,
+                functionName:"ItemForSale",
+                args:[tokenId]
+            },
+            {
+                abi:auctionAbi.abi,
+                address:_contract.auction,
+                functionName:"auctions",
+                args:[tokenId]
+            }
            
         ],
-        enabled:router.isReady
+        enabled:!!tokenId,
+        watch:true
     });
+
+    const {data:tokenDetails} = useCurrency(idata?.[2]?.currency);
 
     const iLoading = info.isLoading || !idata;
 
     const {data:fdata, ...ipfs} = useIpfsData(uri);
 
-    const onOffer = useCallback(val=>update({...initDialogState, offer:val}),[update]);
-    const onBid  = useCallback(val=>update({...initDialogState, bid:val}),[update]);
-    const onPurchase = useCallback(val=> update({...initDialogState, purchase:val}),[update]);
-    const onProcess = useCallback(val=>update({...initDialogState, process:val}),[update])
     
-    if(!router.isReady || isLoading){
-        return (
-        <Stack position="absolute" width="100%" top="50vh" alignItems="center" transform="translate(0, -50%)">
-            <CircularProgress size={50}/>
-        </Stack>)
-    }
+    const [auctionClose] = useSetTimeout(
+        (_cb, close)=>{
+            
+            if(idata?.[3]?.startTime?.gt(0)){
+                let result = Date.now() > idata[3].startTime?.add(idata[3].diffTime)?.mul(1000);
+                if(result)
+                    close();
+                _cb(result);
+                return;
+            }
 
-    if(isError){
-        return (
-        <Stack position="absolute" width="100%" top="50vh" alignItems="center" transform="translate(0, -50%)" spacing={2}>
-            <Typography color="error">
-                {error?.message||"An Error Occured Reloading required"}
-            </Typography>
-            <Button disabled={!router.query?.id} onClick={()=>refetch()} variant="outlined">Retry</Button>
-        </Stack>)
-    }
-
-    if(ipfs.error){
-        return (
-        <Stack position="absolute" width="100%" top="50vh" alignItems="center" transform="translate(0, -50%)" spacing={2}>
-            <Typography color="error">
-                {ipfs.error?.message||"An Error Occured While Fetching Ipfs Data"}
-            </Typography>
-            <Button disabled={!router.query?.id} onClick={()=>ipfs.mutate()} variant="outlined">Reload</Button>
-        </Stack>)
-    }
-    
-    return (
-        <>
-            <Container sx={{my:2}}>
-                    <Stack spacing={2} mb={2}>
-                    <Grid container>
-                        <Grid xs={12} md={8} mdOffset={2}>
-                            <Paper>
-                                {ipfs.isLoading?
-                                    <Skeleton variant="rectangular" height="50vmin" width="100%"/>:
-                                    <Avatar variant="rounded" bgcolor="grey.300" sx={{height:"auto", maxHeight:"65vmin", width:"100%"}} src={fdata?.image}/>
-                                }
-                            </Paper>
-                        </Grid>
-                    </Grid>
-                    <Typography variant="h6" fontWeight="bold">{ipfs.isLoading?<Skeleton width={300}/>:fdata?.name}</Typography>
-                    
-                    <Stack direction="row" spacing={2} alignItems="end">
-                        <Typography fontWeight="bold">Reserve Price</Typography>
-                        <Typography fontWeight="bold" variant="h5">0.4367 ETH</Typography>
-                    </Stack>
-    
-                
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Stack>
-                            <Typography fontWeight="bold">Auction</Typography>
-                            <Typography><b>23</b> Bid Placed</Typography>
-                        </Stack>
-                        <Typography fontWeight="bold" variant="h5" textAlign="end">23:37:48</Typography>
-                    </Stack>
-                    
-                    <Typography>{ipfs.isLoading?<Skeleton width="100%" height={100}/>:(fdata?.description)}</Typography>
-    
-                    <TableContainer>
-                        <Table>
-                            <TableBody>
-                                <TableRow>
-                                    <TableCell sx={{fontWeight:"bold"}}>Creator</TableCell>
-                                    <TableCell>
-                                        <Stack direction="row" alignItems="center" spacing={0.5}>
-                                            <Avatar src={temp_c[1]}/>
-                                            <Typography>{iLoading?<Skeleton width={100}/>:idata[0]}</Typography>
-                                        </Stack>    
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell sx={{fontWeight:"bold"}}>Owner</TableCell>
-                                    <TableCell>
-                                        <Stack direction="row" alignItems="center" spacing={0.5}>
-                                            <Avatar src={temp_c[2]}/>
-                                            <Typography>{iLoading?<Skeleton width={100}/>:idata[1]}</Typography>
-                                        </Stack>   
-                                    </TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-    
-                    <Stack spacing={2}>
-                        <Button variant="contained" fontWeight="bold" 
-                            color="primary" onClick={()=>onBid(true)}>Place a Bid</Button>
-                        <Button variant="contained" color="secondary" onClick={()=>onPurchase(true)}>Buy Now</Button>
-                        <Button variant="contained" color="secondary" onClick={()=>onOffer(true)}>Make an offer</Button>
-                    </Stack>
-    
-                    <Box>
-                        <Divider sx={{my:2}}/>
-                        <Typography>Tags</Typography>
-                        <Stack direction="row" spacing={2} mt={1}>
-                            <Chip sx={{fontSize:14}} label="#nft"/>
-                            <Chip sx={{fontSize:14}} label="#blockchain"/>
-                            <Chip sx={{fontSize:14}} label="#most featured"/>
-                        </Stack>
-                    </Box>
-                </Stack>
-                <TabSection/>
-            </Container>
-            <dialogContext.Provider value={{state, onOffer, onBid, onPurchase, onProcess}}>
-                <PopUpDialog/>
-            </dialogContext.Provider>    
-        </>  
+            if(idata?.[3]?.startTime?.eq(0))
+                close();
+            _cb(false);
+        }, 2000, false, idata?.[3]?.startTime
     );
-}
 
-
-
-const TabSection = ()=>{
-    const [state, setState] = useState(0)
+    if(!tokenId || isLoading){
+        return (    
+            <Backdrop in={true}>
+                <CircularProgress size={50}/>
+            </Backdrop>
+                );
+    }
+    
+    if(error || ipfs.error){
+        return (
+            <Backdrop in={true}>
+            <Typography color="error">
+                {error?
+                    e_msg(error)||"An Error Occured Reloading required":
+                    e_msg(ipfs.error)||"An Error Occured While Fetching Ipfs Data"
+                }
+            </Typography>
+            {
+                error?
+                <Button disabled={!tokenId} onClick={()=>refetch()} variant="outlined">Retry</Button>:
+                <Button disabled={!tokenId} onClick={()=>ipfs.mutate()} variant="outlined">Reload</Button>
+            }
+        </Backdrop>
+        );
+    }
     
     return (
-        <Box>
-            <Tabs value={state} onChange={(e,v)=>setState(v)}>
-                <Tab value={0} label="Transaction"/>
-                <Tab value={1} label="Auction"/>
-            </Tabs>
+            
+    <Stack spacing={2} mb={2}>
+        <Grid container>
+            <Grid xs={12} md={8} mdOffset={2}>
+                <Paper>
+                    {ipfs.isLoading?
+                        <Skeleton variant="rectangular" height="50vmin" width="100%"/>:
+                        <Avatar variant="rounded" bgcolor="grey.300" sx={{height:"auto", maxHeight:"65vmin", width:"100%"}} src={fdata?.image}/>
+                    }
+                </Paper>
+            </Grid>
+        </Grid>
+        <Typography variant="h6" fontWeight="bold">{ipfs.isLoading?<Skeleton width={300}/>:fdata?.name}</Typography>
+        
+        {idata?.[2]?.amount?.gt(0) && _contract.auction !== idata?.[1] &&
+        <Stack direction="row" spacing={2} alignItems="end">
+            <Typography fontWeight="bold">Sale Price</Typography>
+            <Typography fontWeight="bold" variant="h5">{iLoading?<Skeleton width={100}/>:formatEther(idata[2]?.amount||0)}
+                    {iLoading || tokenDetails?.symbol}
+                    </Typography>
+        </Stack>}
 
-            <Box>
-                <CommentList spacing={2} mt={2}>
-                    {Array(5).fill(0).map((d,i)=>
-                        <Comment key={i} uName="Kelvin_34s" uImage={temp_p[i%4]} time="3 days ago"
-                            text={DEMO_TEXT}/>
-                    )}
-                </CommentList>
-            </Box>
-
-        </Box>
-    );
-}
-
-const Comment = ({uImage, uName, time, text})=>{
-
-    return (
-        <Stack direction="row" spacing={1} position="relative" data-comment>
-            <Avatar src={uImage}/>
-            <Stack>
-                <Typography>@{uName}</Typography>
-                <Typography pl={4} pr={2}>{text}</Typography>
-                <Typography alignSelf="end">{time}</Typography>
-            </Stack>
+        {!iLoading && idata[3] && _contract.auction === idata?.[1] && 
+        <Stack direction="row" spacing={2} alignItems="end">
+            <Typography fontWeight="bold">Reserve Price</Typography>
+            <Typography fontWeight="bold" variant="h5">{formatEther(idata[3]?.reserve?.toString()||0)} ETH</Typography>
         </Stack>
-    )
-}
+        }
 
-const CommentList = styled(Stack)(({theme})=>({
-    position:"relative",
-    zindex:1,
-    "&:before, & [data-comment]:last-child:before":{
-        content:'""',
-        position:"absolute",
-        display:"block",
-        width:4,
-        borderRadius:10,
-        height:"100%",
-        backgroundColor:"#cccccccc",
-        transform:"translate(18px)"
-    },
-
-    "& [data-comment]:last-child:before":{
-        backgroundColor:theme.palette.background.paper,
-    }
     
-}));
-
-const PopUpDialog = ()=>{
-
-    return (
-        <>
-            <DialogBid/>
-            <DialogPurchase/>
-            <DialogOffer/>
-            <DialogStepProcess/>
-        </>
-    )
-}
-
-
-const CustomInput = styled('input')(({theme})=>({
-    display:"block",
-    height:"80px",
-    width:"100%",
-    outline:"none",
-    border:"none",
-    backgroundColor:"transparent",
-    textAlign:"end",
-    fontSize:theme.spacing(5),
-    margin:0,
-    fontFamily:"consolas",
-    paddingTop:"30px"
-}));
-
-const DialogBid = ()=>{
-
-    const {state, onBid} = useDialog();
-
-    return(
-        <Dialog open={state.bid} onClose={()=>onBid(false)}>
-            <Box p={2} component={Stack} spacing={2}>
-                <Box component={Paper} position="relative" p={1} bgcolor="#ccc">
-                    <Typography position="absolute" fontWeight={500}>BID AMOUNT</Typography>
-                    <Stack width="100%" direction="row" alignSelf="end" alignItems="baseline">
-                        <CustomInput placeholder="0.00"/>
-                        <Typography fontWeight={600}>ETH</Typography>
-                    </Stack>
-                </Box>
-                <Typography>Last Bid Amount: <b>45.33ETH</b></Typography>
-                <Typography>Account Balance: <b>100.45ETH</b></Typography>
-                <Alert variant="outlined" severity="info">
-                    <Typography>
-                        Amount placed can only be resolved after auction and 
-                        amount placed would be sent back to you in respect of higher amount bid placed
-                    </Typography>
-                </Alert>
-                <Typography color="warning">Estimated Gas Fee ~ <i><b>0.344ETH</b></i></Typography>
-                <Button variant="outlined" size="large">Place Bid</Button>
-            </Box>     
-        </Dialog>
-    )
-}
-
-const DialogPurchase = ()=>{
-    const {state, onPurchase, onProcess} = useDialog();
-
-    return(
-        <Dialog open={state.purchase} onClose={()=>onPurchase(false)}>
-            <Box p={2} component={Stack} spacing={2}>
-                <Box component={Paper} position="relative" p={1} bgcolor="#ccc">
-                    <Typography position="absolute" fontWeight={500}>PRICE AMOUNT</Typography>
-                    <Stack width="100%" direction="row" alignSelf="end" alignItems="baseline">
-                        <CustomInput placeholder="0.00" value={45.33} disabled/>
-                        <Typography fontWeight={600}>ETH</Typography>
-                    </Stack>
-                </Box>
-                <Typography>Account Balance: <b>100.45ETH</b></Typography>
-                <Alert variant="outlined" severity="info">
-                    <Typography>
-                        Amount would be withdrawn from account
-                    </Typography>
-                </Alert>
-                <Typography color="warning">Estimated Gas Fee ~ <i><b>0.344ETH</b></i></Typography>
-                <Button variant="outlined" size="large" onClick={()=>onProcess(true)}>Purchase</Button>
-            </Box>     
-        </Dialog>
-    )
-}
-
-
-const DialogOffer = ()=>{
-    const {state, onOffer} = useDialog();
-    return(
-        <Dialog open={state.offer} onClose={()=>onOffer(false)}>
-            <Box p={2} component={Stack} spacing={2}>
-                <Box component={Paper} position="relative" p={1} bgcolor="#ccc">
-                    <Typography position="absolute" fontWeight={500}>OFFER AMOUNT</Typography>
-                    <Stack width="100%" direction="row" alignSelf="end" alignItems="baseline">
-                        <CustomInput placeholder="0.00"/>
-                        <Typography fontWeight={600}>ETH</Typography>
-                    </Stack>
-                </Box>
-                <Typography>Last Bid Amount: <b>45.33ETH</b></Typography>
-                <Typography>Account Balance: <b>100.45ETH</b></Typography>
-                <Alert variant="outlined" severity="info">
-                    <Typography>
-                        Offer can be cancelled before been accepted or rejected
-                    </Typography>
-                </Alert>
-                <Typography color="warning">Estimated Gas Fee ~ <i><b>0.344ETH</b></i></Typography>
-                <Button variant="outlined" size="large">Make Offer</Button>
-            </Box>     
-        </Dialog>
-    )
-}
-
-const DialogCreatePrice = ()=>{
-    const {state} = useDialog();
-
-    return(
-        <Dialog open={true} onClose={()=>{}}>
-            <Box p={2} component={Stack} spacing={2} minWidth="80vmin">
-                <TextField placeholder="Price Amount" fullWidth/>
-                <TextField placeholder="Currency" select fullWidth>
-                    <MenuItem value="0x00">ETH</MenuItem>
-                    <MenuItem value="0x01">BUSD</MenuItem>
-                </TextField>
-                <TextField placeholder="Deadline(hours)" fullWidth defaultValue={0}/>
-                <Typography>
-                    List Price Amount: 234.45ETH
-                </Typography>
-                <Button>Grant Permission</Button>
-                <Button>Set Price</Button>
-            </Box>
-        </Dialog>
-    )
-}
-
-const ProcessItem = styled(Stack)(({theme})=>({
-    position:"relative",
-    paddingBottom:"30px",
-    "&:before":{
-        content:'""',
-        position:"absolute",
-        display:"block",
-        width:"4px",
-        height:"calc(100% - 44px)",
-        bottom:"2px",
-        backgroundColor:"#cccccccc",
-        transform:"translate(18px)"
-    },
-
-    "&:last-child":{
-        paddingBottom:"0px",
-        "&:before":{
-            backgroundColor:"transparent"
+        {!iLoading && idata[3] && _contract.auction === idata?.[1] && 
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Stack>
+                <Typography fontWeight="bold">Auction</Typography>
+                <Typography><b>{idata?.[3]?.total?.toString()}</b> Bid Placed</Typography>
+            </Stack>
+            <Typography fontWeight="bold" variant="h5" textAlign="end">
+                <TimeBox start={idata?.[3]?.startTime} gap={idata?.[3]?.diffTime}/>
+            </Typography>
+        </Stack>
         }
         
-    }
-}));
+        <Typography>{ipfs.isLoading?<Skeleton width="100%" height={100}/>:(fdata?.description)}</Typography>
+        
+        <TableContainer>
+            <Table>
+                <TableBody>
+                    <TableRow>
+                        <TableCell sx={{fontWeight:"bold"}}>Creator</TableCell>
+                        <TableCell>
+                            <Stack direction="row" alignItems="center" spacing={0.5}>
+                                <Avatar src={temp_c[1]}/>
+                                <Typography>{iLoading?<Skeleton width={100}/>:idata[0]}</Typography>
+                            </Stack>    
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell sx={{fontWeight:"bold"}}>Owner</TableCell>
+                        <TableCell>
+                            <Stack direction="row" alignItems="center" spacing={0.5}>
+                                <Avatar src={temp_c[2]}/>
+                                <Typography>{iLoading?<Skeleton width={100}/>:idata[1]}</Typography>
+                            </Stack>   
+                        </TableCell>
+                    </TableRow>
+                    {_contract.auction === idata?.[1] && idata?.[3]?.topBidder !== constants.AddressZero &&
+                    <TableRow>
+                        <TableCell sx={{fontWeight:"bold"}}>Top Bidder</TableCell>
+                        <TableCell>
+                            <Stack direction="row" alignItems="center" spacing={0.5}>
+                                <Avatar src={temp_c[2]}/>
+                                <Typography>{iLoading?<Skeleton width={100}/>:idata?.[3]?.topBidder}</Typography>
+                            </Stack>   
+                        </TableCell>
+                    </TableRow>
+                    }
+                </TableBody>
+            </Table>
+        </TableContainer>
 
-const StepProcess = ({loading, status, text})=>{
+        
 
-    return (
-        <ProcessItem alignItems="center" spacing={2} direction="row">
-            <Avatar sx={{bgcolor:theme=>loading?"transparent":(theme.palette[status]||theme.palette["info"]).main}} src={loading?"/ajax-loader.gif":""}>
-                {
-                    (status === "success" && <Check/>) ||
-                    (status === "error" && <Error/>) ||
-                    (status === "warning" && <Warning/>) ||
-                    <Info/>
+        { userAddress === idata?.[1] ?
+
+        <Stack spacing={2}>
+            {idata?.[2]?.amount?.gt(0) && <Button variant="contained" onClick={()=>show("removeFromSale")}>Clear Market Value</Button>}
+            <Button variant="contained" onClick={()=>show("addToSale")}>Set MarketValue</Button>
+            <Button variant="contained" onClick={()=>show("createAuction")}>Create Auction</Button>
+        </Stack>
+        :
+        <Stack spacing={2}>
+            {_contract.auction === idata?.[1] &&
+                <>
+                <Button variant="contained" fontWeight="bold" 
+                    color="primary" onClick={()=>show('makeBid')}>Place a Bid</Button>
+                
+                {!idata?.[3]?.scheduled && idata?.[3]?.creator === userAddress && 
+                    <Button variant="contained" color="secondary" onClick={()=>show("extendAuction")}>Extend Auction</Button>
                 }
-            </Avatar>
-            <Typography flexGrow={1}>{text}</Typography>
-        </ProcessItem>
-    )
-}
 
+                {(idata?.[3]?.creator === userAddress || 
+                    (idata?.[3]?.topBidder !== constants.AddressZero && idata?.[3]?.topBidder === userAddress)) &&
+                    auctionClose &&
+                    <Button variant="contained" color="secondary" onClick={()=>show("closeAuction")}>Close Auction</Button>
+                    }
+                </>
+                    
+            }
+            {_contract.auction !== idata?.[1] && idata?.[2]?.amount?.gt(0) &&
+                <Button variant="contained" color="secondary" onClick={()=>show("purchase")}>Buy Now</Button>
+            }
 
-const DialogStepProcess = (processing)=>{
-    const {state, onProcess} = useDialog();
+            {_contract.auction !== idata?.[1] && idata?.[2]?.amount?.eq(0) &&
+                <Button variant="contained" color="secondary" onClick={()=>show("offer")}>Make an offer</Button>
+            }
+        </Stack>
+        }
 
-    return(
-        <Dialog open={state.process} onClose={()=>onProcess(false)} fullWidth>
-            <DialogActions>
-                <Button component="a" href="#">Visit Explorer</Button>
-            </DialogActions>
-            <Stack p={2}>
-                <StepProcess status="success" text="Get payment Details"/>
-                <StepProcess status="info" text="Permission For Token Transfer"/>
-                <StepProcess status="error" text="Payment for Item"/>
-                <StepProcess status="warning" text="Waiting for Transaction"/>
-                <StepProcess status="secondary" text="Getting Reciept"/>
-                <StepProcess loading={true} text="finalizing"/>
+        <Box>
+            <Divider sx={{my:2}}/>
+            <Typography>Tags</Typography>
+            <Stack direction="row" spacing={2} mt={1}>
+                <Chip sx={{fontSize:14}} label="#nft"/>
+                <Chip sx={{fontSize:14}} label="#blockchain"/>
+                <Chip sx={{fontSize:14}} label="#most featured"/>
             </Stack>
-        </Dialog>
-    )
+        </Box>
+    </Stack>
+    );
 }
 
 
+export default ()=>{
+    const router = useRouter();
+    
+    return (
+    <Container sx={{my:2}}>
+        <Provider globalData={{tokenId:+router.query.id}}>
+            <ContainerWrapper/>
+            <div>
+                <DialogPurchase id="purchase"/>
+                <DialogRemoveFromSale id="removeFromSale"/>
+                <DialogAddToSale id="addToSale"/>
+                <DialogCreationAuction id="createAuction"/>
+                <DialogMakeBid id="makeBid"/>
+                <DialogCloseAuction id="closeAuction"/>
+                <DialogExtendAuction id="extendAuction"/>
+            </div>
+        </Provider>
+    </Container>
+    )
+}

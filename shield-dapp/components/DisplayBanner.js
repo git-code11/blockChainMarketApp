@@ -1,5 +1,8 @@
 import {useRef, useEffect} from "react";
 
+import {useRouter} from 'next/router';
+import Link from 'next/link';
+
 import { Typography } from "@mui/material";
 import {  Box, Stack, Paper, Button, styled, useMediaQuery } from "@mui/material";
 
@@ -41,11 +44,14 @@ const DisplayScreen = ()=>{
     const vRef2 = useRef();
 
     const isMd = useMediaQuery(theme=>theme.breakpoints.up("md"));
+    const {isReady} = useRouter();
 
     useEffect(()=>{
-        vRef.current?.play(-1);
-        vRef2.current?.play(-1);
-    },[isMd]);
+        if(isReady){
+            vRef.current?.play(-1);
+            vRef2.current?.play(-1);
+        }
+    },[isMd, isReady]);
 
     return (
         <Screen component={Stack} justifyContent="center" alignItems="center" textAlign="center">
@@ -56,7 +62,7 @@ const DisplayScreen = ()=>{
                 <Typography variant={isMd?"h5":"body1"}>Partner with one of the world’s largest retailers to showcase your brand and products.</Typography>
             </Box>
             
-            <Button size="large" color="secondary" variant="contained">Explore</Button>
+            <Button component={Link} href="/explore/0" size="large" color="secondary" variant="contained">Explore</Button>
             
         </Screen>
     );

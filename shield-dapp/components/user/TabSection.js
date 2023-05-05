@@ -6,11 +6,11 @@ import Slide from "@mui/material/Slide";
 
 import CreatedTab from './tabs/Created';
 import OwnedTab from './tabs/Owned';
-
+import AuctionTab from './tabs/Auction';
 
 export default ()=>{
     const containerRef = useRef(null);
-    const [value, setValue] = useState(0);
+    const [value, setValue] = useState(2);
     
     return (  
             <Box ref={containerRef}>
@@ -30,15 +30,15 @@ const TabMenu = ({value, setValue})=>{
         <Tabs sx={{position:"sticky", top:"58px", zIndex:1, backdropFilter:"blur(15px)", pb:1}} variant="scrollable" value={value} onChange={(e, v)=>setValue(v)}>
             <Tab selected label="Created"/>
             <Tab label="Owned"/>
-            <Tab label="Offer"/>
             <Tab label="Auction"/>
+            <Tab label="Offer"/>
             <Tab label="Transaction"/>
         </Tabs>
     )
 }
 
 
-const panelList = [CreatedTab, OwnedTab];
+const panelList = [CreatedTab, OwnedTab, AuctionTab];
 
 const TabPanel = ({value})=>{
     const panel = useMemo(()=>{

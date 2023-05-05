@@ -29,7 +29,7 @@ export default ()=>{
     const [open, setOpen] = useState(false);
 
     return (
-        <>
+        <Box>
             <AppBar position="fixed" color="secondary">
                 <Toolbar>
                     <Avatar variant="square" src="/images/logo.png"/>
@@ -55,7 +55,7 @@ export default ()=>{
                         <List sx={{"& .MuiListItemButton-root":{cursor:"pointer"}}}>
                             <ListItemButton component={Link} href="/home">Home</ListItemButton>
                             <Divider variant="middle"/>
-                            <ListItemButton component={Link} href="/explore">Explore</ListItemButton>
+                            <ListItemButton component={Link} href="/explore/0">Explore</ListItemButton>
                             <Divider variant="middle"/>
                             <ListItemButton component={Link} href="/nft_create">Create NFT</ListItemButton>
                         </List>
@@ -64,6 +64,6 @@ export default ()=>{
                 </Stack>
             </Drawer>
             <VerifyWalletModal/>
-        </>
+        </Box>
     )
 }
