@@ -67,7 +67,7 @@ const FormSection = ()=>{
             </TextField>
             <Stack>
                 <TextField name="duration" label="duration (in hours)"/>
-                <Typography varaint="caption">use "0" to represent infinty</Typography>
+                <Typography varaint="caption">use &#34;0&#34; to represent infinty</Typography>
             </Stack>
         </Stack>
     );

@@ -1,5 +1,5 @@
 import {useState, useMemo} from 'react';
-import {useBalance, useAccount, useContractRead, useContractWrite, usePrepareContractWrite} from "wagmi";
+import {useBalance, useAccount, useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
 import { useDebounce } from 'use-debounce';
 
 import Paper from '@mui/material/Paper';

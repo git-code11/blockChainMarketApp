@@ -25,7 +25,7 @@ export default ()=>{
         if(!isOpen){
             await open();
         }
-    },[isOpen]);
+    },[isOpen, open]);
 
     /* const _onClick = useCallback(()=>{
         if(!isConnected){

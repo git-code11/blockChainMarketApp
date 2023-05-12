@@ -42,7 +42,7 @@ const ListAllSection = ()=>{
             
 
             <LazyScroll end={data}
-                Parent={({children})=><Grid container spacing={2} rowSpacing={3} children={children}/>}
+                Parent={({children})=><Grid container spacing={2} rowSpacing={3}>{children}</Grid>}
                 >
                 {({index})=>
                    <ItemContainer tokenId={index+1}/>

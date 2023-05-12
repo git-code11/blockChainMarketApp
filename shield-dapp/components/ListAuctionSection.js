@@ -44,7 +44,7 @@ const ListAuctionSection = ({min})=>{
 
             {
             <LazyScroll end={data}
-                Parent={({children})=><Grid container spacing={2} children={children}/>}
+                Parent={({children})=><Grid container spacing={2}>{children}</Grid>}
                 >
                 {({index})=>
                    <ItemContainer index={index}/>

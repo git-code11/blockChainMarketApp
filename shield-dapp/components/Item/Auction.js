@@ -47,7 +47,7 @@ export default ({tokenId, loading, name, image, auction, currency, creator})=>{
                         <AvatarGroup>
                             {loading?
                             Array(2).fill(0).map((_, i)=>
-                                <Skeleton variant="circular" width={30} height={30}/>
+                                <Skeleton key={i} variant="circular" width={30} height={30}/>
                                 )
                             :Array(2).fill(0).map((_, i)=>
                                 <Avatar key={i} sx={{width:30, height:30}} src={temp_c[i]}/>
