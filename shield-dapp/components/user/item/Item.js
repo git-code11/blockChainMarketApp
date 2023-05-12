@@ -12,7 +12,7 @@ const Item = ({tokenId, loading, name, image, addr, addrLabel})=>{
 
     return (
         <Paper>
-            <CardActionArea component={Link} href={loading?`/item/${tokenId?.toString()}`:""}>
+            <CardActionArea component={Link} href={loading?'#':`/item/${tokenId?.toString()}`}>
                 <Stack sx={{p:1}} spacing={1}>
                     {loading?
                     <Skeleton component={Box} variant="rectangular" height={230} width="100%"/>:

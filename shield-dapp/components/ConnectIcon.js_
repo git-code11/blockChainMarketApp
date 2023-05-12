@@ -8,38 +8,36 @@ import WalletOutlined from '@mui/icons-material/WalletOutlined';
 //import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
 //import { useWeb3Modal } from "@web3modal/react";
 
-import { useAccount} from 'wagmi';
-import { useWeb3Modal } from "@web3modal/react";
-import useAuth from "../context/hook/user/useAuth";
-;
+import { useAccount, useDisconnect, useConnect } from 'wagmi';
+
+import useToken from "../context/hook/user/useToken";
+
+import {hardhat} from 'wagmi/chains';
 
 
 export default ()=>{
-    const { isOpen, open} = useWeb3Modal();
+    //const { isOpen, open} = useWeb3Modal();
+    const {connect, connectors} = useConnect();
     
-    const {connect, disconnect, connected} = useAuth();
-    const { status, isConnected } = useAccount();
+    const {data, clear} = useToken();
+    const { status, isConnected } = useAccount({onDisconnect:clear});
+    const {disconnect} = useDisconnect();
 
     //console.log("my token", data, error, isLoading);
-    const onClick = useCallback(async ()=>{
-        if(!isOpen){
-            await open();
-        }
-    },[isOpen]);
-
-    /* const _onClick = useCallback(()=>{
+    
+    const _onClick = useCallback(async ()=>{
         if(!isConnected){
-            connect();
+            await connect({chainId:hardhat.id,connector:connectors[0]});
         }else{
             disconnect();
         }
-    },[isConnected, connect, disconnect]); */
+    },[isConnected, connect, disconnect]);
 
     const statusColor = useMemo(()=>{
         let color;
         switch(status){
             case "connected":
-                color= connected?"success":"info";
+                color= data?"success":"info";
                 break;
             case "disconnected":
                 color="error";
@@ -48,12 +46,12 @@ export default ()=>{
                 color="warning";
         }
         return color;
-    },[status, connected]);
+    },[status, data]);
 
 
     return (
     <Stack direction="row">
-        <IconButton sx={{cursor:{xs:"default", md:"pointer"}}} onClick={onClick}>
+        <IconButton sx={{cursor:{xs:"default", md:"pointer"}}} onClick={_onClick}>
             <Badge color={statusColor} variant="dot">
                 <WalletOutlined fontSize="large" sx={{color:"#fff"}}/>
             </Badge>

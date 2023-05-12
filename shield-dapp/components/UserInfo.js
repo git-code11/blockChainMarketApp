@@ -26,7 +26,7 @@ export default ()=>{
             </Stack>
             <Container sx={{mt:"48px", mb:3}}>
                 <Stack alignItems="center">
-                    <Typography fontWeight="bold" variant="h6">@{profile?.userName}</Typography>
+                    <Typography fontWeight="bold" variant="h6">@{profile?.name}</Typography>
                     <ElTypography sx={{maxWidth:"15ch"}} variant="subtitle1">{uid}</ElTypography>
                 </Stack>
 

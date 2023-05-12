@@ -8,7 +8,7 @@ const getMessage = (address, nonce, chainId)=>
         uri: window.location.origin,
         version: '1',
         chainId,
-        nonce: nonce,
+        nonce,
     });
 
 const validateMessage = (message, signature)=>{

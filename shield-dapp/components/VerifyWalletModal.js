@@ -1,30 +1,28 @@
-
-import {useMemo, useCallback} from "react";
-
+import {useEffect} from 'react';
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
-import { useAccount, useDisconnect } from 'wagmi';
-
-import useToken from "../context/hook/user/useToken";
+import useAuth from "../context/hook/user/useAuth";
 
 import CircularProgress from "@mui/material/CircularProgress";
 
 import Alert from "@mui/material/Alert";
 
+import e_msg from "../context/lib/e_msg";
+
 export default ()=>{
-    const {isConnected} = useAccount();
-    const {disconnect} = useDisconnect();
-    const {data, error, isLoading, refresh} = useToken();
-    //console.log("verifyWallet", data, isConnected);
-    const open = useMemo(()=>isConnected && !data,[isConnected, data]);
-    
-    const _disconnect = useCallback(()=>{
-        disconnect();
-    },[disconnect]);
+    const {showVerify:open, disconnect, verify, loading, 
+                error, isAuthenticated, session, address, reset} = useAuth();
+
+    //to signout on address change
+    useEffect(()=>{
+        if(address && isAuthenticated && address !== session.data.user.uid){
+            reset();
+        }
+    },[address, isAuthenticated, session.data]);
 
     return (
         open?<Dialog open={open}>
@@ -34,12 +32,12 @@ export default ()=>{
                         <Typography>
                             Verification Standpoint Action require
                         </Typography>
-                        {isLoading && <CircularProgress size={30}/>}
+                        {loading && <CircularProgress size={30}/>}
                     </Stack>
                     
-                    {error && <Alert variant="outlined" severity="error">{error.message}</Alert>}
-                    <Button onClick={refresh} disabled={isLoading}>Verify</Button>
-                    <Button onClick={_disconnect} disabled={isLoading}>Disconnect</Button>
+                    {error && <Alert variant="outlined" severity="error">{e_msg(error)}</Alert>}
+                    <Button onClick={()=>verify()} disabled={loading}>Verify</Button>
+                    <Button onClick={disconnect} disabled={loading}>Disconnect</Button>
                 </Stack>
             </DialogContent>
         </Dialog>:<></>

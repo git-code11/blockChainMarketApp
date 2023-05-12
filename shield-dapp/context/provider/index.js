@@ -1,16 +1,19 @@
 import WalletProvider from "./wallet";
 import ThemeProvider from './theme';
-import HttpProvider from "./http";
+import SWRProvider from "./http";//
+import SessionProvider from './session'
 
 
-export default ({children})=>{
+export default ({children, pageProps})=>{
     return (
     <WalletProvider>
-        <HttpProvider>
-            <ThemeProvider>
-                {children}
-            </ThemeProvider>
-        </HttpProvider>
+        <SessionProvider session={pageProps.session}>
+            <SWRProvider>
+                <ThemeProvider>
+                    {children}
+                </ThemeProvider>
+            </SWRProvider>
+        </SessionProvider>
     </WalletProvider>
     );
 }

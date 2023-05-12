@@ -8,7 +8,7 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 
-import {useAccount, useContractRead, useContractWrite, usePrepareContractWrite} from "wagmi";
+import {useAccount, useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
 ;
 
 import saleAbi from "../../contract/Sale.sol/MarketSales.json";
@@ -44,7 +44,11 @@ export default ({id})=>{
     
     const {write, ...writeOpts} = useContractWrite(config);
 
-    const _error = prepare.error || writeOpts.error;
+    const wait =  useWaitForTransaction({
+        hash:writeOpts.data?.hash
+    });
+    const _error = prepare.error || writeOpts.error || wait.error;
+    const _loading = writeOpts.isLoading || wait.isLoading;
 
     return(
         <Dialog open={isVisible} onClose={()=>hide(id)}>
@@ -52,7 +56,7 @@ export default ({id})=>{
                 <Box p={2} component={Stack} spacing={2}>
 
                     {
-                    writeOpts.isSuccess && 
+                    wait.isSuccess && 
                         <Alert variant="outlined">
                             <Typography>Sucessfully Removed from market</Typography>
                         </Alert>
@@ -64,7 +68,7 @@ export default ({id})=>{
                         </Alert>
                     }
                     
-                    {writeOpts.isLoading && 
+                    {_loading && 
                         <Alert variant="outlined" severity="info">
                             <Stack px={1} direction="row" spacing={1} alignItems="center">
                                 <Typography>Processing </Typography>
@@ -78,7 +82,7 @@ export default ({id})=>{
                 <DialogContentText>Proceed to remove item from market</DialogContentText>
                 <DialogActions>
                     <Button variant="outlined" 
-                        disabled={!write || writeOpts.isLoading || writeOpts.isSuccess} 
+                        disabled={!write || _loading || wait.isSuccess} 
                         size="large" 
                         onClick={()=>write?.()}
                     >Remove</Button>

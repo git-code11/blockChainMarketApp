@@ -52,7 +52,7 @@ export default ({loading, image, name, creator, sale, currency, tokenId })=>{
                         </Stack>
                     </Stack>
 
-                    <Button component={Link} href={loading?"":`/item/${tokenId?.toString()}`}>Buy Now</Button>
+                    <Button component={Link} href={loading?'#':`/item/${tokenId?.toString()}`}>Buy Now</Button>
                 </Paper>
             </ScalableBox>
     );

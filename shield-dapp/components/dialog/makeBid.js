@@ -67,7 +67,11 @@ export default ({id})=>{
 
     const {write, ...writeOpts} = useContractWrite(config);
     //console.log({write, writeOpts, prepare});
-    const _error = prepare.error || writeOpts.error
+    const wait =  useWaitForTransaction({
+        hash:writeOpts.data?.hash
+    });
+    const _error = prepare.error || writeOpts.error || wait.error;
+    const _loading = writeOpts.isLoading || wait.isLoading;
 
     return(
         <Dialog open={isVisible} onClose={()=>hide(id)}>
@@ -92,11 +96,11 @@ export default ({id})=>{
                     <Alert severity='error'>{e_msg(_error)}</Alert>
                 }
 
-                {writeOpts.isSuccess &&
+                {wait.isSuccess &&
                     <Alert>Successful</Alert>
                 }
 
-                {writeOpts.isLoading && 
+                {_loading && 
                     <Alert variant="outlined" severity="info">
                         <Stack px={1} direction="row" spacing={1} alignItems="center">
                             <Typography>Processing </Typography>
@@ -105,7 +109,7 @@ export default ({id})=>{
                     </Alert>
                 }     
                 
-                <Button variant="outlined" disabled={!write || writeOpts.isSuccess} size="large" onClick={()=>write?.()}>Place Bid</Button>
+                <Button variant="outlined" disabled={!write || _loading || wait.isSuccess} size="large" onClick={()=>write?.()}>Place Bid</Button>
             </Box>     
         </Dialog>
     )

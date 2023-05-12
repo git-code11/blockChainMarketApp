@@ -1,17 +1,15 @@
-import nextConnect from 'next-connect';
+import createRouter from '../../middleware/createRouter';
 import auth from '../../middleware/auth';
-import dbConnect from '../../middleware/dbConnect';
 
-const router = nextConnect()
+const router = createRouter()
     .use(auth)
-    .use(dbConnect)
     .post(async (req, res)=>{
         const _user = req.user;
-        const {userName} = req.body;
-        await _user.update({userName});
+        const {name} = req.body;
+        await _user.update({name});
         {
-        const {id:uid, userName} = _user;
-        return res.json({uid, userName});
+        const {id:uid, name} = _user;
+        return res.json({uid, name});
         }
     });
 

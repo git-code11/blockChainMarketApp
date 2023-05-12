@@ -10,53 +10,45 @@ import {temp_p} from "../../temp";
 const client = new NFTStorage({ token: process.env.NEXT_PUBLIC_NFT_STORAGE });
 
 
-const _store = async (key, {arg})=>{
-
-    return {ipnft:`CID_${Date.now()}`};
-    const {name, description, image, properties} = arg;
-    const metadata = await client.store({name, description, image, properties:properties || {} });
-    //const metadata =  await (new Promise((resolve)=>setTimeout(()=>resolve(name + description), 4000)));
+const _store = async (key, {arg, ...more})=>{
+    console.log(arg, more);
+    //return {ipnft:`CID_${Date.now()}`};
+    const {name, description, file, properties} = arg;
+    const metadata = await client.store({name, description, image:file[0], properties:properties || {} });
     return metadata;
 }
 
 const store = data=>_store('', data);
 
-const useIpfsStore = (onSuccess, onError)=>{
-    const [status, setStatus] = useState({});
-    const {isMutating:isLoading,...methods} =  useSWRMutation("/ipfsStoreSave", _store, 
-        {
-            onSuccess:()=>setStatus({isSuccess:true}), 
-            onError:()=>setStatus({isError:true})
-        }
-    );
+const useIpfsStore = ()=>{
+    const {isMutating:isLoading,...methods} =  useSWRMutation("/ipfsStoreSave", _store);
 
-    return {isLoading, ...status, ...methods};
+    return {isLoading, ...methods};
 }
 
 const fetcher = async ([_,cid])=>{
-    // const response = await axios.get(cid);
-    // return response.data;
-    //console.log("my fetehcer called", cid);
     if(!cid)
         return null;
+    const response = await axios.get(_);
+    const {image, ...rest} = response.data
+    return {...rest, image:ipfsHttpUrl(image)};
+    //console.log("my fetehcer called", cid);
+    // if(!cid)
+    //     return null;
         
-    return {name:faker.commerce.productName(), description:faker.commerce.productDescription(), image:temp_p[~~(Math.random()*100) % temp_p.length],
-        properties:{
-            catchPhrase:faker.company.catchPhrase(),
-            material:faker.commerce.productMaterial(),
-            cid
-        }
-    }
+    // return {name:faker.commerce.productName(), description:faker.commerce.productDescription(), image:temp_p[~~(Math.random()*100) % temp_p.length],
+    //     properties:{
+    //         catchPhrase:faker.company.catchPhrase(),
+    //         material:faker.commerce.productMaterial(),
+    //         cid
+    //     }
+    // }
 }
 
-// const useIpfsData = (cid, gateway)=>{
-//     const {isMutating:isLoading, ...methods} = useSWRMutation(`https://${gateway||'nftstorage.link'}/ipfs/${cid}/metadata.json`, fetcher);
-//     return {isLoading, ...methods};
-// }
-
 const useIpfsData = (cid, gateway)=>{
-    const methods = useSWRImmutable([`https://${gateway||'nftstorage.link'}/ipfs/${cid}/metadata.json`, cid], fetcher);
-    return methods;
+    const {isMutating:isLoading, ...methods} = useSWRImmutable([`https://${gateway||'nftstorage.link'}/ipfs/${cid}/metadata.json`, cid], fetcher);
+    console.log({data:methods.data});
+    return {isLoading, ...methods};
 }
 
 const ipfsHttpUrl = (ipfs_url, gateway)=>`https://${gateway||'nftstorage.link'}/ipfs/${ipfs_url.replace('ipfs://','')}`;

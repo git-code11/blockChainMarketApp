@@ -8,7 +8,7 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 
-import {useContractRead, useContractWrite, usePrepareContractWrite} from "wagmi";
+import {useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
 ;
 
 import auctionAbi from "../../contract/Auction.sol/MarketAuction.json";
@@ -42,8 +42,14 @@ export default ({id})=>{
     });
     
     const {write, ...writeOpts} = useContractWrite(config);
+    const wait = useWaitForTransaction({
+        hash:writeOpts.data?.hash
+    });
 
-    const _error = prepare.error || writeOpts.error;
+    const _error = prepare.error || writeOpts.error || wait.error;
+
+    const _loading = writeOpts.isLoading|| wait.isLoading;
+    const _success = writeOpts.isSuccess|| wait.isSuccess;;
 
     return(
         <Dialog open={isVisible} onClose={()=>hide(id)}>
@@ -51,7 +57,7 @@ export default ({id})=>{
                 <Box p={2} component={Stack} spacing={2}>
 
                     {
-                    writeOpts.isSuccess && 
+                    wait.isSuccess && 
                         <Alert variant="outlined">
                             <Typography>Sucessfully Close Auction</Typography>
                         </Alert>
@@ -63,7 +69,7 @@ export default ({id})=>{
                         </Alert>
                     }
                     
-                    {writeOpts.isLoading && 
+                    {_loading && 
                         <Alert variant="outlined" severity="info">
                             <Stack px={1} direction="row" spacing={1} alignItems="center">
                                 <Typography>Processing </Typography>
@@ -77,7 +83,7 @@ export default ({id})=>{
                 <DialogContentText>Proceed to close auction</DialogContentText>
                 <DialogActions>
                     <Button variant="outlined" 
-                        disabled={!write || writeOpts.isLoading || writeOpts.isSuccess} 
+                        disabled={!write || _success || _loading} 
                         size="large" 
                         onClick={()=>write?.()}
                     >Proceed</Button>

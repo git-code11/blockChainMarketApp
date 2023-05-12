@@ -6,7 +6,7 @@ import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
-import {useContractRead, useContractWrite, usePrepareContractWrite} from "wagmi";
+import {useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
 
 import auctionAbi from "../../contract/Auction.sol/MarketAuction.json";
 import nftAbi from "../../contract/NFT.sol/NFT.json";
@@ -135,7 +135,9 @@ export default ({id})=>{
     });
 
     const {write:approve, ...approveWriteOpts} = useContractWrite(approveConfig);
-
+    const waitApprove = useWaitForTransaction({
+        hash:approveWriteOpts.data?.hash
+    });
 
     const {config, ...prepare} = usePrepareContractWrite({
         address:_contract.auction,
@@ -147,10 +149,14 @@ export default ({id})=>{
 
     
     const {write, ...writeOpts} = useContractWrite(config);
+    const waitWrite = useWaitForTransaction({
+        hash:writeOpts.data?.hash
+    });
 
-    const _error = approveWriteOpts.error || writeOpts.error;
+
+    const _error = approveWriteOpts.error || writeOpts.error || waitApprove.error || waitWrite.error;
     
-    const _loading = approveWriteOpts.isLoading || writeOpts.isLoading;
+    const _loading = approveWriteOpts.isLoading || writeOpts.isLoading || waitApprove.isLoading || waitWrite.isLoading;
  
 
     return (
@@ -183,7 +189,7 @@ export default ({id})=>{
                         </Alert>
                     }       
 
-                    {writeOpts.isSuccess && 
+                    {waitWrite.isSuccess && 
                         <Alert>Successfully</Alert>
                     }
 
@@ -193,9 +199,9 @@ export default ({id})=>{
            
             
             <DialogActions>
-                <Button disabled={writeOpts.isSuccess || !approve || _loading || isApproved} 
+                <Button disabled={waitWrite.isSuccess || !approve || _loading || isApproved} 
                 onClick={()=>approve?.()}>Approve</Button>
-                <Button disabled={writeOpts.isSuccess || !(write && isApproved) || _loading || writeOpts.isSuccess || prepare.isLoading} 
+                <Button disabled={waitWrite.isSuccess || !(write && isApproved) || _loading || waitWrite.isSuccess || prepare.isLoading} 
                 onClick={()=>write?.()}>Proceed</Button>
             </DialogActions> 
         </Dialog>

@@ -8,6 +8,7 @@ import DisplayFaq from "../../components/DisplayFaq";
 
 import ListPriceSection from '../../components/ListPriceSection';
 
+
 export default ()=>{
     
     return (
@@ -32,4 +33,3 @@ export default ()=>{
 
     );
 }
-

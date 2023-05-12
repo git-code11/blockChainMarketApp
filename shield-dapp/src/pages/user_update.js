@@ -36,7 +36,7 @@ export default ()=>{
             </Stack>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Stack spacing={3}>
-                    <TextField placeholder="userName" {...register('userName')}/>
+                    <TextField placeholder="userName" {...register('name')}/>
                     <Button  disabled={update.isLoading} type="submit">Update</Button>
                 </Stack>
             </form>

@@ -21,7 +21,7 @@ export default ({tokenId, loading, name, image, auction})=>{
     const {data:token} = useCurrency();
 
     return (
-        <CardActionArea component={Link} href={`/item/${tokenId?.toString()}`}>
+        <CardActionArea component={Link} href={loading?'#':`/item/${tokenId?.toString()}`}>
             
             <Paper component={Stack} direction="row-reverse" sx={{p:.5}} spacing={1}>
                     <Box position="relative">

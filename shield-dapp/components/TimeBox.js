@@ -4,9 +4,10 @@ import useTimer from '../context/hook/useTimer';
 import formatTime from '../context/lib/formatTime';
 
 export default ({start, gap})=>{
+
     const state = useTimer(start, gap, 500);
-    const time = useMemo(()=>formatTime(state||gap),[state, gap])
- 
+    const time = useMemo(()=>formatTime(state??gap),[state, gap])
+    
      return (
          gap?
          <div data-timebox style={{display:"flex", gap:"5px"}}>
