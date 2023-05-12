@@ -1,5 +1,5 @@
 import { useController } from "react-hook-form";
-import TextInput from "./BootStrapInput";
+import TextInput from "./BootstrapInput";
 
 export default ({form, control, name, ...props})=>{
     const {field, fieldState:{error}} = useController({name, control, defaultValue:''})

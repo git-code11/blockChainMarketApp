@@ -97,7 +97,7 @@ const ContainerWrapper =  ()=>{
         e.preventDefault();
         if(methods.trigger())
             show("createItem");
-    },[methods.trigger, show]);
+    },[methods, show]);
 
     return (
 

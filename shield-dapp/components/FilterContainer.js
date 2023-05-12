@@ -72,7 +72,7 @@ export const useFilter = ()=>{
     const _max = 3;
     const _id = (+id||0)%_max;
 
-    const goTo = useCallback((id)=>Router.push(`/explore/${(+id||0)%_max}`));
+    const goTo = useCallback((id)=>Router.push(`/explore/${(+id||0)%_max}`),[]);
 
     return {id:_id, isReady, goTo}
 }
