@@ -10,11 +10,11 @@ const Provider = ({children, globalData})=>{
 
     const show = useCallback((id)=>{
         setVisible(_state=>({..._state, [id]:true}));
-    });
+    },[setVisible]);
 
     const hide = useCallback((id)=>{
         setVisible(_state=>({..._state, [id]:false}));
-    });
+    },[setVisible]);
 
     return (
         <_context.Provider value={{globalData, show, hide, visible}}>

@@ -22,7 +22,7 @@ export default ()=>{
         if(address && isAuthenticated && address !== session.data.user.uid){
             reset();
         }
-    },[address, isAuthenticated, session.data]);
+    },[address, isAuthenticated, session.data, reset]);
 
     return (
         open?<Dialog open={open}>

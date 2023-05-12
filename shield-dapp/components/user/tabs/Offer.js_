@@ -1,4 +1,4 @@
-import ItemOffer from '../item/Offer';
+import ItemOffer from '../item/Offer.js_';
 import Grid from "@mui/material/Unstable_Grid2";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
@@ -95,5 +95,4 @@ const ItemContainer = ({value})=>{
     const {data:fdata, ...ipfs} = useIpfsData(idata?.[0]);
 
     return <ItemOffer image={d} key={k} name="Esponiage" addr="0x33884294ccee378" isOfferFrom={k%4 == 1}/>
-    <Item tokenId={data} loading={isLoading || info.isLoading || ipfs.isLoading} {...fdata} addrLabel="Owner" addr={idata?.[1]}/>
 }

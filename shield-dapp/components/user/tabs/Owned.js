@@ -43,7 +43,7 @@ export default ()=>{
 
     return (
             <LazyScroll end={data}
-                Parent={({children})=><Grid container spacing={2} children={children}/>}
+                Parent={({children})=><Grid container spacing={2}>{children}</Grid>}
                 >
                 {({index})=>
                     <Grid xs={12} sm={6} md={4} lg={3}>
