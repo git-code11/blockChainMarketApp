@@ -122,6 +122,7 @@ export default ({id})=>{
     const waitApprove = useWaitForTransaction({
         hash:approveWriteOpts.data?.hash
     })
+    //console.log({approveConfig, approveWriteOpts});
     
     const {config, ...prepare} = usePrepareContractWrite({
         address:_contract.sale,
@@ -139,7 +140,7 @@ export default ({id})=>{
 
     const _error = approveWriteOpts.error || writeOpts.error || waitApprove.error || waitWrite.error;
     
-    const _loading = approveWriteOpts.isLoading||waitApprove || writeOpts.isLoading || waitWrite.isLoading;
+    const _loading = approveWriteOpts.isLoading|| waitApprove.isLoading || writeOpts.isLoading || waitWrite.isLoading;
  
 
     return (

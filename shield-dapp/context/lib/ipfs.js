@@ -11,7 +11,7 @@ const client = new NFTStorage({ token: process.env.NEXT_PUBLIC_NFT_STORAGE });
 
 
 const _store = async (key, {arg, ...more})=>{
-    console.log(arg, more);
+    //console.log(arg, more);
     //return {ipnft:`CID_${Date.now()}`};
     const {name, description, file, properties} = arg;
     const metadata = await client.store({name, description, image:file[0], properties:properties || {} });
@@ -47,7 +47,7 @@ const fetcher = async ([_,cid])=>{
 
 const useIpfsData = (cid, gateway)=>{
     const {isMutating:isLoading, ...methods} = useSWRImmutable([`https://${gateway||'nftstorage.link'}/ipfs/${cid}/metadata.json`, cid], fetcher);
-    console.log({data:methods.data});
+    //console.log({data:methods.data});
     return {isLoading, ...methods};
 }
 

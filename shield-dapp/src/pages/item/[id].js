@@ -55,7 +55,7 @@ const ContainerWrapper =  ()=>{
         args:[tokenId],
         enabled:!!tokenId
     });
-
+    if(error) console.log({tokenId});
     const {data:idata, ...info} = useContractReads({
         contracts:[
             {
