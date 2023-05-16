@@ -86,7 +86,7 @@ export default ({id})=>{
         hash:approveWrite.data?.hash
     })
 
-    console.log({purchaseConfig, purchasePrepare, purchaseWrite})
+    //console.log({purchaseConfig, purchasePrepare, purchaseWrite})
 
     const _error = itemRead.error || approvePrepare.error || approveWrite.error || 
                 (can_pay && purchasePrepare.error) || purchaseWrite.error||
