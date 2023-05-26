@@ -18,6 +18,7 @@ import { useDebounce } from 'use-debounce';
 
 import e_msg from "../../context/lib/e_msg";
 import { useDataContext } from "./context";
+import { auctionStruct } from '../../context/lib/struct';
 
 
 export default ({id})=>{
@@ -37,16 +38,19 @@ export default ({id})=>{
         functionName:"auctions",
         args:[tokenId],
         enabled:!!tokenId,
-        watch:true
+        watch:true,
+        select:auctionStruct
     });
 
-    const auctionExist = auction?.reserve?.gt(0);
+    console.log({auction});
+
+    const auctionExist = auction?.reserve > 0;
 
     const {config, ...prepare} = usePrepareContractWrite({
         address:_contract.auction,
         abi:auctionAbi.abi,
         functionName:"extendAuction",
-        args:[tokenId, +value * 3600],
+        args:[tokenId, valueCorrect?BigInt(value * 3600):0],
         enabled:isVisible && !!tokenId && valueCorrect && auctionExist,
     });
     

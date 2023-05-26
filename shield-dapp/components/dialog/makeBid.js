@@ -18,9 +18,11 @@ import CustomInput from "../CustomInput";
 import auctionAbi from "../../contract/Auction.sol/MarketAuction.json";
 import _contract from "../../contract/address.json";
 import useCurrency from '../../context/hook/useCurrency';
-import { formatEther, parseEther } from 'ethers/lib/utils.js';
+
+import { formatEther, parseEther } from 'viem';
 
 import e_msg from '../../context/lib/e_msg';
+import { auctionStruct } from '../../context/lib/struct';
 
 
 export default ({id})=>{
@@ -34,7 +36,7 @@ export default ({id})=>{
     const [_value, setValue] = useState("");
     
     const [m_Value] = useDebounce(_value, 500);
-    const value = useMemo(()=>m_Value.match(/^[0-9]+(?:\.[0-9]+)?$/)?parseEther(m_Value):0,[m_Value]);
+    const value = useMemo(()=>m_Value.match(/^[0-9]+(?:\.[0-9]+)?$/)?parseEther(m_Value):0n,[m_Value]);
 
 
     const {globalData,visible, hide} = useDataContext();
@@ -48,11 +50,12 @@ export default ({id})=>{
         functionName:"auctions",
         args:[tokenId],
         enabled:!!tokenId,
-        watch:true
+        watch:true,
+        select: auctionStruct
     });
+    console.log({auction})
 
-    const can_proceed = !!(balance?.value?.gte(value) && auction?.reserve?.lte(value) && auction?.price?.lt(value));
-    
+    const can_proceed = !!(balance?.value >= value && auction?.reserve <= value && auction?.price < value);
     
     const {config, ...prepare} = usePrepareContractWrite({
         address:_contract.auction,
@@ -60,9 +63,7 @@ export default ({id})=>{
         functionName:"placeBid",
         args:[tokenId],
         enabled:isVisible && !!tokenId && can_proceed,
-        overrides:{
-            value
-        }
+        value
     });
 
     const {write, ...writeOpts} = useContractWrite(config);
@@ -83,7 +84,7 @@ export default ({id})=>{
                         <Typography fontWeight={600}>{currency?.symbol}</Typography>
                     </Stack>
                 </Box>
-                <Typography>Last Bid Amount: <b>{auction?.price?.gt(0)?formatEther(auction?.price):formatEther(auction?.reserve||0)}{currency?.symbol}</b></Typography>
+                <Typography>Last Bid Amount: <b>{auction?.price > 0 ?formatEther(auction?.price):formatEther(auction?.reserve ?? 0)}{currency?.symbol}</b></Typography>
                 <Typography>Account Balance: <b>{balance?.formatted}{currency?.symbol}</b></Typography>
                 <Alert variant="outlined" severity="info">
                     <Typography>

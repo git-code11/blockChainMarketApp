@@ -1,16 +1,16 @@
-import {useMemo} from 'react';
+
 import Link from 'next/link';
 import { Box, Stack, Paper, Skeleton, Button, Avatar, AvatarGroup, Typography } from "@mui/material";
 import {Image as ScalableImage, Box as ScalableBox} from "../../components/Scalable";
 import ElTypography from "../../components/ElTypography";
 import BlurDarkBox from "../BlurBlackBox";
-import { formatEther } from "ethers/lib/utils.js";
+import { formatEther } from 'viem';
 import {temp_c} from "../../temp";
 
 import TimeBox from '../TimeBox';
 
 export default ({tokenId, loading, name, image, auction, currency, creator})=>{
-
+    
     return (
         <ScalableBox height="100%">
             <Paper component={Stack} sx={{p:1.5, pb:2, borderRadius:2, height:"100%"}} spacing={1}>
@@ -66,7 +66,7 @@ export default ({tokenId, loading, name, image, auction, currency, creator})=>{
                     <Stack justifyContent="space-between" alignItems="center" direction="row">
                         <Stack>
                             <Typography variant="subtite2">{loading?<Skeleton width={75}/>:"Current Bid"}</Typography>
-                            <Typography variant="h5" fontWeight="bold">{loading?<Skeleton width={75}/>:formatEther(auction?.price.gt(0)?auction?.price:auction?.reserve)}{loading?"":currency?.symbol}</Typography>
+                            <Typography variant="h5" fontWeight="bold">{loading?<Skeleton width={75}/>:formatEther(auction?.price > 0 ? auction?.price : auction?.reserve)}{loading?"":currency?.symbol}</Typography>
                         </Stack>
 
                         {loading?

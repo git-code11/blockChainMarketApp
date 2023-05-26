@@ -17,6 +17,7 @@ import _contract from "../../contract/address.json";
 
 import e_msg from "../../context/lib/e_msg";
 import { useDataContext } from "./context";
+import { saleStruct } from "../../context/lib/struct";
 
 
 export default ({id})=>{
@@ -30,7 +31,8 @@ export default ({id})=>{
         address:_contract.sale,
         functionName:"ItemForSale",
         args:[tokenId],
-        enabled:!!tokenId && isVisible
+        enabled:!!tokenId && isVisible,
+        select:saleStruct
     });
     
 
@@ -39,7 +41,7 @@ export default ({id})=>{
         abi:saleAbi.abi,
         functionName:"removeFromMarket",
         args:[tokenId],
-        enabled:!!item?.amount.gt(0) && isVisible,
+        enabled:item?.amount > 0n && isVisible,
     });
     
     const {write, ...writeOpts} = useContractWrite(config);

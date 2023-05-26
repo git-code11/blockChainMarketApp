@@ -1,9 +1,9 @@
 import useSetTimeout from "./useSetTimeout";
 
 const _func = (cb, exit, start, gap)=>{
-    const _current = Math.round(Date.now()/1000);
-    const _start = start?Number(start):0;
-    const _gap = gap?Number(gap):0;
+    const _current = BigInt(Math.round(Date.now()/1000));
+    const _start = start ?? 0n;
+    const _gap = gap ?? 0n;
     const _end = _start + _gap;
     
     if(_current < start){
@@ -19,6 +19,6 @@ const _func = (cb, exit, start, gap)=>{
 }
 
 export default (start, gap, interval)=>{
-    const [state] = useSetTimeout(_func, interval, !Boolean(+gap), start, gap);
+    const [state] = useSetTimeout(_func, interval, !Boolean(gap), start, gap);
     return state;
 }

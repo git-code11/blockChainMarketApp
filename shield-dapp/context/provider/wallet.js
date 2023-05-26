@@ -1,9 +1,8 @@
 import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum'
 import { Web3Modal } from '@web3modal/react'
-import { configureChains, createClient, WagmiConfig } from 'wagmi'
-import {bscTestnet, hardhat} from 'wagmi/chains'
-
-import {useEffect, useState} from "react";
+import { configureChains, createConfig, WagmiConfig } from 'wagmi'
+import {bscTestnet} from 'wagmi/chains'
+import {useState, useEffect} from 'react';
 
 
 // 1. Get projectID at https://cloud.walletconnect.com
@@ -13,38 +12,38 @@ if (!process.env.NEXT_PUBLIC_PROJECT_ID) {
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
 
 // 2. Configure wagmi client
-const chains = [bscTestnet];
+const chains = [bscTestnet]
 
-const { provider } = configureChains(chains, [w3mProvider({ projectId })])
-const wagmiClient = createClient({
+
+const { publicClient, webSocketPublicClient  } = configureChains(chains, [w3mProvider({ projectId })])
+
+const wagmiConfig = createConfig({
   autoConnect: true,
-  connectors: w3mConnectors({ version: 1, chains, projectId }),
-  provider
-});
+  connectors: w3mConnectors({ projectId, version: 1, chains }),
+  publicClient,
+  webSocketPublicClient
+})
+const ethereumClient = new EthereumClient(wagmiConfig, chains)
 
-// 3. Configure modal ethereum client
-const ethereumClient = new EthereumClient(wagmiClient, chains)
-
-// 4. Wrap your app with WagmiProvider and add <Web3Modal /> compoennt
-export default function ({children}) {
+export default function({children}) {
   const [ready, setReady] = useState(false)
 
-// 5. Prevent server-side rendering of Component
+  // 5. Prevent server-side rendering of Component
   useEffect(() => {
     setReady(true)
   }, []);
 
+  
   return (
-    <>
+    <> 
       {ready ? (
-        <WagmiConfig client={wagmiClient}>
-          {children}
+       <WagmiConfig config={wagmiConfig}>
+        {children}
         </WagmiConfig>
       ) : null}
-      
-      
-        <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
-      
+        
+
+      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
     </>
   )
 }

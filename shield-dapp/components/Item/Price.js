@@ -4,8 +4,7 @@ import {FavoriteRounded} from "@mui/icons-material"
 import { red } from '@mui/material/colors';
 import {Image as ScalableImage, Box as ScalableBox} from "../Scalable";
 import ElTypography from "../ElTypography";
-import { formatUnits } from 'ethers/lib/utils.js';
-
+import { formatUnits } from 'viem';
 import { temp_c } from '../../temp';
 
 export default ({loading, image, name, creator, sale, currency, tokenId })=>{
@@ -39,8 +38,8 @@ export default ({loading, image, name, creator, sale, currency, tokenId })=>{
                     <Stack justifyContent="space-between" direction="row">
                         <Typography variant="subtitel">{loading?<Skeleton width={50}/>:"Price"}</Typography>
                         <Stack>
-                            <Typography fontWeight="bold" variant="body1">{loading?<Skeleton width={95}/>:Number(formatUnits(sale?.amount||0)).toFixed(6).toString()} {loading?'':currency?.symbol}</Typography>
-                            <Typography variant="body2">{loading?<Skeleton width={100}/>:`~$${(sale?.amount||0)/200}`}</Typography>
+                            <Typography fontWeight="bold" variant="body1">{loading?<Skeleton width={95}/>:Number(formatUnits(sale?.amount ?? 0n)).toFixed(6).toString()} {loading?'':currency?.symbol}</Typography>
+                            <Typography variant="body2">{loading?<Skeleton width={100}/>:`~$${245.44}`}</Typography>
                         </Stack>
                     </Stack>
 

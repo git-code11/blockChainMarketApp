@@ -1,4 +1,4 @@
-import {useState, useEffect, useCallback} from 'react';
+import {useMemo} from 'react';
 import {useRouter} from "next/router";
 
 import { TableContainer, Table, TableBody, TableRow, TableCell, CircularProgress } from "@mui/material";
@@ -11,7 +11,7 @@ import Grid from "@mui/material/Unstable_Grid2";
 import Divider from "@mui/material/Divider";
 import Skeleton from "@mui/material/Skeleton";
 
-import {useAccount, useContractRead, useContractReads,  useNetwork, useToken} from "wagmi";
+import {useAccount, useContractRead, useContractReads} from "wagmi";
 import nftAbi from "../../../contract/NFT.sol/NFT.json";
 import saleAbi from "../../../contract/Sale.sol/MarketSales.json";
 import auctionAbi from "../../../contract/Auction.sol/MarketAuction.json";
@@ -21,7 +21,8 @@ import { useIpfsData } from "../../../context/lib/ipfs";
 import useCurrency from "../../../context/hook/useCurrency";
 
 import {temp_c} from "../../../temp";
-import { formatEther } from "ethers/lib/utils.js";
+
+import { formatEther } from 'viem';
 
 import Provider,{useDataContext} from '../../../components/dialog/context';
 import DialogPurchase from '../../../components/dialog/purchase';
@@ -40,7 +41,10 @@ import useSetTimeout from '../../../context/hook/useSetTimeout';
 import Backdrop from '@mui/material/Backdrop';
 
 import TimeBox from '../../../components/TimeBox';
+import { compose } from '../../../context/lib/transform';
+import { createSaleStruct, selectReadWithAuction } from '../../../context/lib/struct';
 
+const selectFunc = compose(createSaleStruct(2), selectReadWithAuction(3));
 
 const ContainerWrapper =  ()=>{
     
@@ -55,6 +59,8 @@ const ContainerWrapper =  ()=>{
         args:[tokenId],
         enabled:!!tokenId
     });
+
+    console.log({uri});
     
     const {data:idata, ...info} = useContractReads({
         contracts:[
@@ -85,11 +91,12 @@ const ContainerWrapper =  ()=>{
            
         ],
         enabled:!!tokenId,
-        watch:true
+        watch:true,
+        select:selectFunc
     });
 
     const {data:tokenDetails} = useCurrency(idata?.[2]?.currency);
-
+    console.log({idata})
     const iLoading = info.isLoading || !idata;
 
     const {data:fdata, ...ipfs} = useIpfsData(uri);
@@ -98,18 +105,18 @@ const ContainerWrapper =  ()=>{
     const [auctionClose] = useSetTimeout(
         (_cb, close)=>{
             
-            if(idata?.[3]?.startTime?.gt(0)){
-                let result = Date.now() > idata[3].startTime?.add(idata[3].diffTime)?.mul(1000);
+            if(idata?.[3]?.startTime > 0){
+                let result = Date.now() > Number(idata[3].startTime + idata[3].diffTime) * 1000;
                 if(result)
                     close();
                 _cb(result);
                 return;
             }
 
-            if(idata?.[3]?.startTime?.eq(0))
+            if(idata?.[3]?.startTime === 0n)
                 close();
             _cb(false);
-        }, 2000, false, idata?.[3]?.startTime
+        }, 60000, false, idata?.[3]?.startTime
     );
 
     if(!tokenId || isLoading){
@@ -153,10 +160,10 @@ const ContainerWrapper =  ()=>{
         </Grid>
         <Typography variant="h6" fontWeight="bold">{ipfs.isLoading?<Skeleton width={300}/>:fdata?.name}</Typography>
         
-        {idata?.[2]?.amount?.gt(0) && _contract.auction !== idata?.[1] &&
+        {idata?.[2]?.amount > 0n && _contract.auction !== idata?.[1] &&
         <Stack direction="row" spacing={2} alignItems="end">
             <Typography fontWeight="bold">Sale Price</Typography>
-            <Typography fontWeight="bold" variant="h5">{iLoading?<Skeleton width={100}/>:formatEther(idata[2]?.amount||0)}
+            <Typography fontWeight="bold" variant="h5">{iLoading?<Skeleton width={100}/>:formatEther(idata[2]?.amount ?? 0)}
                     {iLoading || tokenDetails?.symbol}
                     </Typography>
         </Stack>}
@@ -164,7 +171,7 @@ const ContainerWrapper =  ()=>{
         {!iLoading && idata[3] && _contract.auction === idata?.[1] && 
         <Stack direction="row" spacing={2} alignItems="end">
             <Typography fontWeight="bold">Reserve Price</Typography>
-            <Typography fontWeight="bold" variant="h5">{formatEther(idata[3]?.reserve?.toString()||0)} ETH</Typography>
+            <Typography fontWeight="bold" variant="h5">{formatEther(idata[3]?.reserve ?? 0)} ETH</Typography>
         </Stack>
         }
 
@@ -224,7 +231,7 @@ const ContainerWrapper =  ()=>{
         { userAddress === idata?.[1] ?
 
         <Stack spacing={2}>
-            {idata?.[2]?.amount?.gt(0) && <Button variant="contained" onClick={()=>show("removeFromSale")}>Clear Market Value</Button>}
+            {idata?.[2]?.amount > 0 && <Button variant="contained" onClick={()=>show("removeFromSale")}>Clear Market Value</Button>}
             <Button variant="contained" onClick={()=>show("addToSale")}>Set MarketValue</Button>
             <Button variant="contained" onClick={()=>show("createAuction")}>Create Auction</Button>
         </Stack>
@@ -247,11 +254,11 @@ const ContainerWrapper =  ()=>{
                 </>
                     
             }
-            {_contract.auction !== idata?.[1] && idata?.[2]?.amount?.gt(0) &&
+            {_contract.auction !== idata?.[1] && idata?.[2]?.amount > 0n &&
                 <Button variant="contained" color="secondary" onClick={()=>show("purchase")}>Buy Now</Button>
             }
 
-            {_contract.auction !== idata?.[1] && idata?.[2]?.amount?.eq(0) &&
+            {_contract.auction !== idata?.[1] && idata?.[2]?.amount === 0n &&
                 <Button variant="contained" color="secondary" onClick={()=>show("offer")}>Make an offer</Button>
             }
         </Stack>

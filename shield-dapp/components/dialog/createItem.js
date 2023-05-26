@@ -15,8 +15,8 @@ import _contract from "../../contract/address.json";
 import nftAbi from "../../contract/NFT.sol/NFT.json";
 import saleAbi from "../../contract/Sale.sol/MarketSales.json";
 
-import {constants, BigNumber} from "ethers";
-import { parseEther } from "ethers/lib/utils.js";
+import {constants} from "ethers";
+import { parseEther } from "viem";
 import { useContractWrite, usePrepareContractWrite, useAccount, useContractRead, useContractEvent, useWaitForTransaction } from "wagmi";
 import e_msg from "../../context/lib/e_msg";
 import { useDataContext } from "./context";
@@ -43,44 +43,58 @@ export default ({id})=>{
         trigger(formValue);
     },[trigger, formValue]);
 
-    const _fargs = [creatorAddress, ownerAddress, _ipfs.data?.ipnft, parseEther((parseFloat(formValue.sale.price) || 0).toString()), formValue.sale.currency, duration];
+    const _fargs = [creatorAddress, ownerAddress, _ipfs.data?.ipnft, parseEther((Number(formValue.sale.price) || 0).toString()), formValue.sale.currency, duration];
     const [fargs] = useDebounce(_fargs, 500);
     console.log({fargs, _ipfs})
-    const {config:saleConfig, ...salePrepare} = usePrepareContractWrite({
+   /*  const {config:saleConfig, ...salePrepare} = usePrepareContractWrite({
         address:_contract.sale,
         abi:saleAbi.abi,
         functionName:"createItem",
         args:fargs,
-        enabled:!!_ipfs.data?.ipnft && isVisible
+        enabled:Boolean(_ipfs.data?.ipnft) && isVisible
+    }); */
+    //console.log({saleConfig, salePrepare})
+    console.log({enabled:Boolean(_ipfs.data?.ipnft) && isVisible})
+    //const {write:toSale, ...toSaleOpts} = useContractWrite(saleConfig);
+    const {write:toSale, ...toSaleOpts} = useContractWrite({
+        address:_contract.sale,
+        abi:saleAbi.abi,
+        functionName:"createItem",
+        args:fargs,
+        enabled:Boolean(_ipfs.data?.ipnft) && isVisible
     });
-    const {write:toSale, ...toSaleOpts} = useContractWrite(saleConfig);
+    console.log({toSale, toSaleOpts})
+
     const waitSale = useWaitForTransaction({
         hash:toSaleOpts.data?.hash
     });
-    console.log({toSaleOpts, salePrepare, waitSale});
+    //console.log({toSaleOpts, salePrepare, waitSale});
 
     useEffect(()=>{
-        if(isVisible && _ipfs.data && salePrepare.isFetched && toSale && !(toSaleOpts.isLoading || toSaleOpts.isSuccess || toSaleOpts.isError)){
+        if(isVisible && _ipfs.data /*&& salePrepare.isFetched*/ && toSale && !(toSaleOpts.isLoading || toSaleOpts.isSuccess || toSaleOpts.isError)){
             toSale();
         }
-    },[_ipfs.data, salePrepare.isFetched,
+    },[_ipfs.data, //salePrepare.isFetched,
         toSale, toSaleOpts.isLoading, toSaleOpts.isSuccess, toSaleOpts.isError, isVisible]);
     
     const [tokenId, setTokenId] = useState(0);
 
-    useContractEvent({
+    const unwatch = useContractEvent({
         address:_contract.nft,
         abi:nftAbi.abi,
         eventName:"Transfer",
-        listener:(_from, _to, _id)=>{
+        listener:(logs)=>{
+            console.log({log:logs[0]})
+            alert('transfer', JSON.stringify(log));
+            const {args:{_from, _to, _id}} = logs[0]; 
             if(_from === constants.AddressZero && _to === ownerAddress){
                 setTokenId(_id);
+                //unwatch();
             }
-        },
-        once:!!tokenId
+        }
     });
 
-    const needApprove  = +formValue.sale.price > 0;
+    const needApprove  = Number(formValue.sale.price) > 0;
 
     const {data:_isApproved} = useContractRead({
         address:_contract.nft,

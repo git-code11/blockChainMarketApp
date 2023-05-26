@@ -16,7 +16,7 @@ import nftAbi from '../contract/NFT.sol/NFT.json';
 import _contract from '../contract/address.json';
 
 import { useIpfsData } from '../context/lib/ipfs';
-
+import { selectReads } from '../context/lib/transform';
 
 const ListAllSection = ()=>{
 
@@ -75,7 +75,8 @@ const ItemContainer  = ({tokenId})=>{
                 functionName:"ownerOf",
                 args:[tokenId]
             }
-        ]
+        ],
+        select:selectReads
     });
 
    

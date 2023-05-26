@@ -11,7 +11,6 @@ import {useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTr
 import auctionAbi from "../../contract/Auction.sol/MarketAuction.json";
 import nftAbi from "../../contract/NFT.sol/NFT.json";
 import _contract from "../../contract/address.json";
-import { constants, BigNumber } from "ethers";
 
 import e_msg from "../../context/lib/e_msg";
 import { useDataContext } from "./context";
@@ -22,7 +21,8 @@ import { useForm, FormProvider, useController, useFormContext} from "react-hook-
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
-import { parseEther } from 'ethers/lib/utils.js';
+
+import { parseEther } from 'viem';
 
 import {useDebounce} from 'use-debounce';
 

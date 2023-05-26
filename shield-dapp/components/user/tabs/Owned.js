@@ -12,7 +12,7 @@ import _contract from "../../../contract/address.json";
 import { useIpfsData } from "../../../context/lib/ipfs";
 
 import useUserId from "../../../context/hook/user/useId";
-
+import { selectReads } from "../../../context/lib/transform";
 
 export default ()=>{
     const {uid:address, isReady} = useUserId();
@@ -31,7 +31,7 @@ export default ()=>{
         </Stack>
     }
     
-    if(data?.eq(0) || isError){
+    if(data === 0n || isError){
         return (
         <Stack pb={1} alignItems="center" spacing={1}>
             <Typography>No entries{`:${error?.message??""}`}</Typography>
@@ -79,7 +79,8 @@ const ItemContainer = ({address, index})=>{
                 args:[data]
             }
         ],
-        enabled:isSuccess
+        enabled:isSuccess,
+        select:selectReads
     });
 
     const {data:fdata, ...ipfs} = useIpfsData(idata?.[0]);

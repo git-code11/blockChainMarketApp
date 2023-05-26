@@ -12,6 +12,7 @@ import nftAbi from "../../../contract/NFT.sol/NFT.json";
 import auctionAbi from "../../../contract/Auction.sol/MarketAuction.json";
 import _contract from "../../../contract/address.json";
 import { useIpfsData } from "../../../context/lib/ipfs";
+import { selectReadWithAuction } from '../../../context/lib/struct';
 
 export default ()=>{
     const {isReady} = useRouter();
@@ -29,7 +30,7 @@ export default ()=>{
         </Stack>
     }
     
-    if(data?.eq(0) || isError){
+    if(data === 0n || isError){
         return (
         <Stack pb={1} alignItems="center" spacing={1}>
             <Typography>No entries{`:${error?.message??""}`}</Typography>
@@ -76,7 +77,8 @@ const ItemContainer = ({index})=>{
                 args:[data]
             }
         ],
-        enabled:isSuccess
+        enabled:isSuccess,
+        select:selectReadWithAuction
     });
 
     const {data:fdata, ...ipfs} = useIpfsData(idata?.[0]);

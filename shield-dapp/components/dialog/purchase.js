@@ -20,6 +20,7 @@ import e_msg from "../../context/lib/e_msg";
 import { useDataContext } from "./context";
 
 import CustomInput from "../CustomInput";
+import { saleStruct } from "../../context/lib/struct";
 
 export default ({id})=>{
     const {globalData, visible, hide} = useDataContext();
@@ -33,8 +34,10 @@ export default ({id})=>{
         address:_contract.sale,
         functionName:"ItemForSale",
         args:[tokenId],
-        enabled:!!tokenId
+        enabled:!!tokenId,
+        select:saleStruct
     });
+    console.log({sale:item});
     
     const is_erc20 = itemRead.isSuccess && item?.currency != constants.AddressZero;
 
@@ -54,8 +57,8 @@ export default ({id})=>{
         watch:true
     });
 
-    const has_amount = itemRead.isSuccess && balance?.value.gte(item?.amount);
-    const can_pay = has_amount && (is_erc20? allowance?.gte(item?.amount):true)
+    const has_amount = itemRead.isSuccess && balance?.value >= item?.amount;
+    const can_pay = has_amount && (is_erc20? allowance >= item?.amount:true)
 
     const {config:approveConfig, ...approvePrepare} = usePrepareContractWrite({ 
         address:item?.currency,
@@ -75,10 +78,8 @@ export default ({id})=>{
         abi:saleAbi.abi,
         functionName:"purchase",
         args:[tokenId],
-        enabled:can_pay && isVisible,
-        overrides:{
-            value:is_erc20? 0: item?.amount
-        }
+        value:is_erc20? 0n: item?.amount,
+        enabled:can_pay && isVisible
     });
     
     const {write:purchase, ...purchaseWrite} = useContractWrite(purchaseConfig);
@@ -101,7 +102,7 @@ export default ({id})=>{
                 <Box component={Paper} position="relative" p={1} bgcolor="#ccc">
                     <Typography position="absolute" fontWeight={500}>PRICE AMOUNT</Typography>
                     <Stack width="100%" direction="row" alignSelf="end" alignItems="baseline">
-                        <CustomInput placeholder="0.00" value={formatEther(item?.amount??0)} disabled/>
+                        <CustomInput placeholder="0.00" value={formatEther(item?.amount??0n)} disabled/>
                         <Typography fontWeight={600}>{balance?.symbol}</Typography>
                     </Stack>
                 </Box>

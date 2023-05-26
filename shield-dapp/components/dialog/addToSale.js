@@ -11,7 +11,7 @@ import {useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTr
 import saleAbi from "../../contract/Sale.sol/MarketSales.json";
 import nftAbi from "../../contract/NFT.sol/NFT.json";
 import _contract from "../../contract/address.json";
-import { constants, BigNumber } from "ethers";
+import { constants } from "ethers";
 
 import e_msg from "../../context/lib/e_msg";
 import { useDataContext } from "./context";
@@ -22,7 +22,7 @@ import { useForm, FormProvider, useController} from "react-hook-form";
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
-import { parseEther } from 'ethers/lib/utils.js';
+import { parseEther } from 'viem';
 import exchangeCurrency from'../../currency-list';
 
 import {useDebounce} from 'use-debounce';
@@ -94,7 +94,7 @@ export default ({id})=>{
 
     const _formValue = methods.getValues();
     
-    const _rformValue = [_formValue.currency, _formValue.amount && parseEther(_formValue.amount.toString()), _formValue.duration && BigNumber.from(+_formValue.duration*3600)];
+    const _rformValue = [_formValue.currency, _formValue.amount && parseEther(_formValue.amount.toString()), _formValue.duration && BigInt(_formValue.duration)*3600n];
 
     const [formValue] = useDebounce(_rformValue, 500);
 

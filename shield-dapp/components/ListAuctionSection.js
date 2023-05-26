@@ -16,7 +16,7 @@ import Item from "./Item/Auction";
 import auctionAbi from '../contract/Auction.sol/MarketAuction.json';
 import nftAbi from '../contract/NFT.sol/NFT.json';
 import _contract from '../contract/address.json';
-
+import { selectReadWithAuction } from '../context/lib/struct';
 
 
 const ListAuctionSection = ({min})=>{
@@ -86,7 +86,8 @@ const ItemContainer  = ({index})=>{
                 args:[tokenId]
             }
         ],
-        enabled:readProps.isSuccess
+        enabled:readProps.isSuccess,
+        select:selectReadWithAuction(2)
     });
 
     const {data:token, ...tokenOpt} = useCurrency();
@@ -95,6 +96,7 @@ const ItemContainer  = ({index})=>{
     
     const loading = readProps.isLoading  || isLoading || ipfs.isLoading || tokenOpt.isLoading;
     
+    //const auction = useMemo(()=>auctionStruct(data?.[2]),[data?.[2]]);
 
     return (
         <Grid key={index} xs={12} sm={6} md={4} lg={3} justifyContent="space-evenly">

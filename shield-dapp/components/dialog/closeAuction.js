@@ -8,8 +8,8 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 
-import {useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
-;
+import {useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
+
 
 import auctionAbi from "../../contract/Auction.sol/MarketAuction.json";
 import _contract from "../../contract/address.json";

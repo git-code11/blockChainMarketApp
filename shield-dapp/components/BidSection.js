@@ -1,14 +1,9 @@
 import Typography from '@mui/material/Typography';
 import Grid from "@mui/material/Unstable_Grid2";
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import CircularProgress from '@mui/material/CircularProgress';
+
 import ItemBid from "./Item/Bid";
 
-
-import { useContractRead } from 'wagmi';
-
-import saleAbi from '../contract/Sale.sol/MarketSales.json';
 import _contract from '../contract/address.json';
 
 import {temp_c, temp_p} from "../temp";

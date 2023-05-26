@@ -20,6 +20,8 @@ import _contract from '../contract/address.json';
 
 import { useIpfsData } from '../context/lib/ipfs';
 
+import { selectReads } from '../context/lib/transform';
+
 
 const ListPriceSection = ()=>{
 
@@ -65,7 +67,7 @@ const ItemContainer  = ({index})=>{
         args:[index]
     });
 
-    const {data, isLoading} = useContractReads({
+    const {data, isLoading, ...more} = useContractReads({
         contracts:[
             {
                 abi:nftAbi.abi,
@@ -86,7 +88,8 @@ const ItemContainer  = ({index})=>{
                 args:[tokenId]
             }
         ],
-        enabled:readProps.isSuccess
+        enabled:readProps.isSuccess,
+        select:selectReads
     });
 
     const {data:currency, ...tokenOpt} = useCurrency(data?.[2].currency);

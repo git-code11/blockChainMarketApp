@@ -10,11 +10,13 @@ import {temp_p} from "../../temp";
 const client = new NFTStorage({ token: process.env.NEXT_PUBLIC_NFT_STORAGE });
 
 
-const _store = async (key, {arg, ...more})=>{
+const _store = async (key, {arg})=>{
     //console.log(arg, more);
     //return {ipnft:`CID_${Date.now()}`};
     const {name, description, file, properties} = arg;
+    
     const metadata = await client.store({name, description, image:file[0], properties:properties || {} });
+    
     return metadata;
 }
 

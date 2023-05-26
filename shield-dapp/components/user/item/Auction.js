@@ -10,7 +10,7 @@ import CardActionArea from "@mui/material/CardActionArea";
 
 import ElTypography from '../../ElTypography';
 import { Skeleton } from '@mui/material';
-import { formatEther } from 'ethers/lib/utils.js';;
+import { formatEther } from 'viem';
 
 import useCurrency from '../../../context/hook/useCurrency';
 import TimeBox from '../../TimeBox';
@@ -33,7 +33,7 @@ export default ({tokenId, loading, name, image, auction})=>{
                         <Stack component={Box} sx={{position:"absolute", bottom:5, left:5}} direction="row" alignItems="end" spacing={0.25}>
                             <ArrowUpward color="success" fontSize="small"/>
                             <Typography variant="subtitle2" fontWeight="bold">
-                                {loading?<Skeleton width={40}/>:Number(auction?.price/auction?.reserve)?.toFixed(2)+'x'}
+                                {loading?<Skeleton width={40}/>:Number((auction?.price/auction?.reserve).toString())?.toFixed(2)+'x'}
                             </Typography>
                         </Stack>
                     </Box>
@@ -44,7 +44,7 @@ export default ({tokenId, loading, name, image, auction})=>{
                                     <Typography component="div" variant="body2">Top</Typography>
                                     <ElTypography variant="body2">{loading?<Skeleton width={40}/>:auction?.topBidder}</ElTypography> 
                                 </Stack>
-                                <Typography variant="body2">Reserve: {loading?<Skeleton width={30}/>:(+formatEther(auction?.reserve||0)).toFixed(2)}{token?.symbol}</Typography>
+                                <Typography variant="body2">Reserve: {loading?<Skeleton width={30}/>:(+formatEther(auction?.reserve ?? 0n)).toFixed(2)}{token?.symbol}</Typography>
                                 <Stack direction="row" alignItems="center">
                                     <PunchClock/>
                                     <Typography variant="body2">
