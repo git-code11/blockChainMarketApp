@@ -89,6 +89,7 @@ const ContainerWrapper =  ()=>{
     });
 
     const {data:tokenDetails} = useCurrency(idata?.[2]?.currency);
+    const {data:nativeCurrency} = useCurrency();
 
     const iLoading = info.isLoading || !idata;
 
@@ -164,7 +165,7 @@ const ContainerWrapper =  ()=>{
         {!iLoading && idata[3] && _contract.auction === idata?.[1] && 
         <Stack direction="row" spacing={2} alignItems="end">
             <Typography fontWeight="bold">Reserve Price</Typography>
-            <Typography fontWeight="bold" variant="h5">{formatEther(idata[3]?.reserve?.toString()||0)} ETH</Typography>
+            <Typography fontWeight="bold" variant="h5">{formatEther(idata[3]?.reserve?.toString()||0)} {nativeCurrency.symbol}</Typography>
         </Stack>
         }
 
