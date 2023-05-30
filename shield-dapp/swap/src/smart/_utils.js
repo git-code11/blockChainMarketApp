@@ -1,13 +1,13 @@
 //import { ChainId } from '@pancakeswap/sdk'
-import {PoolType, SWAP_ROUTER_ADDRESSES,} from '@pancakeswap/smart-router/evm';
+import {PoolType, SWAP_ROUTER_ADDRESSES, SwapRouter} from '@pancakeswap/smart-router/evm';
 //import { GraphQLClient } from 'graphql-request'
 import { createPublicClient, http, fallback } from 'viem'
 import { bsc, bscTestnet, goerli } from 'viem/chains';
 
 import _quoteProvider from './_quoteProvider';
 import _poolProvider from './_poolProvider';
-import { TradeType, CurrencyAmount} from '@pancakeswap/sdk';
-import { parseUnits } from 'ethers/lib/utils.js';
+import { TradeType, CurrencyAmount, Percent} from '@pancakeswap/sdk';
+import { parseUnits, formatUnits } from 'ethers/lib/utils.js';
 
 // const V3_SUBGRAPH_URLS = {
 //     [ChainId.ETHEREUM]: 'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-eth',
@@ -87,6 +87,14 @@ export function fromReadableAmount(
   return parseUnits(amount.toString(), decimals)
 }
 
+
+const READABLE_FORM_LEN = 24
+
+export function toReadableAmount(rawAmount, decimals) {
+  return formatUnits(rawAmount, decimals).slice(0, READABLE_FORM_LEN)
+}
+
+
 const prepareTradeQuoteParamsConfig  = {
   gasPriceWei: 10,
   poolProvider: _poolProvider.onChain,
@@ -112,3 +120,26 @@ export const prepareTradeQuoteParams = ({amountIn, currencyIn, currencyOut, trad
   return params;
 
 }
+
+
+export const prepareTradeCallData = ({
+            trade,
+            chainId,
+            options
+    })=>{
+  const _options = {}
+  _options.slippageTolerance = new Percent(options.toleranceBips?? 1, 10_000); //1bips
+  _options.deadlineOrPreviousBlockhash = options.deadline ?? Math.round(Date.now()/1000) + 60 * 60; //1hr
+  _options.recipient = options.recipient;
+  if(options.admin){
+    _options.fee = {
+      recipient: options.admin,
+      fee: new Percent(options.feeBips??1, 10_000) //1bips
+    };
+  }
+    
+  const callParams = SwapRouter.swapCallParameters(trade,  _options)
+  const swapRouterAddress = getSwapRouterAddr(chainId);
+  return {address:swapRouterAddress, param:callParams}
+}
+
