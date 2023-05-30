@@ -1,4 +1,4 @@
-import {useState, useEffect, useCallback} from 'react';
+import {useState, useCallback} from 'react';
 
 
 export default (_func)=>{
@@ -20,7 +20,7 @@ export default (_func)=>{
         }
         setLoading(false);
         return _value;
-    },[loading]);
+    },[loading, _func]);
 
     const reset = useCallback(()=>{
         if(loading)

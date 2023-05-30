@@ -1,5 +1,5 @@
 import {SmartRouter } from '@pancakeswap/smart-router/evm';
-import { getWorker, createWorkerGetBestTrade } from './_worker';
+import { getWorker, createWorkerGetBestTrade } from './_web_worker';
 import _poolProvider, { CandidatePoolCache, globalCandidatePoolCache } from './_poolProvider';
 
 const QUOTING_API = "https://swap-quoting.pancakeswap.com/quoting-service/v0/quote";
@@ -62,7 +62,7 @@ const __getBestTradeCached = (_getBestTrade, _cachedPool) =>
     return result;
 }
 
-const __getBestTradeWorkerCached = (_cache)=>(...args)=>_getBestTrade.cached(_getBestTrade.worker(), _cache)(...args);
+const __getBestTradeWorkerCached = (_cache, _worker)=>(...args)=>_getBestTrade.cached(_getBestTrade.worker(_worker), _cache)(...args);
 
 const __getBestTradeApiCached = (_cache)=>_getBestTrade.cached(_getBestTrade.api, _cache);
 
@@ -71,11 +71,13 @@ const __getBestTradeMainCached = (_cache)=>_getBestTrade.cached(_getBestTrade.ma
 const _getBestTrade = {
     main:SmartRouter.getBestTrade,
     api:__getBestTradeApi,
-    worker: worker=>createWorkerGetBestTrade(worker?worker:getWorker()),//new Worker Should be created everytime
+    worker: createWorkerGetBestTrade,//new Worker Should be created everytime
+    cache:{
+      worker:__getBestTradeWorkerCached,
+      api:__getBestTradeApiCached,
+      main:__getBestTradeMainCached
+    },
     cached:__getBestTradeCached,
-    cachedWorker:__getBestTradeWorkerCached,
-    cachedApi:__getBestTradeApiCached,
-    cachedMain: __getBestTradeMainCached
 }
 
 export default _getBestTrade;

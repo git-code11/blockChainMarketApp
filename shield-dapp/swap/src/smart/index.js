@@ -8,7 +8,7 @@ import _quoteProvider from './_quoteProvider';
 import _poolProvider,{CandidatePoolCache, globalCandidatePoolCache} from './_poolProvider';
 import _getBestTrade from './_getBestTrade';
 import {getSwapRouterAddr, timeit} from './_utils';
-import { getWorker } from './_worker';
+import { getWorker } from './_worker';//_web_worker
 
 const currentChainId = ChainId.BSC_TESTNET;
 
@@ -92,9 +92,9 @@ const allFunc = {
   main:_getBestTrade.main,
   api:_getBestTrade.api,
  // worker:(...args)=>_getBestTrade.worker()(...args),
-  cachedMain:_getBestTrade.cachedMain(cache_1),
-  cachedApi:_getBestTrade.cachedApi(cache_2),
- // cachedWorker:_getBestTrade.cachedWorker(cache_3)
+  cachedMain:_getBestTrade.cache.main(cache_1),
+  cachedApi:_getBestTrade.cache.api(cache_2),
+ // cachedWorker:_getBestTrade.cache.worker(cache_3)
 }
 
 const start = async()=>{

@@ -17,29 +17,46 @@ const initialState = {
 
   input: {
     amount:0,
-    curremcy:"0x"
+    currency:"0x"
   },
+
   output: {
     amount:0,
-    curremcy:"0x"
+    currency:"0x"
   },
+
   settings:{
-    slippage: 100, //100bips 1%
+    tolerance: 100, //100bips 1%
     deadline: 30, //30 seconds
     pool: { //enabled pool
-      v2:true,
-      v3:true,
-      stable:true
+      V2:true,
+      V3:true,
+      STABLE:true
     },
   },
+
+  modal:{
+    settings:false,
+    confirm:false,
+    select:false,
+    success:false,
+    failed:false,
+    ioContext:0 //to determine input or output input = 1, output = 2, io=0
+  },
+
   admin:{
     account:"0x",
     feePercent:10 // 0.1% or 10bps
   },
+  
   dev:{
     pool:"main",
     quoter:"main",
     trade:"main"
+  },
+  trade:{
+    chainId:0,
+    value:''
   }
 }
 
@@ -47,14 +64,12 @@ export const counterSlice = createSlice({
   name: 'swap',
   initialState,
   reducers: {
-    inputChange: (state, action) => {
-      state.input.amount = action.amount;
-      state.input.currency = action.currency
+    inputChange: (state, {payload}) => {
+      state.input = {...state.input, ...payload}
     },
 
-    outputChange: (state, action) => {
-      state.output.amount = action.amount;
-      state.output.currency = action.currency
+    outputChange: (state, {payload}) => {
+      state.output = {...state.output, ...payload};
     },
 
     valuesReversed: (state) => {
@@ -63,11 +78,20 @@ export const counterSlice = createSlice({
       state.output = {...input};
     },
 
-    settingsChange: (state, action) => {
-      state.settings.slippage = action.slippage ?? state.settings.slippage;
-      state.settings.deadline = action.deadline ?? state.settings.deadline;
-      state.settings.pool = {...state.settings.pool, ...action.pool}
+    settingsChange: (state, {payload}) => {
+      state.settings.tolerance = payload.tolerance ?? state.settings.tolerance;
+      state.settings.deadline = payload.deadline ?? state.settings.deadline;
+      state.settings.pool = {...state.settings.pool, ...payload.pool}
     },
+
+    toggleModal:(state, {payload})=>{
+      state.modal = {...initialState.modal, ...payload};
+    },
+
+    tradeChange:(state, {payload})=>{
+      state.trade.chainId = payload.chainId;
+      state.trade.value = payload.value;
+    }
   },
 
   extraReducers: (builder) => {

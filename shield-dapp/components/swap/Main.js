@@ -9,17 +9,34 @@ import { Info, Settings } from "@mui/icons-material";
 import { ArrowDownward } from "@mui/icons-material";
 import {LOGO} from '.'
 
+import useSwapModal from "../../context/swap/hooks/useSwapModal";
+import useSwapInput from '../../context/swap/hooks/useSwapInput';
+import useSwapOutput from '../../context/swap/hooks/useSwapOutput';
+import { useSwapCurrency } from '../../context/swap/hooks/currency';
+import useSwapReverse from '../../context/swap/hooks/useSwapReverse';
+import useSwapTrade from '../../context/swap/hooks/useSwapTrade';
 
 export default ()=>{
+    const {toggle} = useSwapModal();
+    const input = useSwapInput();
+    const output = useSwapOutput();
+    const reverse = useSwapReverse();
+    const trade = useSwapTrade();
 
     return (
         <Stack component={Paper} gap={1} p={2} bgcolor="#536269">
             <Stack gap={1}>
-                <SwapField data-inputField/>
+                <SwapField data-inputField isInput toggle={()=>toggle("select", 1)} {...input}/>
                     <Stack alignItems="center">
-                        <ArrowDownward/>
+                        <IconButton 
+                        onClick={reverse}
+                        sx={{
+                            fontWeight:"bold"
+                        }}>
+                            <ArrowDownward/>
+                        </IconButton>
                     </Stack>
-                <SwapField data-outputField/>
+                <SwapField data-outputField toggle={()=>toggle("select", 2)} {...output}/>
             </Stack>
             <SwapBasicInfo/>
             <SwapOptions/>
@@ -27,11 +44,23 @@ export default ()=>{
     );
 }
 
-const SwapField = ()=>{
+
+const SwapCurrencyBalance = ()=>{
+
+    return (
+        <Stack direction="row" justifyContent="space-between">
+            <Typography>$2,301.05</Typography>
+            <Typography>Bal: 0.1639</Typography>
+        </Stack>
+    )
+}
+
+const SwapField = ({isInput, data, update, toggle})=>{
+    const currency = useSwapCurrency(data.currency);
 
     return (
         <Stack gap={2} p={1} direction="row" component={Paper} alignItems="end">
-            <Stack component={Button} alignItems="center" gap={0.5}>
+            <Stack component={Button} alignItems="center" gap={0.5} onClick={toggle}>
                 <Box 
                     sx={{
                         borderRadius:1,
@@ -40,10 +69,13 @@ const SwapField = ()=>{
                     }}>
                     <Avatar src={LOGO} sx={{width:"50px", height:"50px"}}/>
                 </Box>
-                <Typography fontWeight="bold">ETH</Typography>
+                <Typography fontWeight="bold">{currency?.symbol??"- - -"}</Typography>
             </Stack>
             <Stack flex={1} justifyContent="space-between">
-                <Input defaultValue={235.33}
+                <Input 
+                    disabled={isInput?false:true}
+                    value={data.amount}
+                    onChange={e=>update({amount:e.target.value})}
                     placeholder={"0.0"}
                     align="end"
                     margin="dense"
@@ -61,10 +93,7 @@ const SwapField = ()=>{
                         <Button variant="contained" size="small">max</Button>
                     </InputAdornment>
                     }/>
-                <Stack direction="row" justifyContent="space-between">
-                    <Typography>$2,301.05</Typography>
-                    <Typography>Bal: 0.1639</Typography>
-                </Stack>
+                <SwapCurrencyBalance/>
             </Stack>
         </Stack>
     );
@@ -105,10 +134,10 @@ const SwapBasicInfo = ()=>{
 }
 
 const SwapOptions = ()=>{
-
+    const {toggle} = useSwapModal();
     return (
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <IconButton>
+            <IconButton onClick={()=>toggle("settings")}>
                 <Settings/>
             </IconButton>
             <Button variant="contained">Insufficient Balance</Button>

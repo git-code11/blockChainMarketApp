@@ -1,18 +1,30 @@
 
-
+import {useCallback} from 'react';
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import { Button, Input, Typography, IconButton, InputAdornment } from "@mui/material";
 import { Close} from "@mui/icons-material";
-
+import useSwapSettings from '../../context/swap/hooks/useSwapSettings';
+import useSwapModal from '../../context/swap/hooks/useSwapModal';
 
 const Tolerance = ()=>{
+    const {data, update} = useSwapSettings();
+    const updateSlip = useCallback((tolerance)=>{
+        tolerance ||= 0;
+        update({tolerance});
+    },[update]);
 
     return (
         <Stack gap={1}>
-            <Typography>Slippage Tolerance <i>(%)</i></Typography>
+            <Typography>Slippage Tolerance <i>(bips&lt; 0.1% &gt;)</i></Typography>
             <Stack direction="row" justifyContent="space-between">
-                {["0.5", "1", "5", "10"].map(i=><Button variant="outlined">{i}</Button>)}
+                {[1, 10, 20, 30].map(i=>
+                            <Button variant="outlined"
+                                    onClick={()=>updateSlip(i)}
+                                    color={data.tolerance === i?"success":"warning"}
+                                    >{i}
+                                </Button>
+                        )}
             </Stack>
             <Input
                 sx={{
@@ -20,10 +32,11 @@ const Tolerance = ()=>{
                         textAlign:"center"
                     }
                 }}
-                defaultValue="1"
+                value={data.tolerance}
+                onChange = {e=>updateSlip(+e.target.value)}
                 endAdornment={
                     <InputAdornment position="end">
-                        <b>%</b>
+                        <b>{(0.01 * data.tolerance)?.toFixed(2)}%</b>
                     </InputAdornment>
                 }
                 />
@@ -33,11 +46,22 @@ const Tolerance = ()=>{
 
 const Deadline = ()=>{
 
+    const {data, update} = useSwapSettings();
+    
+    const updateSlip = useCallback((deadline)=>{
+        deadline ||= 0;
+        update({deadline});
+    },[update]);
+
     return (
         <Stack gap={1}>
             <Typography>Transaction Deadline<i>(minutes)</i></Typography>
             <Stack direction="row" justifyContent="space-between">
-                {["5", "10", "15", "20"].map(i=><Button variant="outlined">{i}</Button>)}
+                {[5, 10, 15, 20].map(i=>
+                    <Button variant="outlined"
+                    onClick={()=>updateSlip(i)}
+                    color={data.deadline === i?"success":"warning"}
+                >{i}</Button>)}
             </Stack>
             <Input
                 sx={{
@@ -45,10 +69,11 @@ const Deadline = ()=>{
                         textAlign:"center"
                     }
                 }}
-                defaultValue="10"
+                value={data.deadline}
+                onChange = {e=>updateSlip(+e.target.value)}
                 endAdornment={
                     <InputAdornment position="end">
-                        <b>minutes</b>
+                        <b>{(data.deadline/60)?.toFixed(2)}hr</b>
                     </InputAdornment>
                 }
                 />
@@ -58,43 +83,45 @@ const Deadline = ()=>{
 
 const PoolTier = ()=>{
 
+    const {data, update} = useSwapSettings();
+    
+    const updateSlip = useCallback((key)=>{
+        if(key)
+            update({
+                pool:{
+                    [key]:!data.pool[key]
+                }
+            });
+    },[update, data]);
+
     return (
         <Stack gap={1}>
-            <Typography>Pool Fee Tier</Typography>
+            <Typography>Pool Tier</Typography>
             <Stack direction="row" justifyContent="space-between">
-                {["0.25", "0.50", "0.75", "1.00"].map(i=><Button variant="outlined">{i}</Button>)}
+                {["V2", "V3", "STABLE"].map(i=>
+                    <Button variant="outlined" 
+                    onClick={()=>updateSlip(i)}
+                    color={data.pool[i]?"success":"warning"}
+                    >{i}</Button>)}
             </Stack>
-            <Input
-                sx={{
-                    ".MuiInput-input":{
-                        textAlign:"center"
-                    }
-                }}
-                defaultValue="0.50"
-                endAdornment={
-                    <InputAdornment position="end">
-                        <b>tier</b>
-                    </InputAdornment>
-                }
-                />
         </Stack>
     );
 }
 
 export default ()=>{
-    
+    const {toggle} = useSwapModal();
+
     return (
         <Stack gap={2} p={2} bgcolor="#e4e4e4" component={Paper}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Typography fontWeight="bold">Configuration</Typography>
-                <IconButton>
+                <IconButton onClick={()=>toggle("settings")}>
                     <Close/>
                 </IconButton>
             </Stack>
             <Tolerance/>
             <Deadline/>
             <PoolTier/>
-            <Button size="large" variant="contained">Save</Button>
         </Stack>
     );
 }

@@ -4,6 +4,11 @@ import {PoolType, SWAP_ROUTER_ADDRESSES,} from '@pancakeswap/smart-router/evm';
 import { createPublicClient, http, fallback } from 'viem'
 import { bsc, bscTestnet, goerli } from 'viem/chains';
 
+import _quoteProvider from './_quoteProvider';
+import _poolProvider from './_poolProvider';
+import { TradeType, CurrencyAmount} from '@pancakeswap/sdk';
+import { parseUnits } from 'ethers/lib/utils.js';
+
 // const V3_SUBGRAPH_URLS = {
 //     [ChainId.ETHEREUM]: 'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-eth',
 //     [ChainId.GOERLI]: 'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-goerli',
@@ -45,21 +50,21 @@ export const viemClients = ({ chainId}) => {
 
 export const gasPriceWei = (chainId)=>viemClients({chainId}).getGasPrice();
 
-export const getPoolTypes = ({v2, v3, stable}) => {
+export const getPoolTypes = ({V2, V3, STABLE}) => {
     const types = [];
-    if (v2) {
+    if (V2) {
       types.push(PoolType.V2)
     }
-    if (v3) {
+    if (V3) {
       types.push(PoolType.V3)
     }
-    if (stable) {
+    if (STABLE) {
       types.push(PoolType.STABLE)
     }
     return types
 }
 
-export const getAllPoolTypes = ()=>getPoolTypes({v2:true, v3:true, stable:true});
+export const getAllPoolTypes = ()=>getPoolTypes({V2:true, V3:true, STABLE:true});
 
 export const getSwapRouterAddr = id=>SWAP_ROUTER_ADDRESSES[id]
 
@@ -73,4 +78,37 @@ export const timeit = async ({func, name, args})=>{
     console.log("Error Occured")
   }
   return Date.now() - startTime;
+}
+
+export function fromReadableAmount(
+  amount,
+  decimals
+) {
+  return parseUnits(amount.toString(), decimals)
+}
+
+const prepareTradeQuoteParamsConfig  = {
+  gasPriceWei: 10,
+  poolProvider: _poolProvider.onChain,
+  quoteProvider: _quoteProvider.onChain,
+  allowedPoolTypes:getAllPoolTypes()
+}
+
+export const prepareTradeQuoteParams = ({amountIn, currencyIn, currencyOut, tradeType, config})=>{
+  const _config = {
+    ...prepareTradeQuoteParamsConfig,
+    ...config
+  }
+
+  const params = [
+    CurrencyAmount.fromRawAmount(currencyIn,
+        fromReadableAmount( amountIn ,18)
+        ),
+    currencyOut,
+    tradeType??TradeType.EXACT_INPUT,
+    _config
+  ];
+
+  return params;
+
 }
