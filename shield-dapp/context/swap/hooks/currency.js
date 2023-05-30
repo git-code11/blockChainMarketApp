@@ -35,6 +35,7 @@ export const useSwapNativePrice = ({ids, vs})=>{
      ids= ids ?? ['binancecoin','ethereum'];
     const API_URL =  `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=${vs.join(',')}`
     const methods = useSWR(API_URL, fetcher);
+    return methods;
 }
 
 export const useSwapCurrenctPrice = ({contracts, id, vs})=>{
@@ -42,4 +43,5 @@ export const useSwapCurrenctPrice = ({contracts, id, vs})=>{
     id= id ?? 'binancecoin';//'ethereum'
    const API_URL =  contracts?.length > 0 &&`https://api.coingecko.com/api/v3/simple/token_price/${id}?contract_addresses=${contracts.join(',')}&vs_currencies=${vs.join(',')}`
    const methods = useSWR(API_URL, fetcher);
+   return methods;
 }
