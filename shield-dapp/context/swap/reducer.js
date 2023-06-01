@@ -14,6 +14,7 @@ const fetchOutput = createAsyncThunk(
 const initialState = {
   status:"idle",
   error:null,
+  chainId:97,
 
   input: {
     amount:0,
@@ -22,7 +23,12 @@ const initialState = {
 
   output: {
     amount:0,
-    currency:"0x"
+    currency:"0x",
+    _$:{
+      amount:0,
+      currency:"0x",
+      loading:false,
+    }
   },
 
   settings:{
@@ -66,16 +72,60 @@ export const counterSlice = createSlice({
   reducers: {
     inputChange: (state, {payload}) => {
       state.input = {...state.input, ...payload}
+      
+      if(payload.amount && !isNaN(payload.amount) && state.output.currency){
+        console.log("the", payload, !isNaN(payload.amount) && state.output.currency)
+        state.output.amount = 0;
+        state.output._$ = {
+          amount:state.input.amount,
+          currency:state.input.currency,
+          loading:true
+        };
+      }else{
+        state.output._$.loading = false;
+        state.output.amount = 0;
+      }
+
     },
 
-    outputChange: (state, {payload}) => {
-      state.output = {...state.output, ...payload};
+    outputChange: (state, {payload}) => {  
+      if(payload.currency){
+        state.output = { 
+          currency:payload.currency,
+          amount:0,
+          _$:{
+            amount:state.input.amount,
+            currency:state.input.currency,
+            loading:true
+          }
+        };
+      }else if(state.output._$.loading && 
+          state.output._$.currency === state.input.currency && 
+          state.output._$.amount === state.input.amount &&
+          !isNaN(payload.amount)
+        ){
+          //incase of invalid result
+          state.output = {...state.output, ...payload}
+          state.output._$.loading = false;
+      }else{
+        console.log("DEBUG ERROR", {payload});
+      }
     },
 
     valuesReversed: (state) => {
       const {input, output} = state;
-      state.input = {...output};
-      state.output = {...input};
+      state.input = {
+          currency: output.currency,
+          amount: output.amount
+      };
+      state.output = {
+        currency: input.currency,
+        amount: 0,//input.amount,
+        _$:{
+          ...state.input,
+          loading:true
+        }
+      };
     },
 
     settingsChange: (state, {payload}) => {
@@ -91,6 +141,10 @@ export const counterSlice = createSlice({
     tradeChange:(state, {payload})=>{
       state.trade.chainId = payload.chainId;
       state.trade.value = payload.value;
+    },
+
+    chainChange:(state, {payload})=>{
+      state.chainId = payload;
     }
   },
 

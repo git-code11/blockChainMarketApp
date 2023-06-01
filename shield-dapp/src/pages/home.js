@@ -8,6 +8,7 @@ import DisplayFaq from "../../components/DisplayFaq";
 
 import ListPriceSection from '../../components/ListPriceSection';
 
+import {parseUnits} from 'ethers/lib/utils';
 
 export default ()=>{
     

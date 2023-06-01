@@ -1,5 +1,6 @@
 import { ChainId, TradeType, CurrencyAmount, Percent} from '@pancakeswap/sdk';
-import {PoolType, SwapRouter} from '@pancakeswap/smart-router/evm';
+//import {PoolType, SwapRouter} from '@pancakeswap/smart-router/evm';
+const { PoolType, SwapRouter } = require("@pancakeswap/smart-router/evm");
 import { fromReadableAmount, toReadableAmount } from '../libs/conversion';
 import {CurrentConfig} from '../config';
 import { createTransaction, sendTransaction, getWallet, approveAmount } from '../libs/providers';

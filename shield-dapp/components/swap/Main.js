@@ -1,11 +1,11 @@
-
+import {useMemo} from 'react';
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import { Avatar, Button, Input,
     Table, TableBody, TableRow, TableCell, 
-    Typography, IconButton, InputAdornment } from "@mui/material";
-import { Info, Settings } from "@mui/icons-material";
+    Typography, IconButton, InputAdornment, CircularProgress } from "@mui/material";
+import { Info, Settings, AllOut, Update, UpdateDisabled } from "@mui/icons-material";
 import { ArrowDownward } from "@mui/icons-material";
 import {LOGO} from '.'
 
@@ -16,12 +16,15 @@ import { useSwapCurrency } from '../../context/swap/hooks/currency';
 import useSwapReverse from '../../context/swap/hooks/useSwapReverse';
 import useSwapTrade from '../../context/swap/hooks/useSwapTrade';
 
+
 export default ()=>{
     const {toggle} = useSwapModal();
     const input = useSwapInput();
     const output = useSwapOutput();
     const reverse = useSwapReverse();
     const trade = useSwapTrade();
+    console.log("My Trade", trade);
+    const swapPath = useMemo(()=>"",[trade]);
 
     return (
         <Stack component={Paper} gap={1} p={2} bgcolor="#536269">
@@ -56,7 +59,8 @@ const SwapCurrencyBalance = ()=>{
 }
 
 const SwapField = ({isInput, data, update, toggle})=>{
-    const currency = useSwapCurrency(data.currency);
+    const currency = useSwapCurrency(data.currency)
+    console.log({_$:data._$});
 
     return (
         <Stack gap={2} p={1} direction="row" component={Paper} alignItems="end">
@@ -90,7 +94,12 @@ const SwapField = ({isInput, data, update, toggle})=>{
                     fullWidth
                     endAdornment={
                     <InputAdornment position="end">
-                        <Button variant="contained" size="small">max</Button>
+                        {isInput?
+                            <IconButton>
+                                <AllOut/>
+                            </IconButton>:
+                            (data._$?.loading?<CircularProgress size={25}/>:<UpdateDisabled/>)
+                        }
                     </InputAdornment>
                     }/>
                 <SwapCurrencyBalance/>

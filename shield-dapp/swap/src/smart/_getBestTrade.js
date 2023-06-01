@@ -1,6 +1,9 @@
-import {SmartRouter } from '@pancakeswap/smart-router/evm';
+
 import { getWorker, createWorkerGetBestTrade } from './_web_worker';
 import _poolProvider, { CandidatePoolCache, globalCandidatePoolCache } from './_poolProvider';
+
+//import {SmartRouter } from '@pancakeswap/smart-router/evm'; due to error from .mjs version
+const {SmartRouter} = require("@pancakeswap/smart-router/evm");
 
 const QUOTING_API = "https://swap-quoting.pancakeswap.com/quoting-service/v0/quote";
 const __getBestTradeApi = async (
@@ -30,7 +33,7 @@ const __getBestTradeApi = async (
         currency: SmartRouter.Transformer.serializeCurrency(amount.currency),
         value: amount.quotient.toString(),
       },
-      gasPriceWei: (typeof gasPriceWei !== 'function') ? gasPriceWei?.toString() : (await gasPriceWei?.()),
+      gasPriceWei: (typeof gasPriceWei !== 'function') ? gasPriceWei?.toString() : (await gasPriceWei?.(amount.currency??currency)),
       maxHops,
       maxSplits,
       poolTypes: allowedPoolTypes,
@@ -47,6 +50,8 @@ const __getBestTradeApi = async (
 
 const __getBestTradeCached = (_getBestTrade, _cachedPool) => 
     async (amount, currency, tradeType, config) => {
+    const _gasPriceWei = config.gasPriceWei;
+    config.gasPriceWei = (typeof _gasPriceWei !== 'function') ? _gasPriceWei : (()=>_gasPriceWei?.(amount.currency ?? currency))
     const cachedPool = _cachedPool ?? globalCandidatePoolCache;
     const candidatePools = await cachedPool.getPool({
         poolProvider:config.poolProvider,
@@ -55,9 +60,10 @@ const __getBestTradeCached = (_getBestTrade, _cachedPool) =>
         allowedPoolTypes:config.allowedPoolTypes,
         blockNumber:(await config.blockNumber?.()) ?? config.blockNumber
     });
-    //console.log("incache")
+    
     const poolProvider = _poolProvider.static(candidatePools);
-
+    
+    console.log({config})
     const result = await _getBestTrade(amount, currency, tradeType, {...config, poolProvider});
     return result;
 }

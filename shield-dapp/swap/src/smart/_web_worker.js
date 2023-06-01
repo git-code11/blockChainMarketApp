@@ -1,4 +1,5 @@
-import { SmartRouter } from '@pancakeswap/smart-router/evm'
+//import { SmartRouter } from '@pancakeswap/smart-router/evm'
+const { SmartRouter } = require("@pancakeswap/smart-router/evm");
 import {getAllPoolTypes} from './_utils';
 
 

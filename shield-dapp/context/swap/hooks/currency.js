@@ -22,10 +22,9 @@ export const useSwapCurrencyList = (chainId)=>{
 export const useSwapCurrency = (address)=>{
     const token = TOKEN_LIST[address];
     
-    const {data:image} = useSWR(token?.projectLink, icon_grabber);
-    const result = useMemo(()=>({...token, image}), [token, image])
-    console.log({result});
-    return result;
+    //const {data:image} = {}//useSWR(token?.projectLink, icon_grabber);
+    //const result = useMemo(()=>(token?{...token, image}:null), [token, image])
+    return token;
 }
 
 const fetcher = key=>axios.get(key).then(response=>response.data);

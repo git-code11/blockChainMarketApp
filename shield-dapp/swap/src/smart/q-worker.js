@@ -1,6 +1,8 @@
 import { isMainThread, parentPort } from 'node:worker_threads';
 
-import { SmartRouter } from '@pancakeswap/smart-router/evm'
+//import { SmartRouter } from '@pancakeswap/smart-router/evm'
+const { SmartRouter } = require("@pancakeswap/smart-router/evm");
+
 import _quoteProvider from './_quoteProvider'
 
 const { parseCurrency, parseCurrencyAmount, parsePool, serializeTrade } = SmartRouter.Transformer
