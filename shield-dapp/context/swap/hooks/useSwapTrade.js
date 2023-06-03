@@ -40,11 +40,11 @@ export default ()=>{
             dispatch(actions.tradeChange({
                 input:{
                     amount:amountFixed(trade.inputAmount),
-                    currency:trade.inputAmount.currency.address
+                    currency:trade.inputAmount.currency.wrapped.address
                 },
                 output:{
                     amount:amountFixed(trade.outputAmount),
-                    currency:trade.outputAmount.currency.address
+                    currency:trade.outputAmount.currency.wrapped.address
                 },
                 chainId:trade.inputAmount.currency.chainId,
                 value:SmartRouter.Transformer.serializeTrade(trade)

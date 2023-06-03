@@ -17,7 +17,6 @@ const ROUTE_MAP = Object.keys(RouteType).reduce((acc, key)=>({...acc, [RouteType
 
 export const SwapBasicInfo = ({trade})=>{
     const {slippage, minimumAmountOut, maximumAmountIn, executionPrice} = useSwapInfo(trade.data);
-    console.log({slippage, minimumAmountOut, maximumAmountIn, executionPrice});
     
     const _executionPrice = useMemo(()=>
         executionPrice && Number(executionPrice.adjustedForDecimals.toFixed(8)),

@@ -97,6 +97,7 @@ export const counterSlice = createSlice({
     },
 
     outputChange: (state, {payload}) => {
+      console.log({outputChange:payload})
       if(payload.currency){
         state.output.currency = payload.currency;
 
@@ -143,7 +144,7 @@ export const counterSlice = createSlice({
         rule:Number(state.input.amount) === Number(payload.input.amount),
         data:[Number(state.input.amount).toString(), payload.input.amount]
       });
-      
+         
       if(
           payload.input && payload.output &&
           state.input.currency === payload.input.currency &&

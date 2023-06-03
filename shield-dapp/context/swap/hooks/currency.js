@@ -1,10 +1,11 @@
-import { ChainId, Native } from "@pancakeswap/sdk";
+import { ChainId, Native, WNATIVE } from "@pancakeswap/sdk";
 import {bscTestnetTokens} from "@pancakeswap/tokens";
 
 import {useMemo} from 'react';
 import useSWR from 'swr';
 import { icon_grabber } from "../../lib/icon_grabber";
 import axios from 'axios';
+
 
 const _tkList = Object.values(bscTestnetTokens);
 export const TOKEN_LIST = _tkList.reduce((acc, value)=>({...acc, [value.address]:value}),{});
@@ -20,7 +21,16 @@ export const useSwapCurrencyList = (chainId)=>{
 }
 
 export const useSwapCurrency = (address)=>{
-    const token = TOKEN_LIST[address];
+    const token = useMemo(()=>{
+        const token = TOKEN_LIST[address];
+        
+        if(Object.values(WNATIVE).some(token=>token.address === address)){
+            return Native.onChain(token.chainId);
+        }
+
+        return token;
+    },
+    [address]);
     
     //const {data:image} = {}//useSWR(token?.projectLink, icon_grabber);
     //const result = useMemo(()=>(token?{...token, image}:null), [token, image])

@@ -11,14 +11,15 @@ import useSwapModal from "../../../context/swap/hooks/useSwapModal";
 import useSwapInput from '../../../context/swap/hooks/useSwapInput';
 import useSwapOutput from '../../../context/swap/hooks/useSwapOutput';
 import { useSwapCurrency } from '../../../context/swap/hooks/currency';
+import useSwapBalance from '../../../context/swap/hooks/useSwapBalance';
 
 
-const SwapCurrencyBalance = ()=>{
-
+const SwapCurrencyBalance = ({currency})=>{
+    const {value} = useSwapBalance(currency)
     return (
         <Stack direction="row" justifyContent="space-between">
             <Typography>$2,301.05</Typography>
-            <Typography>Bal: 0.1639</Typography>
+            <Typography>Bal: {value?value:'- - -'}</Typography>
         </Stack>
     )
 }
@@ -38,9 +39,9 @@ export const SwapFieldOutput = ({trade})=>{
         trade.update(true);
     },[trade]);
 
-    return <SwapFieldBase 
+    return <SwapFieldBase
+                currency={currency}
                 value={outputValue}
-                symbol={currency?.symbol}
                 disabled={true}
                 onSelect={toggleSelect}
                 endIcon={
@@ -63,9 +64,9 @@ export const SwapFieldInput = ()=>{
 
     const onInput = useCallback(e=>update({amount:e.target.value.trim()}),[update]);
 
-    return <SwapFieldBase 
+    return <SwapFieldBase
                 value={data.amount}
-                symbol={currency?.symbol}
+                currency={currency}
                 disabled={false}
                 onInput={onInput}
                 onSelect={toggleSelect}
@@ -78,7 +79,7 @@ export const SwapFieldInput = ()=>{
 }
 
 
-const SwapFieldBase = ({value, symbol, disabled, onInput, onSelect, endIcon})=>{
+const SwapFieldBase = ({currency, value, disabled, onInput, onSelect, endIcon})=>{
 
     return (
         <Stack gap={2} p={1} direction="row" component={Paper} alignItems="end">
@@ -91,7 +92,7 @@ const SwapFieldBase = ({value, symbol, disabled, onInput, onSelect, endIcon})=>{
                     }}>
                     <Avatar src={LOGO} sx={{width:"50px", height:"50px"}}/>
                 </Box>
-                <Typography fontWeight="bold">{symbol??"- - -"}</Typography>
+                <Typography fontWeight="bold">{currency?.symbol??"- - -"}</Typography>
             </Stack>
             <Stack flex={1} justifyContent="space-between">
                 <Input 
@@ -115,7 +116,7 @@ const SwapFieldBase = ({value, symbol, disabled, onInput, onSelect, endIcon})=>{
                             {endIcon}
                     </InputAdornment>
                     }/>
-                <SwapCurrencyBalance/>
+                <SwapCurrencyBalance currency={currency}/>
             </Stack>
         </Stack>
     );

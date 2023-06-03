@@ -55,7 +55,7 @@ export default ()=>{
                     <Typography fontStyle="italic" textAlign="center">{error.shortMessage?error.shortMessage:error.message?.split('/n')[0]}</Typography>
                 </Alert>
             }
-            <SwapOptionsMenu exist={trade.exist}/>
+            <SwapOptionsMenu trade={trade}/>
         </Stack>
     );
 }
