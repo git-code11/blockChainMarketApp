@@ -70,6 +70,7 @@ addEventListener('message', (event) => {
       quoterOptimization: false,
     })
       .then((res) => {
+        //console.log({_workerResult:res})
         postMessage([
           id,
           {

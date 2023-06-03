@@ -1,6 +1,8 @@
 
 import { getWorker, createWorkerGetBestTrade } from './_web_worker';
 import _poolProvider, { CandidatePoolCache, globalCandidatePoolCache } from './_poolProvider';
+import { _BaseTradeCache } from './_cacheLib';
+import axios from 'axios';
 
 //import {SmartRouter } from '@pancakeswap/smart-router/evm'; due to error from .mjs version
 const {SmartRouter} = require("@pancakeswap/smart-router/evm");
@@ -20,7 +22,8 @@ const __getBestTradeApi = async (
     protocols: allowedPoolTypes,
   })
 
-  const serverRes = await fetch(`${QUOTING_API}`, {
+
+ /*  const serverRes = await fetch(`${QUOTING_API}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -40,7 +43,33 @@ const __getBestTradeApi = async (
       candidatePools: candidatePools.map(SmartRouter.Transformer.serializePool),
     }),
   })
-  const serializedRes = await serverRes.json()
+  const serializedRes = await serverRes.json() */
+  
+  const serverRes = await axios.post(`${QUOTING_API}`, 
+    {
+      chainId: currency.chainId,
+      currency: SmartRouter.Transformer.serializeCurrency(currency),
+      tradeType,
+      amount: {
+        currency: SmartRouter.Transformer.serializeCurrency(amount.currency),
+        value: amount.quotient.toString(),
+      },
+      gasPriceWei: (typeof gasPriceWei !== 'function') ? gasPriceWei?.toString() : (await gasPriceWei?.(amount.currency??currency))?.toString(),
+      maxHops,
+      maxSplits,
+      poolTypes: allowedPoolTypes,
+      candidatePools: candidatePools.map(SmartRouter.Transformer.serializePool),
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+
+  const serializedRes = await serverRes.data;
+  
   return SmartRouter.Transformer.parseTrade(currency.chainId, serializedRes)
 }
 
@@ -53,17 +82,22 @@ const __getBestTradeCached = (_getBestTrade, _cachedPool) =>
     const _gasPriceWei = config.gasPriceWei;
     config.gasPriceWei = (typeof _gasPriceWei !== 'function') ? _gasPriceWei : (()=>_gasPriceWei?.(amount.currency ?? currency))
     const cachedPool = _cachedPool ?? globalCandidatePoolCache;
-    const candidatePools = await cachedPool.getPool({
-        poolProvider:config.poolProvider,
-        currencyIn:amount.currency,
-        currencyOut:currency,   
-        allowedPoolTypes:config.allowedPoolTypes,
-        blockNumber:(await config.blockNumber?.()) ?? config.blockNumber
-    });
+    const candidatePools = await cachedPool.getPool(
+      {
+        forceUpdate:false,
+        args:[{
+          poolProvider:config.poolProvider,
+          currencyIn:amount.currency,
+          currencyOut:currency,   
+          allowedPoolTypes:config.allowedPoolTypes,
+          blockNumber:(await config.blockNumber?.()) ?? config.blockNumber
+        }]
+      }
+  );
     
     const poolProvider = _poolProvider.static(candidatePools);
     
-    console.log({config})
+    //console.log({config})
     const result = await _getBestTrade(amount, currency, tradeType, {...config, poolProvider});
     return result;
 }
@@ -86,22 +120,31 @@ const _getBestTrade = {
     cached:__getBestTradeCached,
 }
 
+const _tradeEncoder = trade=>(
+      { 
+        trade: SmartRouter.Transformer.serializeTrade(trade),
+        chainId:trade.inputAmount.currency.chainId ?? trade.outputAmount.currency.chainId
+      }
+);
+const _tradeDecoder = serial=>SmartRouter.Transformer.parseTrade(serial.chainId, serial.trade);
+
+export class TradeCache extends _BaseTradeCache{
+    constructor(getBestTradeFunc){
+      super({
+        run:getBestTradeFunc,
+        encoder:_tradeEncoder,
+        decoder:_tradeDecoder
+      })
+    }
+}
+
 export default _getBestTrade;
 
-// interface TradeConfig {
-//   gasPriceWei: BigintIsh | (() => Promise<BigintIsh>)
-//   blockNumber?: number | (() => Promise<number>)
-//   poolProvider: PoolProvider
-//   quoteProvider: QuoteProvider
-//   maxHops?: number
-//   maxSplits?: number
-//   distributionPercent?: number
-//   allowedPoolTypes?: PoolType[]
-//   quoterOptimization?: boolean
-// }
-
-// export async function getBestTrade(
-//   amount: CurrencyAmount<Currency>,
-//   currency: Currency,
-//   tradeType: TradeType,
-//   config: TradeConfig,
+/**
+ * NOTE: 
+ * const poolCache1 = new CandidatePoolCache();
+ * const tradeCache1 = new TradeCache(_getBestTrade.cache.main(poolCache1))
+ * _getBestTrade.cache.main(poolCache1) => pool = cached; trade = not cached
+ * is the same as _getBestTrade.main => pool = not cached; trade = not cached
+ * is the same as tradeCache1.getTrade => pool = cached; trade = cached
+ */

@@ -9,13 +9,14 @@ const fetchOutput = createAsyncThunk(
   }
 )
 
-
+const FIXED_NO = 8;
 
 const initialState = {
   status:"idle",
   error:null,
   chainId:97,
 
+  rate:0,
   input: {
     amount:0,
     currency:"0x"
@@ -51,8 +52,8 @@ const initialState = {
   },
 
   admin:{
-    account:"0x",
-    feePercent:10 // 0.1% or 10bps
+    account:"0x116aDB0856ae7ae0EA2Fef08Eaf062470f4b954f",
+    feeBips:10 // 0.1% or 10bps
   },
   
   dev:{
@@ -63,6 +64,10 @@ const initialState = {
   trade:{
     chainId:0,
     value:''
+  },
+  tradeVault:{
+    chainId:0,
+    value:''
   }
 }
 
@@ -71,44 +76,33 @@ export const counterSlice = createSlice({
   initialState,
   reducers: {
     inputChange: (state, {payload}) => {
-      state.input = {...state.input, ...payload}
-      
-      if(payload.amount && !isNaN(payload.amount) && state.output.currency){
-        console.log("the", payload, !isNaN(payload.amount) && state.output.currency)
-        state.output.amount = 0;
-        state.output._$ = {
-          amount:state.input.amount,
-          currency:state.input.currency,
-          loading:true
-        };
-      }else{
-        state.output._$.loading = false;
-        state.output.amount = 0;
+      if(payload.amount){
+        payload.amount = isNaN(payload.amount)||payload.amount.endsWith('.')||payload.amount.endsWith('0')?
+                    payload.amount:
+                    Number(Number(payload.amount).toFixed(FIXED_NO)).toString();
+        if(state.input.amount===payload.amount)
+          return;
       }
 
+      if(
+        (payload.amount && !isNaN(payload.amount) && 
+          Number(payload.amount) !== Number(state.input.amount)) || 
+            payload.currency){
+        state.trade.value = "";
+        state.output.amount = 0;
+      }
+      state.input = {...state.input, ...payload}
+
+      
     },
 
-    outputChange: (state, {payload}) => {  
+    outputChange: (state, {payload}) => {
       if(payload.currency){
-        state.output = { 
-          currency:payload.currency,
-          amount:0,
-          _$:{
-            amount:state.input.amount,
-            currency:state.input.currency,
-            loading:true
-          }
-        };
-      }else if(state.output._$.loading && 
-          state.output._$.currency === state.input.currency && 
-          state.output._$.amount === state.input.amount &&
-          !isNaN(payload.amount)
-        ){
-          //incase of invalid result
-          state.output = {...state.output, ...payload}
-          state.output._$.loading = false;
-      }else{
-        console.log("DEBUG ERROR", {payload});
+        state.output.currency = payload.currency;
+
+        state.trade.value = "";
+        state.output.amount = 0;
+        state.rate = 0;
       }
     },
 
@@ -118,20 +112,25 @@ export const counterSlice = createSlice({
           currency: output.currency,
           amount: output.amount
       };
+
       state.output = {
         currency: input.currency,
         amount: 0,//input.amount,
-        _$:{
-          ...state.input,
-          loading:true
-        }
       };
+
+      state.trade.value = "";
+      state.rate = 0;
     },
 
     settingsChange: (state, {payload}) => {
       state.settings.tolerance = payload.tolerance ?? state.settings.tolerance;
       state.settings.deadline = payload.deadline ?? state.settings.deadline;
       state.settings.pool = {...state.settings.pool, ...payload.pool}
+      if(payload.pool){
+        state.trade.value = "";//reset trade when pool changes
+        state.output.amount = 0;
+        state.rate = 0;
+      }
     },
 
     toggleModal:(state, {payload})=>{
@@ -139,8 +138,31 @@ export const counterSlice = createSlice({
     },
 
     tradeChange:(state, {payload})=>{
-      state.trade.chainId = payload.chainId;
-      state.trade.value = payload.value;
+      //console.log({tradeR:payload})
+      console.log({
+        rule:Number(state.input.amount) === Number(payload.input.amount),
+        data:[Number(state.input.amount).toString(), payload.input.amount]
+      });
+      
+      if(
+          payload.input && payload.output &&
+          state.input.currency === payload.input.currency &&
+          Number(state.input.amount) === Number(payload.input.amount) &&
+          state.output.currency === payload.output.currency){
+            
+            state.trade.chainId = payload.chainId;
+            state.trade.value = payload.value;
+
+            state.output.amount = Number(Number(payload.output.amount).toFixed(FIXED_NO)).toString();
+            
+            state.rate = Number(state.output.amount)/Number(state.input.amount);
+          }
+    },
+    lockTrade:(state)=>{
+      state.tradeVault = {
+        chainId:state.trade.chainId,
+        value:state.trade.value
+      }
     },
 
     chainChange:(state, {payload})=>{
@@ -152,7 +174,7 @@ export const counterSlice = createSlice({
     // Add reducers for additional action types here, and handle loading state as needed
     builder.addCase(fetchOutput.fulfilled, (state, action) => {
       // Add user to the state array
-      state.entities.push(action.payload)
+      state.entities.push(action.payload);
     })
   },
 })

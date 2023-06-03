@@ -6,6 +6,15 @@ export default (_func)=>{
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     
+    const reset = useCallback(()=>{
+        if(loading)
+            return;
+        if(error)
+            setError(null);
+        if(value)
+            setValue(null);
+    },[loading, error, value]);
+
     const call = useCallback(async (...args)=>{
         if(loading)
             return;
@@ -20,16 +29,8 @@ export default (_func)=>{
         }
         setLoading(false);
         return _value;
-    },[loading, _func]);
+    },[loading, _func, reset]);
 
-    const reset = useCallback(()=>{
-        if(loading)
-            return;
-        if(error)
-            setError(null);
-        if(value)
-            setValue(null);
-    },[loading, error, value]);
-
+    
     return {value, loading, error, call, reset}
 }

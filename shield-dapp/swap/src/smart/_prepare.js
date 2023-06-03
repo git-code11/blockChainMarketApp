@@ -1,9 +1,9 @@
 //import { SwapRouter } from '@pancakeswap/smart-router/evm';
-const {SmartRouter} = require("@pancakeswap/smart-router/evm");
+const {SwapRouter} = require("@pancakeswap/smart-router/evm");
 import { TradeType, CurrencyAmount, Percent} from '@pancakeswap/sdk';
 import _quoteProvider from './_quoteProvider';
 import _poolProvider from './_poolProvider';
-import { getAllPoolTypes, getSwapRouterAddr, fromReadableAmount } from './_utils';
+import { getAllPoolTypes, getSwapRouterAddr, fromVReadableAmount } from './_utils';
 
 const prepareTradeQuoteParamsConfig  = {
   gasPriceWei: 10,
@@ -13,7 +13,7 @@ const prepareTradeQuoteParamsConfig  = {
 }
 
 export const prepareTradeQuoteParams = ({amountIn, currencyIn, currencyOut, tradeType, config})=>{
-  console.log({amountIn, currencyIn, currencyOut, tradeType, config})
+  //console.log({amountIn, currencyIn, currencyOut, tradeType, config})
   
   const _config = {
     ...prepareTradeQuoteParamsConfig,
@@ -22,13 +22,13 @@ export const prepareTradeQuoteParams = ({amountIn, currencyIn, currencyOut, trad
 
   const params = [
     CurrencyAmount.fromRawAmount(currencyIn,
-        fromReadableAmount( amountIn ,18)
+      fromVReadableAmount( amountIn , currencyIn.decimals)
         ),
     currencyOut,
     tradeType??TradeType.EXACT_INPUT,
     _config
   ];
-
+  
   return params;
 
 }
@@ -40,7 +40,7 @@ export const prepareTradeCallData = ({
             options
     })=>{
   const _options = {}
-  _options.slippageTolerance = new Percent(options.toleranceBips?? 1, 10_000); //1bips
+  _options.slippageTolerance = new Percent(Number(options.toleranceBips?? 1), 10_000); //1bips
   _options.deadlineOrPreviousBlockhash = options.deadline ?? Math.round(Date.now()/1000) + 60 * 60; //1hr
   _options.recipient = options.recipient;
   if(options.admin){

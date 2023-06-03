@@ -81,27 +81,34 @@ export function fromReadableAmount(
   amount,
   decimals
 ) {
-  return parseUnits(amount.toString(), decimals)
+  return parseUnits(amount.toString(), decimals??18)
 }
 
 export function fromVReadableAmount(
   amount,
   decimals
 ) {
-  return vparseUnits(amount.toString(), decimals)
+  return vparseUnits(amount.toString(), decimals??18)
 }
 
 
 const READABLE_FORM_LEN = 24
 
 export function toReadableAmount(rawAmount, decimals) {
-  return formatUnits(rawAmount, decimals);
+  return formatUnits(rawAmount, decimals??18);
 }
 
 
 export function toVReadableAmount(rawAmount, decimals) {
-  return vformatUnits(rawAmount, decimals);
+  return vformatUnits(rawAmount, decimals??18);
 }
 
 
+export function amountFixed(amount, fixed=8){
+  try{
+    return Number(amount.toFixed(fixed))
+  }catch{
 
+  }
+  return Number(Number(toVReadableAmount(amount.quotient, amount.currency.decimals)).toFixed(fixed));
+}

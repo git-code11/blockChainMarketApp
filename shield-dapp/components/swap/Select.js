@@ -5,7 +5,7 @@ import { Avatar, Chip, OutlinedInput, Typography, IconButton, Divider } from "@m
 import { ListItemAvatar, ListItemText, ListItemButton } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import {FixedSizeList} from "react-window";
-import {TOKEN_LIST, LOGO} from '.'
+import {LOGO} from '.'
 import useSwapModal from "../../context/swap/hooks/useSwapModal";
 import {useSwapCurrencyAddrList, useSwapCurrency, useSwapCurrencyList } from "../../context/swap/hooks/currency";
 import useSwapInput from "../../context/swap/hooks/useSwapInput";

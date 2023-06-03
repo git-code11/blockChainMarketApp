@@ -111,11 +111,15 @@ const PoolTier = ()=>{
 export default ()=>{
     const {toggle} = useSwapModal();
 
+    const toggleClose = useCallback(()=>{
+        toggle('settings');
+    })
+
     return (
         <Stack gap={2} p={2} bgcolor="#e4e4e4" component={Paper}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Typography fontWeight="bold">Configuration</Typography>
-                <IconButton onClick={()=>toggle("settings")}>
+                <IconButton onClick={toggleClose}>
                     <Close/>
                 </IconButton>
             </Stack>

@@ -89,12 +89,13 @@ export const createWorkerGetBestTrade = (quoteWorker) => {
             currency: SmartRouter.Transformer.serializeCurrency(amount.currency),
             value: amount.quotient.toString(),
         },
-        gasPriceWei: typeof gasPriceWei !== 'function' ? gasPriceWei?.toString() : undefined,
+        gasPriceWei: typeof gasPriceWei !== 'function' ? gasPriceWei?.toString() : (await gasPriceWei?.(amount.currency??currency))?.toString(),
         maxHops,
         maxSplits,
         poolTypes: allowedPoolTypes,
         candidatePools: candidatePools.map(SmartRouter.Transformer.serializePool),
         })
+        //console.log("WORKER CALLER", result)
         return SmartRouter.Transformer.parseTrade(currency.chainId, result)
     }
 }
