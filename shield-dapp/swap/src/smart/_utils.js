@@ -63,7 +63,7 @@ export const getPoolTypes = ({V2, V3, STABLE}) => {
 
 export const getAllPoolTypes = ()=>getPoolTypes({V2:true, V3:true, STABLE:true});
 
-export const getSwapRouterAddr = id=>SWAP_ROUTER_ADDRESSES[id]
+export const getSwapRouterAddr = chainId=>SWAP_ROUTER_ADDRESSES[chainId]
 
 export const timeit = async ({func, name, args})=>{
   console.log("CALLING FUNC", name ?? func?.constructor?.name);

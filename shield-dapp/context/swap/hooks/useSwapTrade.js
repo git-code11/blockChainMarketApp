@@ -1,4 +1,4 @@
-import {useMemo, useCallback, useEffect} from 'react';
+import {useMemo, useCallback, useEffect, createContext, useContext} from 'react';
 import { TradeType } from '@pancakeswap/sdk';
 //import { SmartRouter } from '@pancakeswap/smart-router/evm'
 const { SmartRouter } = require('@pancakeswap/smart-router/evm');
@@ -30,7 +30,7 @@ const tradeCache1 = new TradeCache(_getBestTrade.cache.main(poolCache1, worker1)
 
 const DEBOUNCE_TIME = 2500;
 
-export default ()=>{
+const useSwapTradeWrap = ()=>{
     
     const dispatch = useDispatch();
 
@@ -129,4 +129,18 @@ export default ()=>{
     const exist = useMemo(()=>Boolean(data),[data]);
 
     return {data, outputValue, exist, update, loading, error, params:_params}
+}
+
+const swapTradeContext = createContext();
+
+export default ()=>useContext(swapTradeContext);
+
+export const SwapTradeProvider = ({children})=>{
+    const swapWrap = useSwapTradeWrap();
+
+    return (
+        <swapTradeContext.Provider value={swapWrap}>
+            {children}
+        </swapTradeContext.Provider>
+    )
 }

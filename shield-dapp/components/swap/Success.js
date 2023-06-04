@@ -1,4 +1,4 @@
-
+import {useMemo, useCallback} from 'react'
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import { Avatar, Button, Typography, Divider} from "@mui/material";
@@ -6,9 +6,10 @@ import { Check} from "@mui/icons-material";
 import { ArrowForward } from "@mui/icons-material";
 import { LOGO} from '.'
 import useSwapModal from "../../context/swap/hooks/useSwapModal";
-import { useCallback } from "react";
+
 import useSwapCall from "../../context/swap/hooks/useSwapCall";
 import { amountFixed } from "../../swap/src/smart/_utils";
+import useSwapTx from '../../context/swap/hooks/useSwapTx';
 
 const SwapMiniAmount = ({amount})=>{
     const value = useMemo(()=>amountFixed(amount),[amount]);
@@ -24,7 +25,9 @@ export default ()=>{
 
     const {toggle} = useSwapModal();
     const {trade} = useSwapCall();
+    console.log("swapcall here 2")
     const toggleClose = useCallback(()=>toggle('success'),[toggle]);
+    const tx = useSwapTx();
 
     return (
         <Stack gap={1} p={2} bgcolor="#e4e4e4" component={Paper}>
@@ -52,6 +55,7 @@ export default ()=>{
                     }}
                     variant="subtitle2"
                 >
+                    {tx.data.hash}
                     View on EtherScan
                 </Typography>
             </Stack>

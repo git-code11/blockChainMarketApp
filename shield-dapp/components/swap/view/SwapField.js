@@ -15,11 +15,12 @@ import useSwapBalance from '../../../context/swap/hooks/useSwapBalance';
 
 
 const SwapCurrencyBalance = ({currency})=>{
-    const {value} = useSwapBalance(currency)
+    const {formatted} = useSwapBalance(currency);
+    
     return (
         <Stack direction="row" justifyContent="space-between">
             <Typography>$2,301.05</Typography>
-            <Typography>Bal: {value?value:'- - -'}</Typography>
+            <Typography>Bal: {formatted?formatted:'- - -'}</Typography>
         </Stack>
     )
 }

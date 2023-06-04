@@ -11,21 +11,27 @@ import { SwapFieldInput, SwapFieldOutput } from './view/SwapField';
 import {SwapBasicInfo, SwapTradeInfo} from './view/SwapInfo';
 import SwapOptionsMenu from './view/SwapOptionsMenu';
 
+
+
 export default ()=>{
     const reverse = useSwapReverse();
     const trade = useSwapTrade();
+    
     const {loading, error} = trade;
     
     useEffect(()=>{
         console.log("calling trade update");
         trade.update();
-    },[trade.update])
+    },[trade.update]);
 
     useEffect(()=>{
         console.log("Output", {error, loading})
     },[loading, error]);
 
-    console.log("My Trade", trade.data);
+    useEffect(()=>{
+        console.log("My Trade", trade.data);
+    },[trade.data])
+    
 
     return (
         <Stack component={Paper} gap={1} p={2} bgcolor="#536269">

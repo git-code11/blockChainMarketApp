@@ -52,7 +52,7 @@ const initialState = {
   },
 
   admin:{
-    account:"0x116aDB0856ae7ae0EA2Fef08Eaf062470f4b954f",
+    account:"0x47207ECD6a722547ec42ee899d2b8973f707090d",//test Admin
     feeBips:10 // 0.1% or 10bps
   },
   
@@ -65,9 +65,15 @@ const initialState = {
     chainId:0,
     value:''
   },
+
   tradeVault:{
     chainId:0,
     value:''
+  },
+
+  tx:{
+    hash:null,
+    success:null
   }
 }
 
@@ -164,6 +170,19 @@ export const counterSlice = createSlice({
         chainId:state.trade.chainId,
         value:state.trade.value
       }
+    },
+
+    unlockTrade:(state)=>{
+      state.tradeVault = {
+        chainId:0,
+        value:""
+      }
+    },
+
+    saveTx:(state,{payload})=>{
+      state.tx.hash = payload.hash;
+      state.tx.success = payload.success;
+      state.tx.error = payload.error;
     },
 
     chainChange:(state, {payload})=>{

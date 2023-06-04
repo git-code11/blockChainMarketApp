@@ -11,5 +11,9 @@ export default ()=>{
         dispatch(actions.lockTrade());
     },[dispatch]);
 
-    return lock;
+    const unlock = useCallback(()=>{
+        dispatch(actions.unlockTrade());
+    },[dispatch]);
+
+    return {lock, unlock};
 }

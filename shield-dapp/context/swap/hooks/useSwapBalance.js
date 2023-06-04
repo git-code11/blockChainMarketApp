@@ -2,16 +2,19 @@ import { useMemo } from "react";
 import { useAccount, useBalance } from "wagmi";
 
 
-export default (currency)=>{
+export default (currency, watch=true)=>{
     const {address:owner} = useAccount();
 
     const {data:result, isLoading, isError} = useBalance({
         address:owner,
         token:currency?.address,
-        enabled:Boolean(currency)
+        enabled:Boolean(currency),
+        watch
     });
     
-    const value = useMemo(()=>result && Number(result.formatted).toFixed(3),[result])
+    const formatted = useMemo(()=>result && Number(result.formatted).toFixed(3),[result])
 
-    return {result, value, isLoading, isError}
+    const value = useMemo(()=>result && result.value.toBigInt(),[result])
+
+    return {result, formatted, value, isLoading, isError}
 }

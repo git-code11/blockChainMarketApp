@@ -52,6 +52,12 @@ export const prepareTradeCallData = ({
     
   const callParams = SwapRouter.swapCallParameters(trade,  _options)
   const swapRouterAddress = getSwapRouterAddr(chainId);
-  return {address:swapRouterAddress, param:callParams}
+  return {address:swapRouterAddress, param:callParams,
+    
+    //to support other calltypes
+    data:callParams.calldata,
+    value:callParams.value,
+    to:swapRouterAddress
+  }
 }
 

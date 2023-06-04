@@ -7,10 +7,12 @@ import useSwapModal from "../../../context/swap/hooks/useSwapModal";
 import useSwapTradeLock from '../../../context/swap/hooks/useSwapTradeLock';
 import useSwapBalance from '../../../context/swap/hooks/useSwapBalance';
 
+import { LoadingButton } from '@mui/lab';
+
 export default ({trade})=>{
     const {toggle} = useSwapModal();
     
-    const lock = useSwapTradeLock();
+    const {lock} = useSwapTradeLock();
 
     const toggleSetting = useCallback(()=>{
         toggle("settings");
@@ -26,20 +28,18 @@ export default ({trade})=>{
     const {result} = useSwapBalance(trade?.data?.inputAmount?.currency);
     
     const canSwap = useMemo(()=>result && trade.data && result.value.toBigInt()>= trade.data.inputAmount.quotient ,[result, trade.data])
-
-    console.log([result?.value?.toBigInt(), trade?.data?.inputAmount?.quotient])
     
     return (
         <Stack direction="row" justifyContent="space-between" alignItems="center">
             <IconButton onClick={toggleSetting}>
                 <Settings/>
             </IconButton>
-            <Button variant="contained" onClick={btnClick} disabled={!trade.exist}>
+            <LoadingButton loading={trade.loading} variant="contained" onClick={btnClick} disabled={!(trade.exist&&canSwap)}>
                 {canSwap ? 
                 "PROCEED TO SWAP":
-                (trade.data ? "INSUFFIECIENT BALANCE":"LOADING TRADE")
+                "INSUFFIECIENT BALANCE"
                 }
-            </Button>
+            </LoadingButton>
             <IconButton>
                 <Info/>
             </IconButton>

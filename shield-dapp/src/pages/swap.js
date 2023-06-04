@@ -12,6 +12,8 @@ import Setting from "../../components/swap/Setting";
 import SwapProvider from '../../context/swap/provider';
 import useSwapModal from "../../context/swap/hooks/useSwapModal";
 
+import {SwapTradeProvider} from "../../context/swap/hooks/useSwapTrade";
+
 const SwapModal = ()=>{
     const {data} = useSwapModal();
     return (
@@ -52,7 +54,9 @@ const SwapContainer = ()=>{
 const SwapPage = ()=>{
     return (
     <SwapProvider>
-        <SwapContainer/>
+        <SwapTradeProvider>
+            <SwapContainer/>
+        </SwapTradeProvider>
     </SwapProvider>
     )
 }
