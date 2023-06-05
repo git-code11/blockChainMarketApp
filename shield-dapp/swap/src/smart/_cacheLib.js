@@ -13,6 +13,13 @@
 export class AbstractCache{
     constructor({updateInterval, cache}){
         this.updateInterval = (updateInterval ?? 1) * 60 * 10000 //1 min
+        //this.__cache = cache ?? {};
+        this.reset(cache);
+    }
+
+    reset(cache){
+        //reset the cache
+        
         this.__cache = cache ?? {};
     }
 
@@ -44,7 +51,7 @@ export class AbstractCache{
     }
 
     _updateCache(key, value){
-        console.log("SAVING CACHE=> ",key);
+        
         value = this.encode(value);
         this.__cache[key] = {
             value,
@@ -54,12 +61,12 @@ export class AbstractCache{
 
     _getCache(key){
         const cached = this.__cache[key];
-        console.log("START CACHE=> ",key);
+        
         if(cached && cached.expiresIn >= Date.now()){
-            console.log("IN CACHE=> ",key);
+            
             return this.decode(cached.value);
         }
-        console.log("NO CACHE=> ",key);
+        
         return null;
     }
 
@@ -119,7 +126,7 @@ export class _BaseCandidatePoolCache extends AbstractCacheExtended{
             ...allowedPoolTypes.sort()
         ]
         const result  = keys.join('_');
-        console.log("DEBUG GETKEY CANDIPOOlCACHE=>", result);
+        
         return result;
     }
 
@@ -144,7 +151,7 @@ export class _BasePoolCache extends AbstractCacheExtended{
         ]
         
         const result  = keys.join('_');
-        console.log("DEBUG GETKEY POOlCACHE=>", result);
+        
         return result;
     }
 
@@ -170,7 +177,7 @@ export class _BaseTradeCache extends AbstractCacheExtended{
             
         ]
         const result  = keys.join('_');
-        console.log("DEBUG GETKEY TRADECACHE=>", result);
+        
         return result;
     }
 

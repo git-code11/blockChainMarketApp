@@ -3,7 +3,7 @@
 const {PoolType, SWAP_ROUTER_ADDRESSES} = require("@pancakeswap/smart-router/evm");
 //import { GraphQLClient } from 'graphql-request'
 import { createPublicClient, http, fallback } from 'viem'
-import { bsc, bscTestnet, goerli } from 'viem/chains';
+import { bsc, bscTestnet, goerli, mainnet } from 'viem/chains';
 import { parseUnits, formatUnits } from 'ethers/lib/utils.js';
 import { parseUnits as vparseUnits, formatUnits as vformatUnits} from 'viem'
 // const V3_SUBGRAPH_URLS = {
@@ -13,9 +13,9 @@ import { parseUnits as vparseUnits, formatUnits as vformatUnits} from 'viem'
 //     [ChainId.BSC_TESTNET]: 'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-chapel',
 // }
 
-const CHAINS = [bsc, bscTestnet, goerli]
+const CHAINS = [bsc, bscTestnet, goerli, mainnet]
 
-const MAP_ID_CHAIN = CHAINS.reduce((_map, _chain)=>({..._map,[_chain.id]:_chain}),{});
+export const MAP_ID_CHAIN = CHAINS.reduce((_map, _chain)=>({..._map,[_chain.id]:_chain}),{});
 
 export const viemClients = ({ chainId}, ...args) => {
     return createPublicClient({
@@ -37,6 +37,7 @@ export const viemClients = ({ chainId}, ...args) => {
         }
     })
 }
+
 
 // export const v3Clients = {
 //     [ChainId.ETHEREUM]: new GraphQLClient(V3_SUBGRAPH_URLS[ChainId.ETHEREUM]),
@@ -111,4 +112,19 @@ export function amountFixed(amount, fixed=8){
 
   }
   return Number(Number(toVReadableAmount(amount.quotient, amount.currency.decimals)).toFixed(fixed));
+}
+
+
+
+export const getTxExplorer = (tx, chainId)=>{
+  const explorer = MAP_ID_CHAIN[chainId??tx.chainId]?.blockExplorers?.default;
+  const hash = tx?.transactionHash;
+  
+  if(!(explorer && hash))
+    return null;
+  
+  return {
+      name:explorer.name,
+      url:(new URL(`/tx/${hash}`, explorer.url)).href
+    }
 }

@@ -19,17 +19,12 @@ const initialState = {
   rate:0,
   input: {
     amount:0,
-    currency:"0x"
+    currency:null
   },
 
   output: {
     amount:0,
-    currency:"0x",
-    _$:{
-      amount:0,
-      currency:"0x",
-      loading:false,
-    }
+    currency:null,
   },
 
   settings:{
@@ -73,7 +68,12 @@ const initialState = {
 
   tx:{
     hash:null,
-    success:null
+    success:null,
+    error:null,
+    explorer:{
+      name:null,
+      link:"#"
+    }
   }
 }
 
@@ -103,7 +103,6 @@ export const counterSlice = createSlice({
     },
 
     outputChange: (state, {payload}) => {
-      console.log({outputChange:payload})
       if(payload.currency){
         state.output.currency = payload.currency;
 
@@ -146,10 +145,10 @@ export const counterSlice = createSlice({
 
     tradeChange:(state, {payload})=>{
       //console.log({tradeR:payload})
-      console.log({
+      /* console.log({
         rule:Number(state.input.amount) === Number(payload.input.amount),
         data:[Number(state.input.amount).toString(), payload.input.amount]
-      });
+      }); */
          
       if(
           payload.input && payload.output &&
@@ -183,6 +182,7 @@ export const counterSlice = createSlice({
       state.tx.hash = payload.hash;
       state.tx.success = payload.success;
       state.tx.error = payload.error;
+      state.tx.explorer = payload.explorer;
     },
 
     chainChange:(state, {payload})=>{

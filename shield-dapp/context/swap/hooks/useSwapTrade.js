@@ -71,9 +71,15 @@ const useSwapTradeWrap = ()=>{
 
     const [amountIn] = useDebounce(input.amount, DEBOUNCE_TIME);
 
-    const _getBestTradeFunc = useCallback((...args)=>tradeCache1.getTrade(...args),[dev]);
+    const _getBestTradeFunc = useCallback((args)=>{
+        /**
+         * reset pool for forced update or when new transaction takes place
+         */
+        if(args && args.forceUpdate)
+            poolCache1.reset();
+        return tradeCache1.getTrade(args);
+    },[dev]);
     
-    //console.log({amountIn, currencyIn, currencyOut});
     const _enabledQuote = useMemo(
                 ()=>
                     Boolean(!isNaN(amountIn) && Number(amountIn) > 0 && currencyIn && currencyOut)
@@ -105,7 +111,6 @@ const useSwapTradeWrap = ()=>{
     const {call:getTradeQuote, value:callValue, loading, error} = usePromise(_tradeFunc, false);//dont wait for a value fo resume
     
     useEffect(()=>{
-        console.log({callValue});
         if(callValue)
             updateState(callValue);
     }, [callValue]);
@@ -125,11 +130,7 @@ const useSwapTradeWrap = ()=>{
     },[_params]);
 
     const outputValue = useMemo(()=>data?amountFixed(data.outputAmount):"0.0", [data]);
-    useEffect(()=>{
-        console.log("ftt");
-        console.log({data, outputValue});
-    },[data, outputValue]);
-
+    
     const exist = useMemo(()=>Boolean(data),[data]);
 
     return {data, outputValue, exist, update, loading, error, params:_params}

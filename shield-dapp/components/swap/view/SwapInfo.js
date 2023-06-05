@@ -149,7 +149,6 @@ const SwapPoolInfo = ({pool})=>{
         }else if(pool.type === PoolType.V3){
             _tokens = [pool.token0, pool.token1]
         }else if(pool.type === PoolType.STABLE){
-            console.log({pool})
             _tokens = pool.balances.map(balance=>balance.currency).reverse();
         }
         return _tokens;

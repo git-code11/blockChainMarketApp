@@ -1,7 +1,8 @@
+import Link from 'next/link'
 import {useMemo, useCallback} from 'react'
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
-import { Avatar, Button, Typography, Divider} from "@mui/material";
+import { Avatar, Button, Typography, Divider, Link as MuiLink} from "@mui/material";
 import { Check} from "@mui/icons-material";
 import { ArrowForward } from "@mui/icons-material";
 import { LOGO} from '.'
@@ -25,9 +26,9 @@ export default ()=>{
 
     const {toggle} = useSwapModal();
     const {trade} = useSwapCall();
-    console.log("swapcall here 2")
+    
     const toggleClose = useCallback(()=>toggle('success'),[toggle]);
-    const tx = useSwapTx();
+    const {data:{explorer}} = useSwapTx();
 
     return (
         <Stack gap={1} p={2} bgcolor="#e4e4e4" component={Paper}>
@@ -42,7 +43,10 @@ export default ()=>{
             </Stack>
             <Divider/>
             <Stack alignItems="end">
-                <Typography
+                <MuiLink
+                    component={Link}
+                    href={explorer?.url}
+                    target="_blank"
                     sx={{
                         color:"#3333ff",
                         cursor:"pointer",
@@ -55,9 +59,8 @@ export default ()=>{
                     }}
                     variant="subtitle2"
                 >
-                    {tx.data.hash}
-                    View on EtherScan
-                </Typography>
+                    View on {explorer?.name||"explorer"}
+                </MuiLink>
             </Stack>
             <Button size="large" variant="contained" onClick={toggleClose}>Close</Button>
         </Stack>

@@ -20,7 +20,7 @@ const SwapCurrencyBalance = ({currency})=>{
     return (
         <Stack direction="row" justifyContent="space-between">
             <Typography>$2,301.05</Typography>
-            <Typography>Bal: {formatted?formatted:'- - -'}</Typography>
+            <Typography>Bal: {formatted && Boolean(currency)?formatted:'- - -'}</Typography>
         </Stack>
     )
 }

@@ -10,12 +10,13 @@ import useSwapModal from "../../context/swap/hooks/useSwapModal";
 import useSwapCall from "../../context/swap/hooks/useSwapCall";
 import { amountFixed } from "../../swap/src/smart/_utils";
 import useSwapApprove from "../../context/swap/hooks/useSwapApprove";
-import useSwapSendTransaction from "../../context/swap/hooks/useSwapSendTransaction2";
+import useSwapSendTransaction from "../../context/swap/hooks/useSwapSendTransaction";
 import useSwapRouterAddress from "../../context/swap/hooks/useSwapRouterAddress";
 import e_msg from "../../context/lib/e_msg";
 import {LoadingButton} from "@mui/lab";
 import useSwapTx from "../../context/swap/hooks/useSwapTx";
 import useSwapTrade from "../../context/swap/hooks/useSwapTrade";
+
 
 const SwapRecieveToken = ({amount})=>{
 
@@ -61,10 +62,6 @@ const SwapApproveContainer = ({trade, getCalldata})=>{
 
     const approveBtnEnabled = useMemo(()=>!approve.isApproved && trade.inputAmount.currency.isToken,[trade, approve]);
 
-    useEffect(()=>{
-        console.log({approve});
-    },[approve])
-
     return (
         <Stack spacing={1}>
             {
@@ -107,7 +104,7 @@ const SwapSendTxContainer = ({trade, getCalldata, enabled=true})=>{
     const {toggle} = useSwapModal();
 
     const calldata = useMemo(()=>{
-        console.log("updating calldata");
+        
         if(enabled)
             return getCalldata();
         else
@@ -119,20 +116,17 @@ const SwapSendTxContainer = ({trade, getCalldata, enabled=true})=>{
 
     const method = useSwapSendTransaction(calldata, enabled);
 
-    useEffect(()=>{
-        console.log({method, trade})
-    },[method]);
-
     const tx = useSwapTx();
 
     useEffect(()=>{
         if(method.success || method.error){
-            tx.update(method);//save tx
+            tx.update({...method, chainId:trade?.inputAmount?.currency?.chainId});//save tx
             //method.reset();
             toggle(method.success?"success":"failed");
-            console.log({sendError:method.error});
-            if(!swap.loading)
-                swap.update(true);//let refetching take place due to transaction
+            
+            if(!swap.loading){
+                setTimeout(()=>swap.update(true),0);//let refetching take place due to transaction after 5sec
+            }
         }
     },[method.success, method.error, swap]);
 

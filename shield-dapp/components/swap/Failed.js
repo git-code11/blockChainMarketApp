@@ -1,4 +1,4 @@
-
+import Link from 'next/link';
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import { Button, Typography, Alert } from "@mui/material";
@@ -11,7 +11,7 @@ import useSwapTx from "../../context/swap/hooks/useSwapTx";
 export default ()=>{
 
     const {toggle} = useSwapModal();
-    const {error} = useSwapTx();
+    const {data} = useSwapTx();
 
     const toggleClose = useCallback(()=>toggle('failed'),[toggle]);
 
@@ -22,13 +22,19 @@ export default ()=>{
                 <Typography>Transaction Failed</Typography>
                 <Alert severity="error" variant="outlined">
                     <Typography variant="body2" fontStyle="italic">
-                        {error||"Unable to prepare Transaction"}
+                        {data.error||"Unable to prepare Transaction"}
                     </Typography>
                 </Alert>
                 <Typography variant="subtitle2">
                     Try Increasing your slippage tolerance.<br/>
                     Note: fee on transfer and rebase are incompatible with PancakeSwap V3.
                 </Typography>
+                {data.explorer && 
+                        <Typography component={Link} 
+                                href={data.explorer.url}>
+                                    view on {data.explorer.name}
+                        </Typography>
+                }
             </Stack>
             <Button size="large" variant="contained" onClick={toggleClose}>Dismiss</Button>
         </Stack>

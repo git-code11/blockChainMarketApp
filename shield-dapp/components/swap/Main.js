@@ -25,10 +25,6 @@ export default ()=>{
     },[trade.update]);
 
     useEffect(()=>{
-        console.log("Output", {error, loading})
-    },[loading, error]);
-
-    useEffect(()=>{
         console.log("My Trade", trade.data);
     },[trade.data])
     
