@@ -73,10 +73,12 @@ const useSwapTradeWrap = ()=>{
 
     const _getBestTradeFunc = useCallback((args)=>{
         /**
-         * reset pool for forced update or when new transaction takes place
+         * reset pool and trade cache for forced update or when new transaction takes place
          */
-        if(args && args.forceUpdate)
+        if(args && args.forceUpdate){
             poolCache1.reset();
+            tradeCache1.reset();
+        }
         return tradeCache1.getTrade(args);
     },[dev]);
     

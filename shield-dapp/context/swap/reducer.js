@@ -16,7 +16,6 @@ const initialState = {
   error:null,
   chainId:97,
 
-  rate:0,
   input: {
     amount:0,
     currency:null
@@ -108,7 +107,6 @@ export const counterSlice = createSlice({
 
         state.trade.value = "";
         state.output.amount = 0;
-        state.rate = 0;
       }
     },
 
@@ -125,7 +123,6 @@ export const counterSlice = createSlice({
       };
 
       state.trade.value = "";
-      state.rate = 0;
     },
 
     settingsChange: (state, {payload}) => {
@@ -135,7 +132,6 @@ export const counterSlice = createSlice({
       if(payload.pool){
         state.trade.value = "";//reset trade when pool changes
         state.output.amount = 0;
-        state.rate = 0;
       }
     },
 
@@ -160,8 +156,6 @@ export const counterSlice = createSlice({
             state.trade.value = payload.value;
 
             state.output.amount = Number(Number(payload.output.amount).toFixed(FIXED_NO)).toString();
-            
-            state.rate = Number(state.output.amount)/Number(state.input.amount);
           }
     },
     lockTrade:(state)=>{
@@ -185,8 +179,8 @@ export const counterSlice = createSlice({
       state.tx.explorer = payload.explorer;
     },
 
-    chainChange:(state, {payload})=>{
-      state.chainId = payload;
+    chainChange:(state, {payload:chainId})=>{
+      return {...initialState, chainId}
     }
   },
 

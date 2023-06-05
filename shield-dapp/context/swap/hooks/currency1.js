@@ -9,6 +9,8 @@ import {useMemo} from 'react';
 import useSWR from 'swr';
 import { icon_grabber } from "../../lib/icon_grabber";
 import axios from 'axios';
+import useSwapChain from "./useSwapChain";
+
 
 
 const _CHAIN_TOKEN_LIST = {
@@ -39,22 +41,24 @@ const _TOKEN_ADDR_LIST = Object.entries(_TOKEN_LIST).reduce(
     {}
 );
 
-const _tkList = Object.values(bscTestnetTokens);
-export const TOKEN_LIST = _tkList.reduce((acc, value)=>({...acc, [value.address]:value}),{});
+export const useSwapCurrencyAddrList = (_chainId)=>{
+    const {chainId} = useSwapChain();
 
-export const TOKEN_ADDRESS_LIST = _tkList.map(tk=>tk.address);
-
-export const useSwapCurrencyAddrList = (chainId)=>{
-    return TOKEN_ADDRESS_LIST;
+    return _TOKEN_ADDR_LIST[_chainId??chainId];
 }
 
-export const useSwapCurrencyList = (chainId)=>{
-    return TOKEN_LIST;
+export const useSwapCurrencyList = (_chainId)=>{
+    const {chainId} = useSwapChain();
+    
+    return _TOKEN_LIST[_chainId??chainId];
 }
 
-export const useSwapCurrency = (address)=>{
+export const useSwapCurrency = (address, _chainId)=>{
+
+    const {chainId} = useSwapChain();
+
     const token = useMemo(()=>{
-        const token = TOKEN_LIST[address];
+        const token = TOKEN_LIST[_chainId??chainId][address];
         
         if(Object.values(WNATIVE).some(token=>token.address === address)){
             return Native.onChain(token.chainId);
@@ -62,7 +66,7 @@ export const useSwapCurrency = (address)=>{
 
         return token;
     },
-    [address]);
+    [address, _chainId, chainId]);
     
     //const {data:image} = {}//useSWR(token?.projectLink, icon_grabber);
     //const result = useMemo(()=>(token?{...token, image}:null), [token, image])
