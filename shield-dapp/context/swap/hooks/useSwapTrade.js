@@ -28,7 +28,7 @@ const tradeCache1 = new TradeCache(_getBestTrade.cache.main(poolCache1, worker1)
  * is the same as tradeCache1.getTrade => pool = cached; trade = cached
  */
 
-const DEBOUNCE_TIME = 2500;
+const DEBOUNCE_TIME = 250;
 
 const useSwapTradeWrap = ()=>{
     
@@ -125,6 +125,10 @@ const useSwapTradeWrap = ()=>{
     },[_params]);
 
     const outputValue = useMemo(()=>data?amountFixed(data.outputAmount):"0.0", [data]);
+    useEffect(()=>{
+        console.log("ftt");
+        console.log({data, outputValue});
+    },[data, outputValue]);
 
     const exist = useMemo(()=>Boolean(data),[data]);
 

@@ -24,13 +24,15 @@ export default (tokenAddress, amountValue, spender, maxApprove=true, __enabled=t
 
     const approveAmount = useMemo(()=>maxApprove?balance:amountValue,[maxApprove,balance, amountValue]);
 
-    const notApproved = useMemo(()=>
-        allowance < amountValue && balance >= amountValue,
-    [allowance, amountValue, balance]);
+    const valuesDefined = useMemo(()=>!(isNaN(Number(allowance)) || isNaN(Number(balance))),[allowance, balance]);
+
+    const isApproved = useMemo(()=>
+        valuesDefined  && allowance >= amountValue && balance >= amountValue,
+    [valuesDefined, allowance, amountValue, balance]);
 
     const enableApprove = useMemo(()=>
-            Boolean(spender) && Boolean(approveAmount) && notApproved,
-            [notApproved, spender, approveAmount]);
+        valuesDefined && Boolean(spender) && Boolean(approveAmount) && !isApproved,
+            [valuesDefined, isApproved, spender, isApproved]);
     
     const {config, error:prepareError, isLoading:prepareLoading, refetch} = usePrepareContractWrite({
         address:tokenAddress,
@@ -56,10 +58,9 @@ export default (tokenAddress, amountValue, spender, maxApprove=true, __enabled=t
 
     const reset = useCallback(()=>{
         _reset();
-        refetch();
     },[refetch, _reset]);
 
-    return {write, writeAsync, notApproved, 
+    return {write, writeAsync, isApproved, 
                 loading,
                 error,
                 tx,

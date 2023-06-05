@@ -10,7 +10,7 @@ import useSwapModal from "../../context/swap/hooks/useSwapModal";
 import useSwapCall from "../../context/swap/hooks/useSwapCall";
 import { amountFixed } from "../../swap/src/smart/_utils";
 import useSwapApprove from "../../context/swap/hooks/useSwapApprove";
-import useSwapSendTransaction from "../../context/swap/hooks/useSwapSendTransaction";
+import useSwapSendTransaction from "../../context/swap/hooks/useSwapSendTransaction2";
 import useSwapRouterAddress from "../../context/swap/hooks/useSwapRouterAddress";
 import e_msg from "../../context/lib/e_msg";
 import {LoadingButton} from "@mui/lab";
@@ -59,7 +59,11 @@ const SwapApproveContainer = ({trade, getCalldata})=>{
         spender
     );
 
-    const approveBtnEnabled = useMemo(()=>approve.notApproved && trade.inputAmount.currency.isToken,[trade, approve]);
+    const approveBtnEnabled = useMemo(()=>!approve.isApproved && trade.inputAmount.currency.isToken,[trade, approve]);
+
+    useEffect(()=>{
+        console.log({approve});
+    },[approve])
 
     return (
         <Stack spacing={1}>
@@ -91,10 +95,8 @@ const SwapApproveContainer = ({trade, getCalldata})=>{
             </LoadingButton>
         }
 
-        {
-             !approve.notApproved  &&
-             <SwapSendTxContainer {...{trade, getCalldata}}/>
-        }
+        <SwapSendTxContainer {...{trade, getCalldata}} enabled={approve.isApproved}/>
+        
         </Stack>
     )
 }
@@ -106,19 +108,29 @@ const SwapSendTxContainer = ({trade, getCalldata, enabled=true})=>{
 
     const calldata = useMemo(()=>{
         console.log("updating calldata");
-        return getCalldata();
+        if(enabled)
+            return getCalldata();
+        else
+            return null;
     }
-    ,[getCalldata]);//[] empty to be called only on mondal creation
+    ,[getCalldata, enabled]);//[] empty to be called only on mondal creation
 
-    const method = useSwapSendTransaction(calldata);
+
+
+    const method = useSwapSendTransaction(calldata, enabled);
+
+    useEffect(()=>{
+        console.log({method, trade})
+    },[method]);
 
     const tx = useSwapTx();
 
     useEffect(()=>{
         if(method.success || method.error){
             tx.update(method);//save tx
-            method.reset();
-            toggle(method.success?"success":"error");
+            //method.reset();
+            toggle(method.success?"success":"failed");
+            console.log({sendError:method.error});
             if(!swap.loading)
                 swap.update(true);//let refetching take place due to transaction
         }

@@ -27,17 +27,20 @@ export default ({trade})=>{
     
     const {result} = useSwapBalance(trade?.data?.inputAmount?.currency);
     
-    const canSwap = useMemo(()=>result && trade.data && result.value.toBigInt()>= trade.data.inputAmount.quotient ,[result, trade.data])
-    
+    const insufficientBalance = useMemo(()=>
+                Boolean(trade.data) && Boolean(result) && 
+                !isNaN(Number(result.value.toBigInt())) && 
+                result.value.toBigInt() < trade.data.inputAmount.quotient,[trade, result])
+
     return (
         <Stack direction="row" justifyContent="space-between" alignItems="center">
             <IconButton onClick={toggleSetting}>
                 <Settings/>
             </IconButton>
-            <LoadingButton loading={trade.loading} variant="contained" onClick={btnClick} disabled={!(trade.exist&&canSwap)}>
-                {canSwap ? 
-                "PROCEED TO SWAP":
-                "INSUFFIECIENT BALANCE"
+            <LoadingButton loading={trade.loading} variant="contained" onClick={btnClick} disabled={!trade.exist||insufficientBalance}>
+                {trade.exist ? 
+                (insufficientBalance?"INSUFFICIENT BALANCE":"PROCEED TO SWAP"):
+                "SWAP QUOTING"
                 }
             </LoadingButton>
             <IconButton>
