@@ -10,8 +10,7 @@ const nextConfig = {
             fs: false,
             net: false,
             tls:false,
-            "react-native":false,
-            "crypto": require.resolve("crypto-browserify")
+            "react-native":false
         };
 
     }
