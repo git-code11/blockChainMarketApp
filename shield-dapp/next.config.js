@@ -13,10 +13,6 @@ const nextConfig = {
             //"ethers/lib/utils":require.resolve("ethers/lib/utils")
         };
 
-        config.resolve.alias = {
-          ...config.resolve.alias,
-          "ethers/lib/utils":require.resolve("ethers/lib/utils")
-        }
     }
 
     return config;
