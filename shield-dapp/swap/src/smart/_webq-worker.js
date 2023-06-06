@@ -2,7 +2,7 @@
  * NOTE: THIS is NOW in the src folder for public display
  */
 
-//import { SmartRouter } from '@pancakeswap/smart-router/evm'
+
 const { SmartRouter } = require("@pancakeswap/smart-router/evm");
 import _quoteProvider from './_quoteProvider'
 

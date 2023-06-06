@@ -1,5 +1,5 @@
 import { ChainId} from '@pancakeswap/sdk';
-//import { SmartRouter, BATCH_MULTICALL_CONFIGS } from '@pancakeswap/smart-router/evm';
+
 const {SmartRouter, BATCH_MULTICALL_CONFIGS} = require("@pancakeswap/smart-router/evm");
 
 import { viemClients } from './_utils';
