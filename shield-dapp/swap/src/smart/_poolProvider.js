@@ -104,4 +104,6 @@ export class PoolCache extends _BasePoolCache{
     }
 }
 
+export const globalCandidatePoolCache = new CandidatePoolCache();
+
 export default _poolProvider;

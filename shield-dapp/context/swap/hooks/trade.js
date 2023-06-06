@@ -1,6 +1,5 @@
 import {useMemo, useCallback, createContext, useContext, useEffect} from 'react';
 import { TradeType } from '@pancakeswap/sdk';
-//import { SmartRouter } from '@pancakeswap/smart-router/evm'
 const { SmartRouter } = require('@pancakeswap/smart-router/evm');
 import _getBestTrade, { TradeCache } from "../../../swap/src/smart/_getBestTrade";
 import _poolProvider, { CandidatePoolCache } from '../../../swap/src/smart/_poolProvider';

@@ -4,7 +4,6 @@ import _poolProvider, { CandidatePoolCache, globalCandidatePoolCache } from './_
 import { _BaseTradeCache } from './_cacheLib';
 import axios from 'axios';
 
-//import {SmartRouter } from '@pancakeswap/smart-router/evm'; due to error from .mjs version
 const {SmartRouter} = require("@pancakeswap/smart-router/evm");
 
 const QUOTING_API = "https://swap-quoting.pancakeswap.com/quoting-service/v0/quote";

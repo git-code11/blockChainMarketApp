@@ -113,7 +113,7 @@ export default ()=>{
 
     const toggleClose = useCallback(()=>{
         toggle('settings');
-    })
+    },[])
 
     return (
         <Stack gap={2} p={2} bgcolor="#e4e4e4" component={Paper}>
