@@ -8,13 +8,14 @@ const defaultChains = Object.values(MAP_ID_CHAIN);
 export default ()=>{
     
     const method = useSwapChain();
-    console.log({upchange:method})
+    
     return (
         <ButtonGroup disabled={method.loading}>
             {
                 (method.chains.length > 0 ? method.chains : defaultChains).map(
                     chain=>
                         <Button variant="contained" 
+                            size="small"
                             key={chain.id}
                             color="success"
                             disabled={chain.id === method.chainId}

@@ -1,4 +1,4 @@
-import {useMemo, useCallback} from "react";
+import {useMemo, useCallback, useEffect} from "react";
 
 import Badge from "@mui/material/Badge";
 import IconButton from "@mui/material/IconButton";
@@ -11,24 +11,27 @@ import WalletOutlined from '@mui/icons-material/WalletOutlined';
 import { useAccount} from 'wagmi';
 import { useWeb3Modal } from "@web3modal/react";
 import useAuth from "../context/hook/user/useAuth";
+import {bscTestnet} from 'wagmi/chains'
 ;
 
 const DEFAULT_CHAIN_ID = 97;
 
 export default ()=>{
-    const { isOpen, open} = useWeb3Modal();
+    const { isOpen, open, setDefaultChain} = useWeb3Modal();
     
     const {connect, disconnect, connected} = useAuth();
     const { status, isConnected } = useAccount();
 
+    useEffect(()=>{
+        setDefaultChain(bscTestnet);
+    },[]);
+
     //console.log("my token", data, error, isLoading);
     const onClick = useCallback(async ()=>{
-        if(!isConnected){
-            connect({chainId:DEFAULT_CHAIN_ID});
-        }else if(!isOpen){
+       if(!isOpen){
             await open();
         }
-    },[isOpen, open, isConnected]);
+    },[isOpen, open]);
 
     /* const _onClick = useCallback(()=>{
         if(!isConnected){

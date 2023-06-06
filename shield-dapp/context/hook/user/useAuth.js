@@ -53,7 +53,7 @@ export default ()=>{
                 connector:__wagmi_connect.connectors[0],
                 ...props
         });
-    },[__wagmi_account.isConnected, __wagmi_connect.connector]);
+    },[__wagmi_account.isConnected, __wagmi_connect]);
 
     const reset = useCallback(()=>{
         if(isAuthenticated)

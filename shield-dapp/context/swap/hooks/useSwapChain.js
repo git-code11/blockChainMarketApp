@@ -1,7 +1,7 @@
 import {useCallback, useMemo} from 'react'
 import { useSelector, useDispatch } from "react-redux"
 import {actions} from '../reducer';
-import { useAccount, useSwitchNetwork } from 'wagmi';
+import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
 import { MAP_ID_CHAIN } from '../../../swap/src/smart/_utils';
 
 const swapChainIds = Object.keys(MAP_ID_CHAIN).map(Number);
@@ -10,30 +10,30 @@ export default ()=>{
     const data = useSelector(state=>state.swap.chainId);
     const dispatch = useDispatch();
 
-    const method = useSwitchNetwork();
-    const {isConnected} = useAccount();
+    const {switchNetwork, isLoading:switchLoading} = useSwitchNetwork();
+    const network = useNetwork();
+    const {isConnected, isLoading} = useAccount();
 
     const update = useCallback((chainId)=>{
-        
-        if(method.isLoading){
+        if(isLoading){
             return;
         }
             
         if(swapChainIds.includes(chainId)){
-            
-            if(isConnected && method.data?.id !== chainId){
-                method.switchNetwork(chainId)
+
+            if(isConnected && network.chain?.id !== chainId){
+                switchNetwork(chainId)
             }else if(chainId !== data){
                 dispatch(actions.chainChange(chainId));
             }
             
         }
         
-    },[dispatch, method, isConnected, data]);
+    },[dispatch, switchNetwork, network, isConnected, isLoading]);
 
-    const chainId = useMemo(()=>method.chain || data,[data, method.chain]);
+    const chainId = useMemo(()=>network.chain?.id || data,[data, network.chain]);
 
-    return {chain:method.data, chainId, update, chains:method.chains, loading: method.isLoading}
+    return {chain:network.chain, chainId, update, chains:network.chains, loading: switchLoading}
 }
 
 
