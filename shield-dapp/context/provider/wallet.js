@@ -1,7 +1,7 @@
 import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum'
 import { Web3Modal } from '@web3modal/react'
 import { configureChains, createClient, WagmiConfig } from 'wagmi'
-import {bscTestnet, bsc} from 'wagmi/chains'
+import {bscTestnet, bsc, mainnet, goerli} from 'wagmi/chains'
 
 import {useEffect, useState} from "react";
 
@@ -13,7 +13,7 @@ if (!process.env.NEXT_PUBLIC_PROJECT_ID) {
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
 
 // 2. Configure wagmi client
-const chains = [bscTestnet, bsc];
+const chains = [bscTestnet, bsc, goerli, mainnet];
 
 const { provider } = configureChains(chains, [w3mProvider({ projectId })])
 const wagmiClient = createClient({

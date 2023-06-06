@@ -6,24 +6,21 @@ import Alert from '@mui/material/Alert';
 import {IconButton } from "@mui/material";
 import { ArrowDownward } from "@mui/icons-material";
 import useSwapReverse from '../../context/swap/hooks/useSwapReverse';
-import useSwapTrade from '../../context/swap/hooks/useSwapTrade';
+import { useSwapTradeUpdated } from '../../context/swap/hooks/trade';
 import { SwapFieldInput, SwapFieldOutput } from './view/SwapField';
 import {SwapBasicInfo, SwapTradeInfo} from './view/SwapInfo';
 import SwapOptionsMenu from './view/SwapOptionsMenu';
+import SwapChainSelect from './view/SwapChainSelect';
 
 
 
 export default ()=>{
     const reverse = useSwapReverse();
-    const trade = useSwapTrade();
+
+    const trade = useSwapTradeUpdated();
     
     const {loading, error} = trade;
     
-    useEffect(()=>{
-        console.log("calling trade update");
-        trade.update();
-    },[trade.update]);
-
     useEffect(()=>{
         console.log("My Trade", trade.data);
     },[trade.data])
@@ -31,6 +28,9 @@ export default ()=>{
 
     return (
         <Stack component={Paper} gap={1} p={2} bgcolor="#536269">
+            <Stack alignItems="center">
+                <SwapChainSelect/>
+            </Stack>
             <Stack gap={1}>
                 <SwapFieldInput data-inputField trade={trade}/>
                     <Stack alignItems="center">

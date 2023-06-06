@@ -5,13 +5,13 @@ import Paper from "@mui/material/Paper";
 import { Avatar, Button, Input,
     Typography, IconButton, InputAdornment, CircularProgress} from "@mui/material";
 import {AllOut, Update} from "@mui/icons-material";
-import {LOGO} from '..'
 
 import useSwapModal from "../../../context/swap/hooks/useSwapModal";
 import useSwapInput from '../../../context/swap/hooks/useSwapInput';
 import useSwapOutput from '../../../context/swap/hooks/useSwapOutput';
 import { useSwapCurrency } from '../../../context/swap/hooks/currency';
 import useSwapBalance from '../../../context/swap/hooks/useSwapBalance';
+import useTokenLogo from '../../../token_logo/useTokenLogo';
 
 
 const SwapCurrencyBalance = ({currency})=>{
@@ -81,6 +81,7 @@ export const SwapFieldInput = ()=>{
 
 
 const SwapFieldBase = ({currency, value, disabled, onInput, onSelect, endIcon})=>{
+    const token_logo = useTokenLogo(currency);
 
     return (
         <Stack gap={2} p={1} direction="row" component={Paper} alignItems="end">
@@ -91,7 +92,7 @@ const SwapFieldBase = ({currency, value, disabled, onInput, onSelect, endIcon})=
                         boxShadow:"0 0 0 2px #454545",
                         bgcolor:"orange"
                     }}>
-                    <Avatar src={LOGO} sx={{width:"50px", height:"50px"}}/>
+                    <Avatar src={token_logo} sx={{width:"50px", height:"50px"}}/>
                 </Box>
                 <Typography fontWeight="bold">{currency?.symbol??"- - -"}</Typography>
             </Stack>

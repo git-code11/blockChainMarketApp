@@ -7,7 +7,7 @@ import { BigNumber } from "ethers";
 
 
 //amountValue should pass non integer or BigInt
-export default (tokenAddress, amountValue, spender, maxApprove=true, __enabled=true)=>{
+export default ({chainId, address: tokenAddress}, amountValue, spender, maxApprove=true, __enabled=true)=>{
     const {address:owner} = useAccount();
     const currency = useSwapCurrency(tokenAddress);
     const {value:balance} = useSwapBalance(currency);
@@ -19,7 +19,8 @@ export default (tokenAddress, amountValue, spender, maxApprove=true, __enabled=t
         args:[owner, spender],
         enabled:Boolean(owner) && Boolean(spender) && __enabled,
         select:data=>data.toBigInt(),
-        watch:true
+        watch:true,
+        chainId:chainId
     });
 
     const approveAmount = useMemo(()=>maxApprove?balance:amountValue,[maxApprove,balance, amountValue]);
@@ -39,7 +40,8 @@ export default (tokenAddress, amountValue, spender, maxApprove=true, __enabled=t
         abi:erc20ABI,
         functionName:"approve",
         args:[spender, approveAmount && BigNumber.from(approveAmount)],
-        enabled: enableApprove && __enabled
+        enabled: enableApprove && __enabled,
+        chainId:chainId
     });
 
     const {write, writeAsync, data, isLoading:writeLoading, error:writeError, reset:_reset} = useContractWrite(config);

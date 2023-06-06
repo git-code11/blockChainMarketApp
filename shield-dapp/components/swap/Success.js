@@ -5,18 +5,19 @@ import Paper from "@mui/material/Paper";
 import { Avatar, Button, Typography, Divider, Link as MuiLink} from "@mui/material";
 import { Check} from "@mui/icons-material";
 import { ArrowForward } from "@mui/icons-material";
-import { LOGO} from '.'
 import useSwapModal from "../../context/swap/hooks/useSwapModal";
 
 import useSwapCall from "../../context/swap/hooks/useSwapCall";
 import { amountFixed } from "../../swap/src/smart/_utils";
 import useSwapTx from '../../context/swap/hooks/useSwapTx';
+import useTokenLogo from '../../token_logo/useTokenLogo';
 
 const SwapMiniAmount = ({amount})=>{
+    const token_logo = useTokenLogo(amount.currency);
     const value = useMemo(()=>amountFixed(amount),[amount]);
     return (
         <Stack direction="row" alignItems="center">
-            <Avatar src={LOGO} sx={{bgcolor:"#333", width:"30px", height:"30px"}}/>
+            <Avatar src={token_logo} sx={{bgcolor:"#333", width:"30px", height:"30px"}}/>
             <Typography>{value} {amount.currency.symbol}</Typography>
         </Stack>
     )

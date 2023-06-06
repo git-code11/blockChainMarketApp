@@ -71,7 +71,7 @@ export default (_func, wait=true)=>{
             setLoading(false);
         }
         
-        return [_value, verified];
+        return {result:_value, verified};
     },[loading, _func, reset, wait, session]);
 
     

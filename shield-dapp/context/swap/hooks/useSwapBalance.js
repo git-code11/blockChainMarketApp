@@ -9,6 +9,7 @@ export default (currency, watch=true)=>{
         address:owner,
         token:currency?.address,
         enabled:Boolean(currency),
+        chainId:currency?.chainId,
         watch
     });
     

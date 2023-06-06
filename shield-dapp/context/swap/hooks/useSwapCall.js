@@ -1,11 +1,10 @@
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback} from "react";
 import { useSelector } from "react-redux";
-
-const {SmartRouter} = require("@pancakeswap/smart-router/evm") ;
 
 import { prepareTradeCallData } from "../../../swap/src/smart/_prepare";
 
 import { createSelector } from "@reduxjs/toolkit";
+import { useDeserializeTrade } from "./trade";
 
 const _selector = createSelector(state=>state.swap,
     swap=>({
@@ -17,18 +16,8 @@ const _selector = createSelector(state=>state.swap,
     })
 );
 
-export default ()=>{
-    const {serializedTrade, ...options} = useSelector(_selector);
-
-    const trade = useMemo(()=>{
-        if(serializedTrade.chainId && serializedTrade.value){
-            return SmartRouter.Transformer.parseTrade(serializedTrade.chainId, serializedTrade.value);
-        }
-        return null;
-    },[serializedTrade]);
-
-
-    const getCalldata = useCallback(()=>{
+const usePrepareTradeCallData = (trade, options)=>{
+    return useCallback(()=>{
         if(trade){
             return prepareTradeCallData(
                 {
@@ -40,7 +29,16 @@ export default ()=>{
                 })
         }
         return null;
-    },[trade, options])
+    },[trade, options]);
+
+}
+
+export default ()=>{
+    const {serializedTrade, ...options} = useSelector(_selector);
+
+    const trade = useDeserializeTrade(serializedTrade);
+
+    const getCalldata = usePrepareTradeCallData(trade, options);
 
     return {trade, getCalldata}
 

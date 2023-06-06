@@ -58,6 +58,8 @@ export default ()=>{
                             <ListItemButton component={Link} href="/explore/0">Explore</ListItemButton>
                             <Divider variant="middle"/>
                             <ListItemButton component={Link} href="/nft_create">Create NFT</ListItemButton>
+                            <Divider variant="middle"/>
+                            <ListItemButton component={Link} href="/swap">Swap Exchange</ListItemButton>
                         </List>
                     </Box>
                     <BalanceBar/>

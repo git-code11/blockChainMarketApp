@@ -3,7 +3,6 @@ import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import { Avatar, Button, Typography, IconButton, Alert } from "@mui/material";
 import { Close} from "@mui/icons-material";
-import {LOGO} from '.'
 
 import useSwapModal from "../../context/swap/hooks/useSwapModal";
 
@@ -15,17 +14,19 @@ import useSwapRouterAddress from "../../context/swap/hooks/useSwapRouterAddress"
 import e_msg from "../../context/lib/e_msg";
 import {LoadingButton} from "@mui/lab";
 import useSwapTx from "../../context/swap/hooks/useSwapTx";
-import useSwapTrade from "../../context/swap/hooks/useSwapTrade";
+import useSwapTrade from "../../context/swap/hooks/trade";
+import useTokenLogo from "../../token_logo/useTokenLogo";
 
 
 const SwapRecieveToken = ({amount})=>{
 
     const value = useMemo(()=>amountFixed(amount),[amount]);
+    const token_logo = useTokenLogo(amount.currency);
 
     return (
         <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Stack gap={1} direction="row" alignItems="center">
-                <Avatar src={LOGO} sx={{bgcolor:"#444"}}/>
+                <Avatar src={token_logo} sx={{bgcolor:"#444"}}/>
                 <Typography fontFamily="monospace" fontSize="24px" fontWeight="bold">{value}</Typography>
             </Stack>
             <Typography fontSize="20px" fontWeight="bold">{amount.currency.symbol}</Typography>
@@ -55,7 +56,7 @@ const SwapApproveContainer = ({trade, getCalldata})=>{
     const spender = useSwapRouterAddress(trade.inputAmount.currency);
 
     const approve = useSwapApprove(
-        trade.inputAmount.currency.address,
+        trade.inputAmount.currency,
         trade.inputAmount.quotient,
         spender
     );
@@ -77,7 +78,7 @@ const SwapApproveContainer = ({trade, getCalldata})=>{
                 approve.success && 
                 <Alert>
                     <Typography>
-                        RequestId {approve.tx.transactionHash}
+                        Approval Successful
                     </Typography>
                 </Alert>
             }

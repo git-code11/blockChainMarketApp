@@ -19,7 +19,7 @@ const Tolerance = ()=>{
             <Typography>Slippage Tolerance <i>(bips&lt; 0.1% &gt;)</i></Typography>
             <Stack direction="row" justifyContent="space-between">
                 {[1, 10, 20, 30].map(i=>
-                            <Button variant="outlined"
+                            <Button key={i} variant="outlined"
                                     onClick={()=>updateSlip(i)}
                                     color={data.tolerance === i?"success":"warning"}
                                     >{i}
@@ -58,7 +58,7 @@ const Deadline = ()=>{
             <Typography>Transaction Deadline<i>(minutes)</i></Typography>
             <Stack direction="row" justifyContent="space-between">
                 {[5, 10, 15, 20].map(i=>
-                    <Button variant="outlined"
+                    <Button key={i} variant="outlined"
                     onClick={()=>updateSlip(i)}
                     color={data.deadline === i?"success":"warning"}
                 >{i}</Button>)}
@@ -99,7 +99,7 @@ const PoolTier = ()=>{
             <Typography>Pool Tier</Typography>
             <Stack direction="row" justifyContent="space-between">
                 {["V2", "V3", "STABLE"].map(i=>
-                    <Button variant="outlined" 
+                    <Button key={i} variant="outlined" 
                     onClick={()=>updateSlip(i)}
                     color={data.pool[i]?"success":"warning"}
                     >{i}</Button>)}

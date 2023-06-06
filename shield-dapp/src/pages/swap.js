@@ -1,5 +1,4 @@
 import Container from "@mui/material/Container";
-import Stack from "@mui/material/Stack";
 
 import { ModalBox } from "../../components/swap";
 import Main from "../../components/swap/Main";
@@ -12,10 +11,11 @@ import Setting from "../../components/swap/Setting";
 import SwapProvider from '../../context/swap/provider';
 import useSwapModal from "../../context/swap/hooks/useSwapModal";
 
-import {SwapTradeProvider} from "../../context/swap/hooks/useSwapTrade";
+import {SwapTradeProvider} from "../../context/swap/hooks/trade";
 
 const SwapModal = ()=>{
     const {data} = useSwapModal();
+
     return (
         <>
             <ModalBox open={data.select}>

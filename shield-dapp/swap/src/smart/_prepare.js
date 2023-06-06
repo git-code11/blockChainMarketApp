@@ -57,7 +57,8 @@ export const prepareTradeCallData = ({
     //to support other calltypes
     data:callParams.calldata,
     value:callParams.value,
-    to:swapRouterAddress
+    to:swapRouterAddress,
+    chainId
   }
 }
 

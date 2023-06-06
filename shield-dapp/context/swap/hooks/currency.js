@@ -6,9 +6,8 @@ import { ethereumTokens,
     } from "@pancakeswap/tokens";
 
 import {useMemo} from 'react';
-import useSWR from 'swr';
-import { icon_grabber } from "../../lib/icon_grabber";
-import axios from 'axios';
+import useSwapChain from "./useSwapChain";
+
 
 
 const _CHAIN_TOKEN_LIST = {
@@ -21,7 +20,7 @@ const _CHAIN_TOKEN_LIST = {
 const _TOKEN_LIST = Object.entries(_CHAIN_TOKEN_LIST).reduce(
     (_map, _data)=>{
         const [chainId, tokens] = _data;
-        _map[chainId] = Object.values(tokens.reduce).reduce((_tokenMap, token)=>{
+        _map[chainId] = Object.values(tokens).reduce((_tokenMap, token)=>{
             _tokenMap[token.address] = token;
             return _tokenMap;
         },{});
@@ -29,6 +28,7 @@ const _TOKEN_LIST = Object.entries(_CHAIN_TOKEN_LIST).reduce(
     },
     {}
 );
+
 
 const _TOKEN_ADDR_LIST = Object.entries(_TOKEN_LIST).reduce(
     (_map, _data)=>{
@@ -39,50 +39,33 @@ const _TOKEN_ADDR_LIST = Object.entries(_TOKEN_LIST).reduce(
     {}
 );
 
-const _tkList = Object.values(bscTestnetTokens);
-export const TOKEN_LIST = _tkList.reduce((acc, value)=>({...acc, [value.address]:value}),{});
+export const useSwapCurrencyAddrList = (_chainId)=>{
+    const {chainId} = useSwapChain();
 
-export const TOKEN_ADDRESS_LIST = _tkList.map(tk=>tk.address);
-
-export const useSwapCurrencyAddrList = (chainId)=>{
-    return TOKEN_ADDRESS_LIST;
+    return _TOKEN_ADDR_LIST[_chainId??chainId];
 }
 
-export const useSwapCurrencyList = (chainId)=>{
-    return TOKEN_LIST;
+export const useSwapCurrencyList = (_chainId)=>{
+    const {chainId} = useSwapChain();
+    
+    return _TOKEN_LIST[_chainId??chainId];
 }
 
-export const useSwapCurrency = (address)=>{
-    const token = useMemo(()=>{
-        const token = TOKEN_LIST[address];
+export const useSwapCurrency = (address, _chainId)=>{
+
+    const {chainId} = useSwapChain();
+
+    const _token = useMemo(()=>{
+        const token = _TOKEN_LIST[_chainId??chainId][address];
         
-        if(Object.values(WNATIVE).some(token=>token.address === address)){
-            return Native.onChain(token.chainId);
+        const native = Object.values(WNATIVE).find(token=> token.address === address);
+        if(Boolean(native)){
+            return Native.onChain(native.chainId);
         }
 
         return token;
     },
-    [address]);
+    [address, _chainId, chainId]);
     
-    //const {data:image} = {}//useSWR(token?.projectLink, icon_grabber);
-    //const result = useMemo(()=>(token?{...token, image}:null), [token, image])
-    return token;
-}
-
-const fetcher = key=>axios.get(key).then(response=>response.data);
-
-export const useSwapNativePrice = ({ids, vs})=>{
-     vs = vs ?? ['usd', 'eur', 'jpy'];
-     ids= ids ?? ['binancecoin','ethereum'];
-    const API_URL =  `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=${vs.join(',')}`
-    const methods = useSWR(API_URL, fetcher);
-    return methods;
-}
-
-export const useSwapCurrenctPrice = ({contracts, id, vs})=>{
-    vs = vs ?? ['usd', 'eur', 'jpy'];
-    id= id ?? 'binancecoin';//'ethereum'
-   const API_URL =  contracts?.length > 0 &&`https://api.coingecko.com/api/v3/simple/token_price/${id}?contract_addresses=${contracts.join(',')}&vs_currencies=${vs.join(',')}`
-   const methods = useSWR(API_URL, fetcher);
-   return methods;
+    return _token;
 }

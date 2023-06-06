@@ -6,7 +6,7 @@ import { Info, Settings} from "@mui/icons-material";
 import useSwapModal from "../../../context/swap/hooks/useSwapModal";
 import useSwapTradeLock from '../../../context/swap/hooks/useSwapTradeLock';
 import useSwapBalance from '../../../context/swap/hooks/useSwapBalance';
-
+import { useAccount } from 'wagmi';
 import { LoadingButton } from '@mui/lab';
 
 export default ({trade})=>{
@@ -32,12 +32,14 @@ export default ({trade})=>{
                 !isNaN(Number(result.value.toBigInt())) && 
                 result.value.toBigInt() < trade.data.inputAmount.quotient,[trade, result])
 
+    const {isConnected} = useAccount()
+
     return (
         <Stack direction="row" justifyContent="space-between" alignItems="center">
             <IconButton onClick={toggleSetting}>
                 <Settings/>
             </IconButton>
-            <LoadingButton loading={trade.loading} variant="contained" onClick={btnClick} disabled={!trade.exist||insufficientBalance}>
+            <LoadingButton loading={trade.loading} variant="contained" onClick={btnClick} disabled={!trade.exist||insufficientBalance||!isConnected}>
                 {trade.exist ? 
                 (insufficientBalance?"INSUFFICIENT BALANCE":"PROCEED TO SWAP"):
                 "SWAP QUOTING"

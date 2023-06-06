@@ -5,12 +5,12 @@ import { Avatar, Chip, OutlinedInput, Typography, IconButton, Divider } from "@m
 import { ListItemAvatar, ListItemText, ListItemButton } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import {FixedSizeList} from "react-window";
-import {LOGO} from '.'
 import useSwapModal from "../../context/swap/hooks/useSwapModal";
 import {useSwapCurrencyAddrList, useSwapCurrency, useSwapCurrencyList } from "../../context/swap/hooks/currency";
 import useSwapInput from "../../context/swap/hooks/useSwapInput";
 import useSwapOutput from "../../context/swap/hooks/useSwapOutput";
 import useSwapCtx from "../../context/swap/hooks/useSwapCtx";
+import useTokenLogo from '../../token_logo/useTokenLogo';
 
 const TokenChip = ({address})=>{
     const currency = useSwapCurrency(address);
@@ -23,7 +23,9 @@ const TokenChip = ({address})=>{
     const onClick = useCallback(()=>{
         const _func = ctx.i?input.update:output.update;
         _func({currency:address});
-    },[input, output, address]);
+    },[input, output, address, ctx.i]);
+
+    const token_logo = useTokenLogo(currency);
 
     return (
         <Chip
@@ -40,7 +42,7 @@ const TokenChip = ({address})=>{
                 cursor:"pointer"
             }}
             avatar={
-                <Avatar src={currency?.logo || LOGO}/>
+                <Avatar src={token_logo}/>
             } 
             label={
                 <Typography fontWeight="bold" fontSize="1rem">{currency?.symbol ?? "- - - -"}</Typography>
@@ -63,10 +65,12 @@ const TokenSelectItem = ({address, ...props})=>{
         _func({currency:address});
     },[input, output, address]);
 
+    const token_logo = useTokenLogo(currency);
+
     return (
         <ListItemButton {...props} disabled={disabled} onClick={onClick}>
             <ListItemAvatar>
-                <Avatar src={currency?.logo??LOGO} sx={{width:"50px", height:"50px", bgcolor:"#e9e9e9"}}/>
+                <Avatar src={token_logo} sx={{width:"50px", height:"50px", bgcolor:"#e9e9e9"}}/>
             </ListItemAvatar>
             <ListItemText
                 primary={
