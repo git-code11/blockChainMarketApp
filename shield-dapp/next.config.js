@@ -11,7 +11,6 @@ const nextConfig = {
             net: false,
             tls:false,
             "react-native":false,
-            crypto:false
             //"ethers/lib/utils":require.resolve("ethers/lib/utils")
         };
 
