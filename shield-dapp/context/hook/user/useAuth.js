@@ -47,10 +47,11 @@ export default ()=>{
     const __wagmi_disconnect = useDisconnect();
     const __wagmi_account = useAccount();
 
-    const connect = useCallback(()=>{
+    const connect = useCallback((props)=>{
         if(!__wagmi_account.isConnected)
             __wagmi_connect.connect({
-                connector:__wagmi_connect.connectors[0]
+                connector:__wagmi_connect.connectors[0],
+                ...props
         });
     },[__wagmi_account.isConnected, __wagmi_connect.connector]);
 

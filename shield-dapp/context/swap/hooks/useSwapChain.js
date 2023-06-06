@@ -14,18 +14,15 @@ export default ()=>{
     const {isConnected} = useAccount();
 
     const update = useCallback((chainId)=>{
-        console.log({first:chainId, swapChainIds})
+        
         if(method.isLoading){
             return;
         }
             
         if(swapChainIds.includes(chainId)){
-            console.log({inc:chainId})
+            
             if(isConnected && method.data?.id !== chainId){
-                method.switchNetworkAsync(chainId)
-                    .then(chain=>
-                                dispatch(actions.chainChange(chain.id))
-                        )
+                method.switchNetwork(chainId)
             }else if(chainId !== data){
                 dispatch(actions.chainChange(chainId));
             }

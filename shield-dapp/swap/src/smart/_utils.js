@@ -12,16 +12,22 @@ import { parseUnits as vparseUnits, formatUnits as vformatUnits} from 'viem'
 //     [ChainId.BSC_TESTNET]: 'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-chapel',
 // }
 
-import { CHAINS, RPC_URL } from './_rpc';
+import { CHAINS, PUBLIC_RPC_URL } from './_rpc';
 
 export const MAP_ID_CHAIN = CHAINS.reduce((_map, _chain)=>({..._map,[_chain.id]:_chain}),{});
 
+export const CHAIN_NAME = {
+  [ChainId.BSC_TESTNET]:"BScTestnet",
+  [ChainId.BSC]:"BSC",
+  [ChainId.GOERLI]:"Goerli",
+  [ChainId.ETHEREUM]:"Ethereum"
+}
 
 export const viemClients = ({ chainId }) => {
     return createPublicClient({
         chain: MAP_ID_CHAIN[chainId],
         transport:fallback(
-          RPC_URL[chainId].map(_url=>
+          PUBLIC_RPC_URL[chainId].map(_url=>
                 http(_url, {
                     timeout: 15_000,
                 })

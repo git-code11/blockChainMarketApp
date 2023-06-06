@@ -13,6 +13,7 @@ import { useWeb3Modal } from "@web3modal/react";
 import useAuth from "../context/hook/user/useAuth";
 ;
 
+const DEFAULT_CHAIN_ID = 97;
 
 export default ()=>{
     const { isOpen, open} = useWeb3Modal();
@@ -22,10 +23,12 @@ export default ()=>{
 
     //console.log("my token", data, error, isLoading);
     const onClick = useCallback(async ()=>{
-        if(!isOpen){
+        if(!isConnected){
+            connect({chainId:DEFAULT_CHAIN_ID});
+        }else if(!isOpen){
             await open();
         }
-    },[isOpen, open]);
+    },[isOpen, open, isConnected]);
 
     /* const _onClick = useCallback(()=>{
         if(!isConnected){
