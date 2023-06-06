@@ -11,7 +11,7 @@ const nextConfig = {
             net: false,
             tls:false,
             "react-native":false,
-            //"ethers/lib/utils":require.resolve("ethers/lib/utils")
+            "crypto": require.resolve("crypto-browserify")
         };
 
     }
