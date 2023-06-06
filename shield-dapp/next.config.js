@@ -4,12 +4,14 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     if (!isServer || true) {
         // don't resolve 'fs' module on the client to prevent this error on build --> Error: Can't resolve 'fs'
+
         config.resolve.fallback = {
             ...config.resolve.fallback,
             fs: false,
             net: false,
             tls:false,
             "react-native":false,
+            crypto:false
             //"ethers/lib/utils":require.resolve("ethers/lib/utils")
         };
 
