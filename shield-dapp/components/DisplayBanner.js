@@ -62,7 +62,7 @@ const DisplayScreen = ()=>{
                 <Typography variant={isMd?"h5":"body1"}>Partner with one of the world’s largest retailers to showcase your brand and products.</Typography>
             </Box>
             
-            <Button component={Link} href="/explore/0" size="large" color="secondary" variant="contained">Explore</Button>
+            <Button component={Link} href="/explore/0" size="large" color="primary" variant="contained">Explore</Button>
             
         </Screen>
     );

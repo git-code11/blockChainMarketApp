@@ -23,7 +23,7 @@ export default ()=>{
         address?
             (
             <CardActionArea component={Link} href="/user/me">
-                <Stack p={1} direction="row" bgcolor="#000" justifyContent="space-between" alignItems="center">
+                <Stack p={1} direction="row" sx={{bgcolor:theme=>theme.palette.primary.main}} justifyContent="space-between" alignItems="center">
                     <Avatar src={temp_c[2]}/>
                     <Box>
                         <Typography fontWeight="bold" color="#fff">

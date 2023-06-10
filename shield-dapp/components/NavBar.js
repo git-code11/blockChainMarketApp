@@ -13,7 +13,7 @@ import VerifyWalletModal from './VerifyWalletModal';
 
 const AppBar = styled(MuiAppBar)(({theme})=>({
     backdropFilter:"blur(15px)",
-    backgroundColor:"#1d1d1dd1",//"transparent",
+    //backgroundColor:theme.palette.secondary.dark,//"transparent",
 }));
 
 
@@ -30,10 +30,10 @@ export default ()=>{
 
     return (
         <Box>
-            <AppBar position="fixed" color="secondary">
+            <AppBar position="fixed" color="primary">
                 <Toolbar>
                     <Avatar variant="square" src="/logo.png"/>
-                    <Typography mx={1} flexGrow={1} fontSize="large" fontWeight="bold" color="common.white" fontStyle="italic">ShieldPact</Typography>
+                    <Typography mx={1} flexGrow={1} fontSize="large" fontWeight="bold" color="secondary" fontStyle="italic">ShieldPact</Typography>
                     <ConnectIcon/>
                     <IconButton onClick={()=>setOpen(true)}>
                         <MenuRounded fontSize="large" sx={{color:"#fff"}}/>
@@ -44,9 +44,9 @@ export default ()=>{
             <Drawer open={open} onClose={()=>setOpen(false)}>
                 <Stack justifyContent="space-between" height="100%">
                     <Box>
-                        <Toolbar sx={{bgcolor:"common.black", pr:2}} disableGutters>
+                        <Toolbar sx={{bgcolor:theme=>theme.palette.primary.main, pr:2}} disableGutters>
                             <Avatar variant="square" src="/logo.png"/>
-                            <Typography mx={1} flexGrow={1} fontSize="large" fontWeight="bold" color="common.white" fontStyle="italic">ShieldPact</Typography>
+                            <Typography mx={1} flexGrow={1} fontSize="large" fontWeight="bold" color="secondary" fontStyle="italic">ShieldPact</Typography>
                             <IconButton color="error" onClick={()=>setOpen(false)}>
                                 <CloseRounded fontSize="large"/>
                             </IconButton>

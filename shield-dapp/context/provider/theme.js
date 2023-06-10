@@ -2,15 +2,24 @@ import {createTheme, ThemeProvider} from '@mui/material/styles';
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 
+const color = [
+  "#fb4e02",
+  "#ffffff",
+  "#2abfff",
+  "#0e2142"
+];
 const theme = createTheme({
     palette: {
       mode:"light",
       primary: {
-        main: '#081229'
+        main: color[3]
       },
       secondary: {
-        main: '#325b6e'
+        main: color[0]
       },
+      tertiary:{
+        main: color[2]
+      }
     }
 });
 
