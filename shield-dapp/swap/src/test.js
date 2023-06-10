@@ -1,13 +1,13 @@
 import { prepareTradeCallData, prepareTradeQuoteParams, quoteProviders,
-    poolProviders, CandidatePoolCache, TradeCache,bestTrades, utils, TradeType, PoolType
+    CandidatePoolCache, TradeCache,bestTrades, utils, TradeType, PoolType
 } from './smart'
 
 import {SELECTED_CHAINID} from './constants'
 import {bscTestnetTokens } from "@pancakeswap/tokens";
 import {Native} from "@pancakeswap/sdk"
 
-import { createTransaction, sendTransaction, getWallet, approveAmount } from '../libs/providers';
-import { fromReadableAmount, toReadableAmount } from '../libs/conversion';_
+import { createTransaction, sendTransaction, getWallet, approveAmount } from './libs/providers';
+import { fromReadableAmount, toReadableAmount } from './libs/conversion';
 
 const poolCache = new CandidatePoolCache();
 const getBestTradeFunc = bestTrades.cache.main(poolCache);
@@ -17,9 +17,9 @@ const WBNB_TOKEN = Native.onChain(SELECTED_CHAINID);
 const USDT_TOKEN = bscTestnetTokens.usdt;
 
 const trade_params = {
-    amountIn:"0.004",
-    currencyIn: WBNB_TOKEN,
-    currencyOut:USDT_TOKEN,
+    amountIn:"35",
+    currencyIn: USDT_TOKEN,
+    currencyOut:WBNB_TOKEN,
     tradeType:TradeType.EXACT_INPUT,
     config:{
         gasPriceWei:utils.gasPriceWei,

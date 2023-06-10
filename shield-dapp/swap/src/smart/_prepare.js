@@ -49,7 +49,7 @@ export const prepareTradeCallData = ({
       fee: new Percent(options.feeBips??1, 10_000) //1bips
     };
   }
-  const chainId = chainId || trade.inputAmount.currency.chainId || trade.outputAmount.currency.chainId;
+  const chainId = _chainId || trade.inputAmount.currency.chainId || trade.outputAmount.currency.chainId;
   const callParams = SwapRouter.swapCallParameters(trade,  _options)
   const swapRouterAddress = getSwapRouterAddr(chainId);
   return {address:swapRouterAddress, param:callParams,

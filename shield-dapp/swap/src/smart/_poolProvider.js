@@ -12,7 +12,7 @@ const _poolProvider = {
     static:(candidatePools)=>SmartRouter.createStaticPoolProvider(candidatePools)
 }
 
-export const getCandidatePools = (
+const getCandidatePools = (
     {poolProvider, currencyIn, currencyOut,   
     allowedPoolTypes, blockNumber})=>
         poolProvider?.getCandidatePools(currencyIn, currencyOut, {

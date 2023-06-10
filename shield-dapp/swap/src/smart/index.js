@@ -2,7 +2,7 @@ export {default as quoteProviders} from   "./_quoteProvider"
 
 export {default as poolProviders} from "./_poolProvider"
 
-export {globalCandidatePoolCache, CandidatePoolCache, PoolCache} from "./_poolProvider"
+export * from "./_poolProvider"
 
 export {default as bestTrades} from "./_getBestTrade"
 
