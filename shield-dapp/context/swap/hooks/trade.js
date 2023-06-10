@@ -1,35 +1,37 @@
 import {useMemo, useCallback, createContext, useContext, useEffect} from 'react';
-import { TradeType } from '@pancakeswap/sdk';
-const { SmartRouter } = require('@pancakeswap/smart-router/evm');
-import _getBestTrade, { TradeCache } from "../../../swap/src/smart/_getBestTrade";
-import _poolProvider, { CandidatePoolCache } from '../../../swap/src/smart/_poolProvider';
-import _quoteProvider from '../../../swap/src/smart/_quoteProvider';
-import { getPoolTypes, gasPriceWei, amountFixed } from '../../../swap/src/smart/_utils';
+
+import {
+        TradeCache, bestTrades, 
+        CandidatePoolCache, poolProviders, quoteProviders,
+        utils as SmartUtils, getWorker, prepareTradeQuoteParams,
+        TradeType
+
+} from "../../../swap/src/smart";
+
 import { useDispatch, useSelector } from 'react-redux';
 import { useSwapCurrency } from './currency';
 import usePromise from '../../hook/usePromise2';
 import { actions } from '../reducer';
-import { prepareTradeQuoteParams } from '../../../swap/src/smart/_prepare';
 import { useDebounce } from 'use-debounce';
 import useSwapChainChanged from './useSwapChainChanged';
-import { getWorker } from '../../../swap/src/smart/_web_worker';
 
+
+const { getPoolTypes, gasPriceWei, amountFixed, Transformer } = SmartUtils;
 
 const poolCache1 = new CandidatePoolCache();
 const worker1 = getWorker();
-const tradeCache1 = new TradeCache(_getBestTrade.cache.main(poolCache1, worker1))
+const tradeCache1 = new TradeCache(bestTrades.cache.main(poolCache1, worker1))
 
 /**
  * NOTE: 
  * const poolCache1 = new CandidatePoolCache();
- * const tradeCache1 = new TradeCache(_getBestTrade.cache.main(poolCache1))
- * _getBestTrade.cache.main(poolCache1) => pool = cached; trade = not cached
- * is the same as _getBestTrade.main => pool = not cached; trade = not cached
+ * const tradeCache1 = new TradeCache(bestTrades.cache.main(poolCache1))
+ * bestTrades.cache.main(poolCache1) => pool = cached; trade = not cached
+ * is the same as bestTrades.main => pool = not cached; trade = not cached
  * is the same as tradeCache1.getTrade => pool = cached; trade = cached
  */
 
 const DEBOUNCE_TIME = 250;
-
 
 const useGetBestTrade = ()=>{
     
@@ -59,14 +61,14 @@ const useAllowedPoolTypes = ()=>{
 export const useDeserializeTrade = (serializedTrade)=>{
     return useMemo(()=>{
         if(serializedTrade.chainId && serializedTrade.value){
-            return SmartRouter.Transformer.parseTrade(serializedTrade.chainId, serializedTrade.value);
+            return Transformer.parseTrade(serializedTrade.chainId, serializedTrade.value);
         }
         return null;
     },[serializedTrade]);
 }
 
 export const useSerializeTrade = ()=>{
-    return useCallback(SmartRouter.Transformer.serializeTrade,[]);
+    return useCallback(Transformer.serializeTrade,[]);
 }
 
 const useUpdateCurrentTradeState = ()=>{

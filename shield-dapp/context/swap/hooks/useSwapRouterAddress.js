@@ -1,5 +1,8 @@
-import { getSwapRouterAddr } from "../../../swap/src/smart/_utils"
+import {
+    utils as SmartUtils
+} from "../../../swap/src/smart";
+
 
 export default ({chainId})=>{
-    return getSwapRouterAddr(chainId);
+    return SmartUtils.getSwapRouterAddr(chainId);
 }

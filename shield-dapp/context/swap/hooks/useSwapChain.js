@@ -2,7 +2,9 @@ import {useCallback, useMemo} from 'react'
 import { useSelector, useDispatch } from "react-redux"
 import {actions} from '../reducer';
 import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
-import { MAP_ID_CHAIN } from '../../../swap/src/smart/_utils';
+import { utils as SmartUtils } from '../../../swap/src/smart';
+
+const {MAP_ID_CHAIN} = SmartUtils;
 
 const swapChainIds = Object.keys(MAP_ID_CHAIN).map(Number);
 

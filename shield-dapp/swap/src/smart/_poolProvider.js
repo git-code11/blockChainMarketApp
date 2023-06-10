@@ -1,6 +1,6 @@
 
 
-const {SmartRouter, PoolType} = require("@pancakeswap/smart-router/evm");
+const {SmartRouter, PoolType, RouteType} = require("@pancakeswap/smart-router/evm");
 import {viemClients} from './_utils';
 import { _BaseCandidatePoolCache, _BasePoolCache } from './_cacheLib';
 
@@ -106,4 +106,5 @@ export class PoolCache extends _BasePoolCache{
 
 export const globalCandidatePoolCache = new CandidatePoolCache();
 
+export {PoolType, RouteType};
 export default _poolProvider;

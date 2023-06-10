@@ -1,6 +1,6 @@
 import { ChainId } from '@pancakeswap/sdk'
 //import {PoolType, SWAP_ROUTER_ADDRESSES} from '@pancakeswap/smart-router/evm';
-const {PoolType, SWAP_ROUTER_ADDRESSES} = require("@pancakeswap/smart-router/evm");
+const {PoolType, SWAP_ROUTER_ADDRESSES, SmartRouter} = require("@pancakeswap/smart-router/evm");
 //import { GraphQLClient } from 'graphql-request'
 import { createPublicClient, http, fallback } from 'viem'
 import { parseUnits, formatUnits } from 'ethers/lib/utils.js';
@@ -120,8 +120,6 @@ export function amountFixed(amount, fixed=8){
   return Number(Number(toVReadableAmount(amount.quotient, amount.currency.decimals)).toFixed(fixed));
 }
 
-
-
 export const getTxExplorer = (tx, chainId)=>{
   const explorer = MAP_ID_CHAIN[chainId??tx.chainId]?.blockExplorers?.default;
   const hash = tx?.transactionHash;
@@ -134,3 +132,7 @@ export const getTxExplorer = (tx, chainId)=>{
       url:(new URL(`/tx/${hash}`, explorer.url)).href
     }
 }
+
+const {Transformer, getExecutionPrice, minimumAmountOut, maximumAmountIn} = SmartRouter;
+
+export {Transformer, getExecutionPrice, minimumAmountOut, maximumAmountIn}

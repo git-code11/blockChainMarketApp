@@ -1,7 +1,10 @@
 import { useCallback} from "react";
 import { useSelector } from "react-redux";
 
-import { prepareTradeCallData } from "../../../swap/src/smart/_prepare";
+import {
+    prepareTradeCallData
+} from "../../../swap/src/smart";
+
 
 import { createSelector } from "@reduxjs/toolkit";
 import { useDeserializeTrade } from "./trade";

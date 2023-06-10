@@ -1,19 +1,11 @@
 import { ethers, BigNumber, Contract } from 'ethers'
-import { CurrentConfig } from '../config'
-import { ERC20_ABI } from '../constants';
+import { ERC20_ABI, RPCURL, WALLET_KEY } from '../constants';
 // Provider Functions
-
 
 export const wallet = createWallet();
 
-export const TransactionState = {
-  Failed:"Failed",
-  Success:"Success",
-  Sent:"Sent"
-}
-
 export function getProvider(){
-  return new ethers.providers.JsonRpcProvider(CurrentConfig.rpc.bsc_testnet)
+  return new ethers.providers.JsonRpcProvider(RPCURL)
 }
 
 export function getWallet(){
@@ -27,7 +19,7 @@ export function getWalletAddress(){
 
 function createWallet(){
   let provider = getProvider();
-  return new ethers.Wallet(CurrentConfig.wallet.privateKey, provider)
+  return new ethers.Wallet(WALLET_KEY, provider)
 }
 
 export async function sendTransaction(
@@ -54,9 +46,9 @@ export const createTransaction =  async({from, to, data, value})=>{
     data,
     ...(value ? {value}:{})
   }
-  console.log("Estimating Gas To use")
+  console.log("Estimating Gas To use");
   const txEstimate = await gasEstimate(tradeTX).catch(e=>console.log({e})||null);
-  console.log({txEstimate})
+  
   if(!txEstimate)
     return;
   return {

@@ -3,7 +3,9 @@ import { useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux"
 import e_msg from "../../lib/e_msg";
 import { actions } from "../reducer"
-import { getTxExplorer } from "../../../swap/src/smart/_utils";
+import { utils as SmartUtils } from "../../../swap/src/smart";
+
+const {getTxExplorer} = SmartUtils;
 
 const _selector = createSelector(state=>state.swap, swap=>swap.tx);
 
