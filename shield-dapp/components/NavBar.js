@@ -45,7 +45,7 @@ export default ()=>{
                 <Stack justifyContent="space-between" height="100%">
                     <Box>
                         <Toolbar sx={{bgcolor:"common.black", pr:2}} disableGutters>
-                            <Avatar variant="square" src="/images/logo.png"/>
+                            <Avatar variant="square" src="/logo.png"/>
                             <Typography mx={1} flexGrow={1} fontSize="large" fontWeight="bold" color="common.white" fontStyle="italic">ShieldPact</Typography>
                             <IconButton color="error" onClick={()=>setOpen(false)}>
                                 <CloseRounded fontSize="large"/>
