@@ -32,7 +32,7 @@ export default ()=>{
         <Box>
             <AppBar position="fixed" color="secondary">
                 <Toolbar>
-                    <Avatar variant="square" src="/images/logo.png"/>
+                    <Avatar variant="square" src="/logo.png"/>
                     <Typography mx={1} flexGrow={1} fontSize="large" fontWeight="bold" color="common.white" fontStyle="italic">ShieldPact</Typography>
                     <ConnectIcon/>
                     <IconButton onClick={()=>setOpen(true)}>

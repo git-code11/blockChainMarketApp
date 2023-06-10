@@ -55,8 +55,8 @@ const DisplayScreen = ()=>{
 
     return (
         <Screen component={Stack} justifyContent="center" alignItems="center" textAlign="center">
-            <BackGroundPlay ref={vRef} src="/images/vedio/banner01.mp4" muted loop/>
-            {isMd && <BackGroundPlay invert ref={vRef2} src="/images/vedio/banner01.mp4" muted loop/>}
+            <BackGroundPlay ref={vRef} src="/banner.mp4" muted loop/>
+            {isMd && <BackGroundPlay invert ref={vRef2} src="/banner.mp4" muted loop/>}
             <Box position="relative" mb={6}>
                 <Typography variant={isMd?"h3":"h4"} mb={3}>Discover Digital Art,<br/>Collect and Sell Your Specific NFTs.</Typography>
                 <Typography variant={isMd?"h5":"body1"}>Partner with one of the world’s largest retailers to showcase your brand and products.</Typography>
