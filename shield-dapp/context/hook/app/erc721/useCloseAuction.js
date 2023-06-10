@@ -1,8 +1,10 @@
 import useAppContractWrite from "../../../wagmi_ethers/useAppContractWrite";
+import auctionAbi from "../../../../contract/Auction.sol/MarketAuction.json"
+import _contract from "../../../../contract/address.json"
 
 export default ({
-    address,
-    args,
+    address=_contract.auction,
+    item,
     enabled
     })=>{
 
@@ -10,7 +12,7 @@ export default ({
         address,
         abi:auctionAbi.abi,
         functionName:"closeAuction",
-        args,
+        args:[item],
         enabled,
     });
 

@@ -8,27 +8,57 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 
+import {useAccount, useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
+;
+
+import saleAbi from "../../contract/Sale.sol/MarketSales.json";
+import _contract from "../../contract/address.json";
+
+
 import e_msg from "../../context/lib/e_msg";
+import { useDataContext } from "./context";
 
-import useCloseAuction from "../../context/hook/app/erc721/useCloseAuction";
 
+export default ({id})=>{
+    const {globalData, visible, hide} = useDataContext();
+    const {tokenId} = globalData;
 
-export default ({tokenId, toggle})=>{
-   
-    const {loading:_loading, error:_error,success:_success, write} = useCloseAuction({
-        item:tokenId,
-        enabled:Boolean(tokenId)
-    })
+    const isVisible = !!visible[id];
+
+    const {data:item, ...itemRead} = useContractRead({
+        abi:saleAbi.abi,
+        address:_contract.sale,
+        functionName:"ItemForSale",
+        args:[tokenId],
+        enabled:!!tokenId && isVisible
+    });
+    
+
+    const {config, ...prepare} = usePrepareContractWrite({
+        address:_contract.sale,
+        abi:saleAbi.abi,
+        functionName:"removeFromMarket",
+        args:[tokenId],
+        enabled:!!item?.amount.gt(0) && isVisible,
+    });
+    
+    const {write, ...writeOpts} = useContractWrite(config);
+
+    const wait =  useWaitForTransaction({
+        hash:writeOpts.data?.hash
+    });
+    const _error = prepare.error || writeOpts.error || wait.error;
+    const _loading = writeOpts.isLoading || wait.isLoading;
 
     return(
-        <Dialog open={true} onClose={_loading?null:toggle}>
+        <Dialog open={isVisible} onClose={()=>hide(id)}>
             <DialogContent>
                 <Box p={2} component={Stack} spacing={2}>
 
                     {
-                    _success && 
+                    wait.isSuccess && 
                         <Alert variant="outlined">
-                            <Typography>Sucessfully Close Auction</Typography>
+                            <Typography>Sucessfully Removed from market</Typography>
                         </Alert>
                     }
 
@@ -49,13 +79,13 @@ export default ({tokenId, toggle})=>{
 
                    
                 </Box>
-                <DialogContentText>Proceed to close auction</DialogContentText>
+                <DialogContentText>Proceed to remove item from market</DialogContentText>
                 <DialogActions>
                     <Button variant="outlined" 
-                        disabled={!write || _success || _loading} 
+                        disabled={!write || _loading || wait.isSuccess} 
                         size="large" 
                         onClick={()=>write?.()}
-                    >Proceed</Button>
+                    >Remove</Button>
                 </DialogActions>
             </DialogContent>
                  

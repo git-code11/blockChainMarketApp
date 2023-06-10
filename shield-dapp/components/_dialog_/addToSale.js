@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import {useEffect} from 'react';
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import Typography from "@mui/material/Typography";
@@ -6,10 +6,16 @@ import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
+import {useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
+
+import saleAbi from "../../contract/Sale.sol/MarketSales.json";
+import nftAbi from "../../contract/NFT.sol/NFT.json";
 import _contract from "../../contract/address.json";
 import { constants, BigNumber } from "ethers";
 
 import e_msg from "../../context/lib/e_msg";
+import { useDataContext } from "./context";
+
 
 import { TextField as MuiTextField, MenuItem, DialogActions, DialogContent} from "@mui/material";
 import { useForm, FormProvider, useController} from "react-hook-form";
@@ -20,17 +26,15 @@ import { parseEther } from 'ethers/lib/utils.js';
 import exchangeCurrency from'../../currency-list';
 
 import {useDebounce} from 'use-debounce';
-import useApprove from '../../context/hook/app/erc721/useApprove';
-import useAddToMarket from '../../context/hook/app/erc721/useAddToMarket';
-import TextField from '../ControlledTextField';
+
 
 const schema = yup.object({
     amount: yup.number().moreThan(0, "Invalid Price").required("Set Price"),
     currency: yup.string().required("required"),
-    duration: yup.number().min(0, "invalid").required("required"),
+    duration: yup.number().moreThan(-1, "Can not be negative").required("required"),
 }).required();
 
-/* const TextField = ({name, ...props})=>{
+const TextField = ({name, ...props})=>{
     const {field, fieldState:{error}} = useController({name})
 
     return (
@@ -46,7 +50,7 @@ const schema = yup.object({
             FormHelperTextProps={{error:!!error}}
         />
     )
-} */
+}
 
 
 const FormSection = ()=>{
@@ -69,9 +73,12 @@ const FormSection = ()=>{
     );
 }
 
-export default ({tokenId, toggle})=>{
+export default ({id})=>{
     
-    const tokenIdIsValid = Boolean(tokenId);
+    const {globalData, visible, hide} = useDataContext();
+    const {tokenId} = globalData;
+
+    const isVisible = !!visible[id];
 
     const methods = useForm({
         mode:"onChange",
@@ -83,38 +90,61 @@ export default ({tokenId, toggle})=>{
         resolver: yupResolver(schema)
     });
 
-    const formValid = methods.formState.isValid;
+    const formValid = methods.formState.isDirty && methods.formState.isValid;
 
-    const _formValue = formValid?methods.getValues():{};
+    const _formValue = methods.getValues();
     
-    const _rformValue = useMemo(()=>
-        formValid ? [[_formValue.currency, _formValue.amount && parseEther(_formValue.amount.toString()),
-                    _formValue.duration && BigNumber.from(_formValue.duration*3600)], formValid]:[[], formValid],
-        [_formValue, formValid]);
+    const _rformValue = [_formValue.currency, _formValue.amount && parseEther(_formValue.amount.toString()), _formValue.duration && BigNumber.from(+_formValue.duration*3600)];
 
-    const [[formValue, dformValid]] = useDebounce(_rformValue, 500);
+    const [formValue] = useDebounce(_rformValue, 500);
 
-    const approve = useApprove({
-        item:tokenId,
-        spender:_contract.sale,
-        enabled:tokenIdIsValid
-    });
-    
-    const addToMarketEnabled = approve.isApproved && tokenIdIsValid && dformValid;
-    const market = useAddToMarket({
-        item:tokenId,
-        formArgs:formValue,
-        enabled:addToMarketEnabled
+    const {data:_isApproved} = useContractRead({
+        address:_contract.nft,
+        abi:nftAbi.abi,
+        functionName:"getApproved",
+        args:[tokenId],
+        enabled:!!tokenId,
+        watch:true
     });
 
+    const isApproved = _isApproved === _contract.sale;
     
-    const _error = approve.error || (addToMarketEnabled && market.error);
+    const {config:approveConfig} = usePrepareContractWrite({
+        address:_contract.nft,
+        abi:nftAbi.abi,
+        functionName:"approve",
+        args:[_contract.sale, tokenId],
+        enabled:!(!tokenId || isApproved) && isVisible
+    });
+
     
-    const _loading = approve.loading|| market.loading;
+    const {write:approve, ...approveWriteOpts} = useContractWrite(approveConfig);
+    const waitApprove = useWaitForTransaction({
+        hash:approveWriteOpts.data?.hash
+    })
+    //console.log({approveConfig, approveWriteOpts});
+    
+    const {config, ...prepare} = usePrepareContractWrite({
+        address:_contract.sale,
+        abi:saleAbi.abi,
+        functionName:"addToMarket",
+        args:[tokenId, ...formValue],
+        enabled:!!tokenId && formValid && isApproved && isVisible
+    });
+
+    
+    const {write, ...writeOpts} = useContractWrite(config);
+    const waitWrite = useWaitForTransaction({
+        hash:writeOpts.data?.hash
+    })
+
+    const _error = approveWriteOpts.error || writeOpts.error || waitApprove.error || waitWrite.error;
+    
+    const _loading = approveWriteOpts.isLoading|| waitApprove.isLoading || writeOpts.isLoading || waitWrite.isLoading;
  
 
     return (
-        <Dialog open={true} onClose={_loading?null:toggle} fullWidth>
+        <Dialog open={isVisible} onClose={()=>hide(id)} fullWidth>
            <DialogContent>
                 <FormProvider {...methods}>
                     <FormSection/>
@@ -123,7 +153,7 @@ export default ({tokenId, toggle})=>{
                 <Alert severity='info'>
                     <Typography>
                     {
-                        approve.isApproved?
+                        isApproved?
                         "Market is Approved to set Price on Item":
                         "Market needs approval to set Price"
                     }    
@@ -143,7 +173,7 @@ export default ({tokenId, toggle})=>{
                         </Alert>
                     }       
 
-                    {market.isSuccess && 
+                    {writeOpts.isSuccess && 
                         <Alert>Successfully</Alert>
                     }
 
@@ -153,10 +183,10 @@ export default ({tokenId, toggle})=>{
            
             
             <DialogActions>
-                <Button disabled={!approve.write || _loading || approve.isApproved} 
-                onClick={()=>approve.write?.()}>Approve</Button>
-                <Button disabled={!(market.write && approve.isApproved) || _loading || market.success} 
-                onClick={()=>market.write?.()}>Proceed</Button>
+                <Button disabled={!approve || _loading || isApproved} 
+                onClick={()=>approve?.()}>Approve</Button>
+                <Button disabled={!(write && isApproved) || _loading || writeOpts.isSuccess || prepare.isLoading} 
+                onClick={()=>write?.()}>Proceed</Button>
             </DialogActions> 
         </Dialog>
     )

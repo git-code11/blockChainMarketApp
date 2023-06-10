@@ -11,7 +11,7 @@ export default ({
     functionName,
     abi,
     args,
-    enabled=true,
+    enabled,
     ...props
     })=>{
 
@@ -36,14 +36,14 @@ export default ({
         ,[prepareOpts, writeOpts, wait]);
 
     const error = useMemo(()=>
-        configOpts.error || writeOpts.error || wait.error
-    ,[configOpts, writeOpts, wait]);
+        prepareOpts.error || writeOpts.error || wait.error
+    ,[prepareOpts, writeOpts, wait]);
 
     return {    
                 write, writeAsync, 
                 loading, error, success:wait.isSuccess, 
                 reset: writeOpts.reset, refetch:prepareOpts.refetch,
                 hash:writeOpts.data?.hash,
-                recipt:wait.data
+                reciept:wait.data
             }
 }

@@ -1,17 +1,23 @@
 import useAppContractWrite from "../../../wagmi_ethers/useAppContractWrite";
+import auctionAbi from "../../../../contract/Auction.sol/MarketAuction.json"
+import _contract from "../../../../contract/address.json"
 
 export default ({
-    address,
-    args,
-    enabled
+    address=_contract.auction,
+    item,
+    enabled,
+    value
     })=>{
 
     const method = useAppContractWrite({
         address,
         abi:auctionAbi.abi,
-        functionName:"extendAuction",
-        args,
-        enabled
+        functionName:"placeBid",
+        args:[item],
+        enabled,
+        overrides:{
+            value
+        }
     });
 
     return method;

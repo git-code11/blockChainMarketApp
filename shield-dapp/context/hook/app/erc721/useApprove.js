@@ -2,13 +2,15 @@ import { useContractRead } from "wagmi";
 import { BigNumber } from "ethers";
 import { useMemo } from "react";
 import useAppContractWrite from "../../../wagmi_ethers/useAppContractWrite";
+import _contract from "../../../../contract/address.json";
+import nftAbi from "../../../../contract/NFT.sol/NFT.json";
 
 /**
  * item can also be BigInt
  */
 
 export default ({
-    address,
+    address=_contract.nft,
     item,
     spender,
     enabled=true
@@ -31,6 +33,7 @@ export default ({
 
     const method = useAppContractWrite({
         address,
+        abi:nftAbi.abi,
         functionName:"approve",
         args:[spender, _item],
         enabled:_enabled

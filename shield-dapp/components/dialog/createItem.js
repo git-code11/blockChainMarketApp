@@ -1,4 +1,4 @@
-import {useEffect, useCallback, useState} from "react";
+import {useEffect, useCallback, useState, useMemo} from "react";
 import Router from "next/router";
 import { Button, Stack, Typography} from "@mui/material";
 
@@ -8,131 +8,120 @@ import Alert from "@mui/material/Alert";
 
 import { StepImage, StepSection } from "../../components/StepProcess";
 
-import {useIpfsStore} from "../../context/lib/ipfs";;
-
+import {useIpfsStore} from "../../context/hook/ipfs";;
 
 import _contract from "../../contract/address.json";
-import nftAbi from "../../contract/NFT.sol/NFT.json";
-import saleAbi from "../../contract/Sale.sol/MarketSales.json";
+import { BigNumber } from "ethers";
 
-import {constants, BigNumber} from "ethers";
+import {constants} from "ethers";
 import { parseEther } from "ethers/lib/utils.js";
-import { useContractWrite, usePrepareContractWrite, useAccount, useContractRead, useContractEvent, useWaitForTransaction } from "wagmi";
+import {  useAccount, useContractEvent } from "wagmi";
 import e_msg from "../../context/lib/e_msg";
-import { useDataContext } from "./context";
+
 import { useDebounce } from "use-debounce";
+import useCreateItem from "../../context/hook/app/erc721/useCreateItem";
+import useApprove from "../../context/hook/app/erc721/useApprove";
 
 
-export default ({id})=>{
-    const {address:ownerAddress} = useAccount();
+export default ({modal, form})=>{
+    const {address:ownerAddr} = useAccount();
+    const creatorAddr = ownerAddr;
 
-    const {globalData, hide, visible} = useDataContext();
+    const formValue = form.getValues();
     
-    const isVisible = !!visible[id];
-
-    const {getData} = globalData;
-
-    const formValue = getData();
-
-    const creatorAddress = ownerAddress;
+    //no deadline (duration for sale of item)
     const duration = 0;
 
-    const {trigger, ..._ipfs} = useIpfsStore();
-
-    const onUpload = useCallback(()=>{
-        trigger(formValue);
-    },[trigger, formValue]);
-
-    const _fargs = [creatorAddress, ownerAddress, _ipfs.data?.ipnft, parseEther((parseFloat(formValue.sale.price) || 0).toString()), formValue.sale.currency, duration];
-    const [fargs] = useDebounce(_fargs, 500);
-    console.log({fargs, _ipfs})
-    const {config:saleConfig, ...salePrepare} = usePrepareContractWrite({
-        address:_contract.sale,
-        abi:saleAbi.abi,
-        functionName:"createItem",
-        args:fargs,
-        enabled:!!_ipfs.data?.ipnft && isVisible
-    });
-    const {write:toSale, ...toSaleOpts} = useContractWrite(saleConfig);
-    const waitSale = useWaitForTransaction({
-        hash:toSaleOpts.data?.hash
-    });
-    console.log({toSaleOpts, salePrepare, waitSale});
-
-    useEffect(()=>{
-        if(isVisible && _ipfs.data && salePrepare.isFetched && toSale && !(toSaleOpts.isLoading || toSaleOpts.isSuccess || toSaleOpts.isError)){
-            toSale();
-        }
-    },[_ipfs.data, salePrepare.isFetched,
-        toSale, toSaleOpts.isLoading, toSaleOpts.isSuccess, toSaleOpts.isError, isVisible]);
+    const ipfs = useIpfsStore();
+    const cid = formValue.cid;
     
-    const [tokenId, setTokenId] = useState(0);
+    const onUpload = useCallback(()=>
+        ipfs.trigger(formValue).then(
+            data=>form.setValue('cid', data?.ipnft)
+        )
+    ,[ipfs.trigger, formValue]);
 
-    useContractEvent({
-        address:_contract.nft,
-        abi:nftAbi.abi,
-        eventName:"Transfer",
-        listener:(_from, _to, _id)=>{
-            if(_from === constants.AddressZero && _to === ownerAddress){
-                setTokenId(_id);
-            }
-        },
-        once:!!tokenId
-    });
-
-    const needApprove  = +formValue.sale.price > 0;
-
-    const {data:_isApproved} = useContractRead({
-        address:_contract.nft,
-        abi:nftAbi.abi,
-        functionName:"getApproved",
-        args:[tokenId],
-        enabled:!!tokenId,
-        watch:true
-    });
-
-    const isApproved = _isApproved == _contract.sale;
-
-    const {config:approveConfig, ...approvePrepare} = usePrepareContractWrite({
-        address:_contract.nft,
-        abi:nftAbi.abi,
-        functionName:"approve",
-        args:[_contract.sale, tokenId],
-        enabled:!(!tokenId && isApproved) && toSaleOpts.isSuccess && isVisible && waitSale.isSuccess
-    });
-
-
-    const {write:approve, ...approveOpts} = useContractWrite(approveConfig);
-    const waitApprove = useWaitForTransaction({
-        hash:approveOpts.data?.hash
-    });
-
-    useEffect(()=>{
+    //Args for create item as follows
+    //[creator, owner, cid, salePrice, saleCurrency(0x0 for native or erc20 addresses), duration]
+    //it is believed that the saleCurrency has a decimal equal to ether (18)
+    const toSaleArgs = useMemo(()=>
+                                [creatorAddr, ownerAddr, 
+                                    cid,
+                                    parseEther(formValue.sale.price.toString()),
+                                    formValue.sale.currency, duration],
+                        [creatorAddr, ownerAddr, cid, form.sale, duration]);
+                                    
+    const [debouncedToSaleArgs] = useDebounce(toSaleArgs, 500);
     
-        if(isVisible && needApprove && approve && !(isApproved || approveOpts.isLoading || approveOpts.isSuccess || approveOpts.isError) && toSaleOpts.isSuccess && waitSale.isSuccess){
-            approve();
+    const _toSaleEnabled = Boolean(cid);
+    
+    const toSale = useCreateItem({
+        args:debouncedToSaleArgs,
+        enabled:_toSaleEnabled
+    });
+
+    /**
+     * Side effect to call after ipfs & toSale success
+     */
+    useEffect(()=>{
+        if(_toSaleEnabled  && !(toSale.loading || toSale.success || Boolean(toSale.error)) ){
+            toSale.write?.();
         }
-    },[approve, approveOpts.isLoading, approveOpts.isSuccess, approveOpts.isError, isApproved, toSaleOpts.isSuccess, waitSale.isSuccess, needApprove, isVisible]);
+    },[_toSaleEnabled, toSale]);
+    
+    //To Check for minted token Id
+    //Another implementation would be to get token Id from the transaction reciept logs
+    const tokenId = useMemo(()=>
+        (toSale.success && toSale.reciept)?BigNumber.from(toSale.reciept.logs[0].topics[3]):null
+        ,[toSale.reciept, toSale.success]);
+    
+    //const [tokenId, setTokenId] = useState(null);
+    // useContractEvent({
+    //     address:_contract.nft,
+    //     abi:nftAbi.abi,
+    //     eventName:"Transfer",
+    //     listener:(_from, _to, _id)=>{
+    //         if(_from === constants.AddressZero && _to === ownerAddr){
+    //             setTokenId(_id);
+    //         }
+    //     },
+    //     once:!!tokenId
+    // });
 
-    const hasLoading = _ipfs.isLoading  || toSaleOpts.isLoading || approveOpts.isLoading || waitSale.isLoading || waitApprove.isLoading;
+    
+    //if the sale Price > 0 then this item created need to approve the market
+    const needApproval  = formValue.sale.price > 0 ;//&& toSale.success; 
+    //Approval is enabled on if token
+    const approve = useApprove({
+        item:tokenId,
+        spender:_contract.sale,
+        enabled:needApproval && toSale.success
+    });
 
-    //console.log( _ipfs.isLoading  , toSaleOpts.isLoading, approveOpts.isLoading , waitSale.isLoading , waitApprove.isLoading, needApprove)
-    //console.log({tokenId, cid:_ipfs.data, approve, approveOpts});
+    // side effect to call when created token needs approval to be added to market
+    useEffect(()=>{
+        if(needApproval && !(approve.isApproved || approve.loading || approve.success || Boolean(approve.error)) && toSale.success){
+            approve.write?.();
+        }
+    },[approve, toSale.success, needApproval]);
+    
+    const hasLoading = ipfs.loading  || toSale.loading || approve.loading
 
+    //modal can only be toggled off only when upload is made
     return (
-        <Dialog open={isVisible} onClose={()=>hasLoading || isApproved || !needApprove || hide(id)} fullWidth>
+        <Dialog open={modal.visible} onClose={()=>Boolean(hasLoading || cid)?null:modal.toggle()} fullWidth>
             <Stack p={2.5} spacing={2}>
                 <Stack>
                     <StepSection>
                         <StepImage
-                            loading={_ipfs.isLoading}
-                            status={(_ipfs.data&&"success") || (_ipfs.error && "error")}
+                            loading={ipfs.loading}
+                            status={(ipfs.data && "success") || (ipfs.error && "error")}
                         />
                         <Stack>
                             <Typography>Upload to server</Typography>
-                            {_ipfs.error && 
+                            {ipfs.error && 
                                 <>
-                                    <Alert severity="error">{_ipfs.error?.message}</Alert>
+                                    <Alert severity="error">{ipfs.error?.message}</Alert>
                                     <Typography component={Link} onClick={onUpload} variant="caption">Retry Uploading to server</Typography>
                                 </>
                             }
@@ -141,40 +130,43 @@ export default ({id})=>{
 
                     <StepSection>
                         <StepImage
-                            loading={toSaleOpts.isLoading||waitSale.isLoading}
-                            status={(waitSale.isSuccess&&"success") || ((waitSale.isError||toSaleOpts.isError) && "error")}
+                            loading={toSale.loading}
+                            status={(toSale.success &&"success") || (Boolean(toSale.error) && "error")}
                         />
                         <Stack>
                             <Typography>Add To market</Typography>
-                            {(waitSale.isError||toSaleOpts.isError) &&
+                            {Boolean(toSale.error) &&
                                 <>
-                                    <Alert severity="error">{e_msg(waitSale.error||toSaleOpts.error)}</Alert>
-                                    <Typography disabled={!toSale} component={Link} onClick={()=>toSale?.()} variant="caption">retry</Typography>
+                                    <Alert severity="error">{e_msg(toSale.error)}</Alert>
+                                    <Typography disabled={!toSale.write} component={Link} onClick={()=>toSale.write?.()} variant="caption">retry</Typography>
                                 </>
                             }
                         </Stack>
                     </StepSection>
 
-                    {needApprove &&
+                    {needApproval &&
                     <StepSection>
                         <StepImage
-                            loading={approveOpts.isLoading||waitApprove.isLoading}
-                            status={(waitApprove.isSuccess &&"success") || ((approveOpts.isError||waitApprove.isError) && "error")}
+                            loading={approve.loading}
+                            status={(approve.success &&"success") || (Boolean(approve.error) && "error")}
                         />
                         <Stack>
                             <Typography>Give Market Permission</Typography>
-                            {(approveOpts.isError||waitApprove.isError) &&
+                            { Boolean(approve.error) &&
                                     <>
-                                        <Alert severity="error">{e_msg(approveOpts.error||waitApprove.error)}</Alert>
-                                        <Typography disabled={!approve} component={Link} onClick={()=>approve?.()} variant="caption">retry</Typography>
+                                        <Alert severity="error">{e_msg(approve.error)}</Alert>
+                                        <Typography disabled={!approve.write} component={Link} onClick={()=>approve.write?.()} variant="caption">retry</Typography>
                                     </>
                             }
                             </Stack>
                     </StepSection>
                     }
                 </Stack>
-                {(waitApprove.isSuccess || (!needApprove && waitSale.isSuccess))?<Button variant="outlined" onClick={()=>Router.replace(`/item/${tokenId?.toString()}`)}>Preview</Button>:
-                <Button disabled={!!(_ipfs.data || _ipfs.isLoading)} variant="outlined" onClick={onUpload}>Proceed</Button>}
+                {   //if the token is approved or tosale was created without approval the preview
+                    (approve.success || (!needApproval && toSale.success))?
+                    <Button variant="outlined" onClick={()=>Router.replace(`/item/${tokenId?.toString()}`)}>Preview</Button>:
+                    <Button disabled={Boolean(ipfs.data || ipfs.loading)} variant="outlined" onClick={onUpload}>Proceed</Button>
+                }
             </Stack>
         </Dialog>
      )

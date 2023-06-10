@@ -8,9 +8,7 @@ import Confirm from "../../components/swap/Confirm";
 import Select from "../../components/swap/Select";
 import Setting from "../../components/swap/Setting";
 
-import SwapProvider from '../../context/swap/provider';
 import useSwapModal from "../../context/swap/hooks/useSwapModal";
-
 import {SwapTradeProvider} from "../../context/swap/hooks/trade";
 
 const SwapModal = ()=>{
@@ -53,11 +51,9 @@ const SwapContainer = ()=>{
 
 const SwapPage = ()=>{
     return (
-    <SwapProvider>
-        <SwapTradeProvider>
-            <SwapContainer/>
-        </SwapTradeProvider>
-    </SwapProvider>
+    <SwapTradeProvider>
+        <SwapContainer/>
+    </SwapTradeProvider>
     )
 }
 

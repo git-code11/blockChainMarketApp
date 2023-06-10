@@ -9,7 +9,7 @@ import LazyScroll from "../../LazyScroll";
 import Item from '../item/Item';
 import nftAbi from "../../../contract/NFT.sol/NFT.json";
 import _contract from "../../../contract/address.json";
-import { useIpfsData } from "../../../context/lib/ipfs";
+import { useIpfsData } from "../../../context/hook/ipfs";
 
 import useUserId from "../../../context/hook/user/useId";
 

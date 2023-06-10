@@ -1,75 +1,71 @@
-import {useMemo} from 'react';
+import {useState, useMemo} from 'react';
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import { DialogActions, DialogContent, DialogContentText } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 
-import {useContractRead} from "wagmi";
+import {useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
+;
 
 import auctionAbi from "../../contract/Auction.sol/MarketAuction.json";
 import _contract from "../../contract/address.json";
 import { useDebounce } from 'use-debounce';
 
 import e_msg from "../../context/lib/e_msg";
-
-import { useForm, FormProvider} from "react-hook-form";
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from "yup";
-
-import TextField from '../ControlledTextField';
-import useExtendAuction from '../../context/hook/app/erc721/useExtendAuction';
-
-const schema = yup.object({
-    extendTime:yup.number().min(1).required()
-}).required();
+import { useDataContext } from "./context";
 
 
-export default ({tokenId, toggle})=>{
+export default ({id})=>{
+    const {globalData, visible, hide} = useDataContext();
+    const {tokenId} = globalData;
+
+    const [_value, setValue] = useState("");
+    const [value] = useDebounce(_value, 500);
     
-    const methods = useForm({
-        mode:"onChange",
-        defaultValues:{
-            extendTime:1
-        },
-        resolver: yupResolver(schema)
-    });
-    const _formValid = methods.formState.isValid;
-    const {extendTime:_value} = _formValid?methods.getValues():{};
-    const [[value, formValid]] = useDebounce([_value, _formValid], 500);
-    const timeDuration = useMemo(()=>value * 3600, [value]);
+    const valueCorrect = useMemo(()=>!!value.match(/^[0-9]+$/),[value]);
+
+    const isVisible = !!visible[id];
 
     const {data:auction} = useContractRead({
         abi:auctionAbi.abi,
         address:_contract.auction,
         functionName:"auctions",
         args:[tokenId],
-        enabled:Boolean(tokenId),
+        enabled:!!tokenId,
         watch:true
     });
 
-    const auctionExist = useMemo(()=>auction && auction.reserve.toBigInt() > 0,[]);
-    const auctionEnabled = Boolean(tokenId) && formValid && auctionExist;
-    const {error, loading:_loading, ...extend} = useExtendAuction({
-        item:tokenId,
-        duration:timeDuration,
-        enabled:auctionEnabled
-    });
+    const auctionExist = auction?.reserve?.gt(0);
 
-    const _error = auctionEnabled && error;
-       
+    const {config, ...prepare} = usePrepareContractWrite({
+        address:_contract.auction,
+        abi:auctionAbi.abi,
+        functionName:"extendAuction",
+        args:[tokenId, +value * 3600],
+        enabled:isVisible && !!tokenId && valueCorrect && auctionExist,
+    });
+    
+    const {write, ...writeOpts} = useContractWrite(config);
+    const wait =  useWaitForTransaction({
+        hash:writeOpts.data?.hash
+    });
+    const _error = prepare.error || writeOpts.error || wait.error;
+    const _loading = writeOpts.isLoading || wait.isLoading;
+
     return(
-        <Dialog open={true} onClose={_loading?null:toggle}>
+        <Dialog open={isVisible} onClose={()=>hide(id)}>
             <DialogContent>
                 <Box p={2} component={Stack} spacing={2}>
-                    <FormProvider {...methods}>
-                        <TextField name="extendTime" label="extendTime (in hour)"/>
-                    </FormProvider>
+
+                    <TextField label="extendTime (in hour)" value={_value} onChange={e=>setValue(e.target.value)}/>
+
                     {
-                    extend.success && 
+                    wait.isSuccess && 
                         <Alert variant="outlined">
                             <Typography>Sucessful</Typography>
                         </Alert>
@@ -95,9 +91,9 @@ export default ({tokenId, toggle})=>{
                 <DialogContentText>Proceed to Extend auction</DialogContentText>
                 <DialogActions>
                     <Button variant="outlined" 
-                        disabled={!extend.write || _loading || extend.success} 
+                        disabled={!write || _loading || wait.isSuccess} 
                         size="large" 
-                        onClick={()=>extend.write?.()}
+                        onClick={()=>write?.()}
                     >Proceed</Button>
                 </DialogActions>
             </DialogContent>

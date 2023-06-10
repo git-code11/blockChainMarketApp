@@ -8,7 +8,7 @@ import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useContractRead, useContractReads } from 'wagmi';
 import useCurrency from '../context/hook/useCurrency';
-import { useIpfsData } from '../context/lib/ipfs';
+import { useIpfsData } from '../context/hook/ipfs';
 
 import LazyScroll from './LazyScroll';
 import Item from "./Item/Auction";

@@ -1,9 +1,10 @@
 import useAppContractWrite from "../../../wagmi_ethers/useAppContractWrite";
-
+import saleAbi from "../../../../contract/Sale.sol/MarketSales.json"
+import _contract from "../../../../contract/address.json"
 
 export default ({
-    address,
-    args,
+    address=_contract.sale,
+    item,
     enabled,
     value
 })=>{
@@ -12,7 +13,7 @@ export default ({
         address,
         abi:saleAbi.abi,
         functionName:"purchase",
-        args,
+        args:[item],
         enabled,
         overrides:{
             value

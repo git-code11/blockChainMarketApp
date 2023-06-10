@@ -1,23 +1,21 @@
-import { BigNumber } from "ethers";
+
 import useAppContractWrite from "../../../wagmi_ethers/useAppContractWrite";
+import saleAbi from "../../../../contract/Sale.sol/MarketSales.json"
+import _contract from "../../../../contract/address.json"
 
 export default ({
-    address,
+    address=_contract.sale,
     item,
     formArgs,
-    enabled=true
+    enabled
     })=>{
-
-    const _item = useMemo(()=>item && BigNumber.from(item),[item]);
-
-    const _enabled = enabled && Boolean(_item);
 
     const method = useAppContractWrite({
         address,
         abi:saleAbi.abi,
         functionName:"addToMarket",
-        args:[_item, ...formArgs],
-        enabled:_enabled
+        args:[item, ...formArgs],
+        enabled
     });
 
     return method;

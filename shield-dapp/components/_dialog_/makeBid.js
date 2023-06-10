@@ -1,5 +1,5 @@
-import {useMemo} from 'react';
-import {useBalance, useAccount, useContractRead} from "wagmi";
+import {useState, useMemo} from 'react';
+import {useBalance, useAccount, useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
 import { useDebounce } from 'use-debounce';
 
 import Paper from '@mui/material/Paper';
@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 
 
+import { useDataContext } from "./context";
 import CustomInput from "../CustomInput";
 
 import auctionAbi from "../../contract/Auction.sol/MarketAuction.json";
@@ -21,25 +22,8 @@ import { formatEther, parseEther } from 'ethers/lib/utils.js';
 
 import e_msg from '../../context/lib/e_msg';
 
-import { useForm} from "react-hook-form";
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from "yup";
-import usePlaceBid from '../../context/hook/app/erc721/usePlaceBid';
 
-const schema = yup.object({
-    amount:yup.number().min(0).required()
-}).required();
-
-export default ({tokenId, toggle})=>{
-
-    const methods = useForm({
-        mode:"onChange",
-        defaultValues:{
-            amount:1
-        },
-        resolver: yupResolver(schema)
-    });
-
+export default ({id})=>{
     const {address} = useAccount();
     const {data:balance} = useBalance({
         address
@@ -47,49 +31,55 @@ export default ({tokenId, toggle})=>{
 
     const {data:currency} = useCurrency();
     
-    const {amount:_value} = methods.getValues();
-    const _isValid = methods.formState.isValid;
+    const [_value, setValue] = useState("");
     
-    const [[d_Value, isValid]] = useDebounce([_value, _isValid], 500);
-    const value = useMemo(()=>isValid && parseEther(d_Value.toString()),[isValid, d_Value]);
+    const [m_Value] = useDebounce(_value, 500);
+    const value = useMemo(()=>m_Value.match(/^[0-9]+(?:\.[0-9]+)?$/)?parseEther(m_Value):0,[m_Value]);
 
+
+    const {globalData,visible, hide} = useDataContext();
+    const {tokenId} = globalData;
+
+    const isVisible = !!visible[id];
 
     const {data:auction} = useContractRead({
         abi:auctionAbi.abi,
         address:_contract.auction,
         functionName:"auctions",
         args:[tokenId],
-        enabled:Boolean(tokenId),
+        enabled:!!tokenId,
         watch:true
     });
 
-    const can_proceed = useMemo(()=>{
-        if(balance && auction && value){
-            const _balance = balance.value.toBigInt();
-            const _reserve = auction.reserve.toBigInt();
-            const _price = auction.price.toBigInt();
-            const _value = value.toBigInt();
-            return _balance >= value && _reserve <= _value && _price < _value;
+    const can_proceed = !!(balance?.value?.gte(value) && auction?.reserve?.lte(value) && auction?.price?.lt(value));
+    
+    
+    const {config, ...prepare} = usePrepareContractWrite({
+        address:_contract.auction,
+        abi:auctionAbi.abi,
+        functionName:"placeBid",
+        args:[tokenId],
+        enabled:isVisible && !!tokenId && can_proceed,
+        overrides:{
+            value
         }
-        return false;
-    }
-    ,[balance, auction, value]);
-        
-    const placeBidEnabled = Boolean(tokenId) && can_proceed;
-
-    const {error:_error, loading:_loading, ...bid} = usePlaceBid({
-        item:tokenId,
-        value,
-        enabled:placeBidEnabled
     });
 
+    const {write, ...writeOpts} = useContractWrite(config);
+    //console.log({write, writeOpts, prepare});
+    const wait =  useWaitForTransaction({
+        hash:writeOpts.data?.hash
+    });
+    const _error = prepare.error || writeOpts.error || wait.error;
+    const _loading = writeOpts.isLoading || wait.isLoading;
+
     return(
-        <Dialog open={true} onClose={_loading?null:toggle}>
+        <Dialog open={isVisible} onClose={()=>hide(id)}>
             <Box p={2} component={Stack} spacing={2}>
                 <Box component={Paper} position="relative" p={1} bgcolor="#ccc">
                     <Typography position="absolute" fontWeight={500}>BID AMOUNT</Typography>
                     <Stack width="100%" direction="row" alignSelf="end" alignItems="baseline">
-                        <CustomInput {...methods.register('amount')} placeholder="0.00"/>
+                        <CustomInput placeholder="0.00" defaultValue={_value} onChange={e=>setValue(e.target.value)}/>
                         <Typography fontWeight={600}>{currency?.symbol}</Typography>
                     </Stack>
                 </Box>
@@ -106,7 +96,7 @@ export default ({tokenId, toggle})=>{
                     <Alert severity='error'>{e_msg(_error)}</Alert>
                 }
 
-                {bid.success &&
+                {wait.isSuccess &&
                     <Alert>Successful</Alert>
                 }
 
@@ -119,7 +109,7 @@ export default ({tokenId, toggle})=>{
                     </Alert>
                 }     
                 
-                <Button variant="outlined" disabled={!bid.write || _loading || bid.success} size="large" onClick={()=>bid.write?.()}>Place Bid</Button>
+                <Button variant="outlined" disabled={!write || _loading || wait.isSuccess} size="large" onClick={()=>write?.()}>Place Bid</Button>
             </Box>     
         </Dialog>
     )

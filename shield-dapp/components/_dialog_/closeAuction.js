@@ -8,25 +8,56 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 
+import {useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
+;
+
+import auctionAbi from "../../contract/Auction.sol/MarketAuction.json";
+import _contract from "../../contract/address.json";
+
+
 import e_msg from "../../context/lib/e_msg";
+import { useDataContext } from "./context";
 
-import useCloseAuction from "../../context/hook/app/erc721/useCloseAuction";
 
+export default ({id})=>{
+    const {globalData, visible, hide} = useDataContext();
+    const {tokenId} = globalData;
 
-export default ({tokenId, toggle})=>{
-   
-    const {loading:_loading, error:_error,success:_success, write} = useCloseAuction({
-        item:tokenId,
-        enabled:Boolean(tokenId)
-    })
+    /*const {data:auction} = useContractRead({
+        abi:auctionAbi.abi,
+        address:_contract.auction,
+        functionName:"auctions",
+        args:[tokenId],
+        watch:true
+    });*/
+    
+    const isVisible = !!visible[id];
+
+    const {config, ...prepare} = usePrepareContractWrite({
+        address:_contract.auction,
+        abi:auctionAbi.abi,
+        functionName:"closeAuction",
+        args:[tokenId],
+        enabled:isVisible && !!tokenId,
+    });
+    
+    const {write, ...writeOpts} = useContractWrite(config);
+    const wait = useWaitForTransaction({
+        hash:writeOpts.data?.hash
+    });
+
+    const _error = prepare.error || writeOpts.error || wait.error;
+
+    const _loading = writeOpts.isLoading|| wait.isLoading;
+    const _success = writeOpts.isSuccess|| wait.isSuccess;;
 
     return(
-        <Dialog open={true} onClose={_loading?null:toggle}>
+        <Dialog open={isVisible} onClose={()=>hide(id)}>
             <DialogContent>
                 <Box p={2} component={Stack} spacing={2}>
 
                     {
-                    _success && 
+                    wait.isSuccess && 
                         <Alert variant="outlined">
                             <Typography>Sucessfully Close Auction</Typography>
                         </Alert>

@@ -11,7 +11,7 @@ import ItemAuctionBid from '../item/Auction';
 import nftAbi from "../../../contract/NFT.sol/NFT.json";
 import auctionAbi from "../../../contract/Auction.sol/MarketAuction.json";
 import _contract from "../../../contract/address.json";
-import { useIpfsData } from "../../../context/lib/ipfs";
+import { useIpfsData } from "../../../context/hook/ipfs";
 
 export default ()=>{
     const {isReady} = useRouter();

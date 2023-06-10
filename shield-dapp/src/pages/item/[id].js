@@ -1,4 +1,4 @@
-import {useState, useEffect, useCallback} from 'react';
+import { useMemo} from 'react';
 import {useRouter} from "next/router";
 
 import { TableContainer, Table, TableBody, TableRow, TableCell, CircularProgress } from "@mui/material";
@@ -11,19 +11,20 @@ import Grid from "@mui/material/Unstable_Grid2";
 import Divider from "@mui/material/Divider";
 import Skeleton from "@mui/material/Skeleton";
 
-import {useAccount, useContractRead, useContractReads,  useNetwork, useToken} from "wagmi";
+import {useAccount, useContractReads} from "wagmi";
 import nftAbi from "../../../contract/NFT.sol/NFT.json";
 import saleAbi from "../../../contract/Sale.sol/MarketSales.json";
 import auctionAbi from "../../../contract/Auction.sol/MarketAuction.json";
 import _contract from "../../../contract/address.json";
 
-import { useIpfsData } from "../../../context/lib/ipfs";
+import { useIpfsData } from "../../../context/hook/ipfs";
 import useCurrency from "../../../context/hook/useCurrency";
 
 import {temp_c} from "../../../temp";
 import { formatEther } from "ethers/lib/utils.js";
 
-import Provider,{useDataContext} from '../../../components/dialog/context';
+import ModalProvider,{useModal} from '../../../context/modal';
+
 import DialogPurchase from '../../../components/dialog/purchase';
 import DialogRemoveFromSale from '../../../components/dialog/removeFromSale';
 import DialogAddToSale from '../../../components/dialog/addToSale';
@@ -33,7 +34,7 @@ import DialogCloseAuction from '../../../components/dialog/closeAuction';
 import DialogExtendAuction from '../../../components/dialog/extendAuction';
 
 import e_msg from "../../../context/lib/e_msg";
-import { constants } from "ethers";
+import { constants, BigNumber } from "ethers";
 
 import useSetTimeout from '../../../context/hook/useSetTimeout';
 
@@ -42,22 +43,28 @@ import Backdrop from '@mui/material/Backdrop';
 import TimeBox from '../../../components/TimeBox';
 
 
-const ContainerWrapper =  ()=>{
+const ContainerWrapper =  ({tokenId})=>{
     
-    const {globalData, show} = useDataContext();
-    const {tokenId} = globalData;
-    const {address:userAddress} = useAccount();
+    const {toggleId} = useModal();
 
-    const {data:uri, error, isLoading, refetch} = useContractRead({
-        abi:nftAbi.abi,
-        address:_contract.nft,
-        functionName:"tokenURI",
-        args:[tokenId],
-        enabled:!!tokenId
-    });
+    const {address:user} = useAccount();
+
+    // const {data:uri, error, isLoading, refetch} = useContractRead({
+    //     abi:nftAbi.abi,
+    //     address:_contract.nft,
+    //     functionName:"tokenURI",
+    //     args:[tokenId],
+    //     enabled:Boolean(tokenId)
+    // });
     
-    const {data:idata, ...info} = useContractReads({
+    const {data:idata, isLoading, error, ...info} = useContractReads({
         contracts:[
+            {
+                abi:nftAbi.abi,
+                address:_contract.nft,
+                functionName:"tokenURI",
+                args:[tokenId],
+            },
             {
                 abi:nftAbi.abi,
                 address:_contract.nft,
@@ -82,38 +89,41 @@ const ContainerWrapper =  ()=>{
                 functionName:"auctions",
                 args:[tokenId]
             }
-           
         ],
-        enabled:!!tokenId,
+        enabled:Boolean(tokenId),
         watch:true
     });
 
-    const {data:tokenDetails} = useCurrency(idata?.[2]?.currency);
-    const {data:nativeCurrency} = useCurrency();
+    const [uri, creator, owner, saleData, auctionData] = idata||[];
 
-    const iLoading = info.isLoading || !idata;
+    const {data:token} = useCurrency(saleData?.currency);
+    const {data:native} = useCurrency();
 
     const {data:fdata, ...ipfs} = useIpfsData(uri);
+    const ipsLoading = !fdata || ipfs.isLoading;
 
-    
-    const [auctionClose] = useSetTimeout(
+    const [auctionStartTime, auctionDiffTime] = useMemo(()=>
+        Boolean(auctionData) ? [auctionData.startTime.toNumber(), auctionData.diffTime.toNumber()]:[]
+        ,[auctionData]);
+
+    const [auctionClosed] = useSetTimeout(
         (_cb, close)=>{
-            
-            if(idata?.[3]?.startTime?.gt(0)){
-                let result = Date.now() > idata[3].startTime?.add(idata[3].diffTime)?.mul(1000);
+            if(auctionStartTime && auctionDiffTime &&
+                auctionStartTime > 0){
+                let result = Date.now() > (auctionStartTime + auctionDiffTime)*1000;
                 if(result)
                     close();
                 _cb(result);
                 return;
             }
 
-            if(idata?.[3]?.startTime?.eq(0))
+            if(auctionStartTime === 0)
                 close();
             _cb(false);
-        }, 2000, false, idata?.[3]?.startTime
+        }, 2000, false, [auctionStartTime, auctionDiffTime]
     );
 
-    if(!tokenId || isLoading){
+    if(!Boolean(tokenId) || isLoading){
         return (    
             <Backdrop in={true}>
                 <CircularProgress size={50}/>
@@ -132,57 +142,71 @@ const ContainerWrapper =  ()=>{
             </Typography>
             {
                 error?
-                <Button disabled={!tokenId} onClick={()=>refetch()} variant="outlined">Retry</Button>:
+                <Button disabled={!tokenId} onClick={()=>info.refetch()} variant="outlined">Retry</Button>:
                 <Button disabled={!tokenId} onClick={()=>ipfs.mutate()} variant="outlined">Reload</Button>
             }
         </Backdrop>
         );
     }
     
+    const itemOnSale = saleData && saleData.amount.toBigInt() > 0 && owner !== _contract.auction;
+    const salePrice = saleData && formatEther(saleData.amount);
+
+    const itemOnAuction = auctionData && owner === _contract.auction;
+    const auctionPrice = auctionData && formatEther(auctionData.reserve);
+
+    const hasTopBidder = auctionData && _contract.auction === owner && auctionData && auctionData.topBidder !== constants.AddressZero;
+    const numberOfBidPlaced = auctionData && auctionData.total.toNumber();
+
+    const allowedToCloseAuction = auctionClosed && auctionData && (auctionData.creator === user || 
+        (auctionData.topBidder !== constants.AddressZero && auctionData.topBidder === user))
+    
+    const allowedToExtendAuction = auctionData && !auctionData.scheduled && auctionData.creator === user;
+
     return (
             
     <Stack spacing={2} mb={2}>
         <Grid container>
-            <Grid xs={12} md={8} mdOffset={2}>
+            <Grid md={8} mdOffset={2}>
                 <Paper>
-                    {ipfs.isLoading?
+                    {ipsLoading?
                         <Skeleton variant="rectangular" height="50vmin" width="100%"/>:
                         <Avatar variant="rounded" bgcolor="grey.300" sx={{height:"auto", maxHeight:"65vmin", width:"100%"}} src={fdata?.image}/>
                     }
                 </Paper>
             </Grid>
         </Grid>
-        <Typography variant="h6" fontWeight="bold">{ipfs.isLoading?<Skeleton width={300}/>:fdata?.name}</Typography>
+        <Typography variant="h6" fontWeight="bold">{ipsLoading?<Skeleton width={300}/>:fdata?.name}</Typography>
         
-        {idata?.[2]?.amount?.gt(0) && _contract.auction !== idata?.[1] &&
+        {itemOnSale &&
         <Stack direction="row" spacing={2} alignItems="end">
             <Typography fontWeight="bold">Sale Price</Typography>
-            <Typography fontWeight="bold" variant="h5">{iLoading?<Skeleton width={100}/>:formatEther(idata[2]?.amount||0)}
-                    {iLoading || tokenDetails?.symbol}
+            <Typography fontWeight="bold" variant="h5">{isLoading?<Skeleton width={100}/>:salePrice}
+                    {isLoading || token?.symbol}
                     </Typography>
         </Stack>}
 
-        {!iLoading && idata[3] && _contract.auction === idata?.[1] && 
+        {!isLoading && itemOnAuction && 
         <Stack direction="row" spacing={2} alignItems="end">
             <Typography fontWeight="bold">Reserve Price</Typography>
-            <Typography fontWeight="bold" variant="h5">{formatEther(idata[3]?.reserve?.toString()||0)} {nativeCurrency.symbol}</Typography>
+            <Typography fontWeight="bold" variant="h5">{auctionPrice} {native.symbol}</Typography>
         </Stack>
         }
 
     
-        {!iLoading && idata[3] && _contract.auction === idata?.[1] && 
+        {!isLoading && itemOnAuction && 
             <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Stack>
                 <Typography fontWeight="bold">Auction</Typography>
-                <Typography><b>{idata?.[3]?.total?.toString()}</b> Bid Placed</Typography>
+                <Typography><b>{numberOfBidPlaced}</b> Bid Placed</Typography>
             </Stack>
             <Typography fontWeight="bold" variant="h5" textAlign="end">
-                <TimeBox start={idata?.[3]?.startTime} gap={idata?.[3]?.diffTime}/>
+                <TimeBox start={auctionStartTime} gap={auctionDiffTime}/>
             </Typography>
         </Stack>
         }
         
-        <Typography>{ipfs.isLoading?<Skeleton width="100%" height={100}/>:(fdata?.description)}</Typography>
+        <Typography>{ipsLoading?<Skeleton width="100%" height={100}/>:(fdata?.description)}</Typography>
         
         <TableContainer>
             <Table>
@@ -192,7 +216,7 @@ const ContainerWrapper =  ()=>{
                         <TableCell>
                             <Stack direction="row" alignItems="center" spacing={0.5}>
                                 <Avatar src={temp_c[1]}/>
-                                <Typography>{iLoading?<Skeleton width={100}/>:idata[0]}</Typography>
+                                <Typography>{isLoading?<Skeleton width={100}/>:creator}</Typography>
                             </Stack>    
                         </TableCell>
                     </TableRow>
@@ -201,17 +225,17 @@ const ContainerWrapper =  ()=>{
                         <TableCell>
                             <Stack direction="row" alignItems="center" spacing={0.5}>
                                 <Avatar src={temp_c[2]}/>
-                                <Typography>{iLoading?<Skeleton width={100}/>:idata[1]}</Typography>
+                                <Typography>{isLoading?<Skeleton width={100}/>:owner}</Typography>
                             </Stack>   
                         </TableCell>
                     </TableRow>
-                    {_contract.auction === idata?.[1] && idata?.[3]?.topBidder !== constants.AddressZero &&
+                    {hasTopBidder &&
                     <TableRow>
                         <TableCell sx={{fontWeight:"bold"}}>Top Bidder</TableCell>
                         <TableCell>
                             <Stack direction="row" alignItems="center" spacing={0.5}>
                                 <Avatar src={temp_c[2]}/>
-                                <Typography>{iLoading?<Skeleton width={100}/>:idata?.[3]?.topBidder}</Typography>
+                                <Typography>{isLoading?<Skeleton width={100}/>:auctionData?.topBidder}</Typography>
                             </Stack>   
                         </TableCell>
                     </TableRow>
@@ -222,38 +246,37 @@ const ContainerWrapper =  ()=>{
 
         
 
-        { userAddress === idata?.[1] ?
+        { user === owner ?
 
         <Stack spacing={2}>
-            {idata?.[2]?.amount?.gt(0) && <Button variant="contained" onClick={()=>show("removeFromSale")}>Clear Market Value</Button>}
-            <Button variant="contained" onClick={()=>show("addToSale")}>Set MarketValue</Button>
-            <Button variant="contained" onClick={()=>show("createAuction")}>Create Auction</Button>
+            {itemOnSale && 
+                <Button variant="contained" onClick={()=>toggleId("removeFromSale")}>Clear Market Value</Button>}
+            <Button variant="contained" onClick={()=>toggleId("addToSale")}>Set MarketValue</Button>
+            <Button variant="contained" onClick={()=>toggleId("createAuction")}>Create Auction</Button>
         </Stack>
         :
         <Stack spacing={2}>
-            {_contract.auction === idata?.[1] &&
+            {itemOnAuction &&
                 <>
                 <Button variant="contained" fontWeight="bold" 
-                    color="primary" onClick={()=>show('makeBid')}>Place a Bid</Button>
+                    color="primary" onClick={()=>toggleId('makeBid')}>Place a Bid</Button>
                 
-                {!idata?.[3]?.scheduled && idata?.[3]?.creator === userAddress && 
-                    <Button variant="contained" color="secondary" onClick={()=>show("extendAuction")}>Extend Auction</Button>
+                {allowedToExtendAuction && 
+                    <Button variant="contained" color="secondary" onClick={()=>toggleId("extendAuction")}>Extend Auction</Button>
                 }
 
-                {(idata?.[3]?.creator === userAddress || 
-                    (idata?.[3]?.topBidder !== constants.AddressZero && idata?.[3]?.topBidder === userAddress)) &&
-                    auctionClose &&
-                    <Button variant="contained" color="secondary" onClick={()=>show("closeAuction")}>Close Auction</Button>
+                {allowedToCloseAuction &&
+                    <Button variant="contained" color="secondary" onClick={()=>toggleId("closeAuction")}>Close Auction</Button>
                     }
                 </>
                     
             }
-            {_contract.auction !== idata?.[1] && idata?.[2]?.amount?.gt(0) &&
-                <Button variant="contained" color="secondary" onClick={()=>show("purchase")}>Buy Now</Button>
+            {itemOnSale &&
+                <Button variant="contained" color="secondary" onClick={()=>toggleId("purchase")}>Buy Now</Button>
             }
 
-            {_contract.auction !== idata?.[1] && idata?.[2]?.amount?.eq(0) &&
-                <Button variant="contained" color="secondary" onClick={()=>show("offer")}>Make an offer</Button>
+            {!itemOnAuction &&
+                <Button variant="contained" color="secondary" onClick={()=>toggleId("offer")}>Make an offer</Button>
             }
         </Stack>
         }
@@ -271,24 +294,35 @@ const ContainerWrapper =  ()=>{
     );
 }
 
+const ModalGroup = ({tokenId})=>{
+    const {state, toggleId} = useModal();
+
+    const cb = id=>()=>toggleId(id);
+
+    return (
+        <>
+            {state.purchase && <DialogPurchase toggle={cb("purchase")} tokenId={tokenId}/> }
+            {state.removeFromSale && <DialogRemoveFromSale toggle={cb("removeFromSale")} tokenId={tokenId}/>}
+            {state.addToSale && <DialogAddToSale toggle={cb("addToSale")} tokenId={tokenId}/>}
+            {state.createAuction && <DialogCreationAuction toggle={cb("createAuction")} tokenId={tokenId}/>}
+            {state.makeBid && <DialogMakeBid toggle={cb("makeBid")} tokenId={tokenId}/>}
+            {state.closeAuction && <DialogCloseAuction toggle={cb("closeAuction")} tokenId={tokenId}/>}
+            {state.extendAuction && <DialogExtendAuction toggle={cb("extendAuction")} tokenId={tokenId}/>}
+        </>
+    )
+}
 
 export default ()=>{
     const router = useRouter();
     
+    const tokenId = useMemo(()=>router.query.id?BigNumber.from(router.query.id):null, [router.query.id])
+
     return (
     <Container sx={{my:2}}>
-        <Provider globalData={{tokenId:+router.query.id}}>
-            <ContainerWrapper/>
-            <div>
-                <DialogPurchase id="purchase"/>
-                <DialogRemoveFromSale id="removeFromSale"/>
-                <DialogAddToSale id="addToSale"/>
-                <DialogCreationAuction id="createAuction"/>
-                <DialogMakeBid id="makeBid"/>
-                <DialogCloseAuction id="closeAuction"/>
-                <DialogExtendAuction id="extendAuction"/>
-            </div>
-        </Provider>
+        <ModalProvider>
+            <ContainerWrapper tokenId={tokenId}/>
+            <ModalGroup tokenId={tokenId}/>
+        </ModalProvider>
     </Container>
     )
 }

@@ -1,4 +1,4 @@
-import {useMemo} from 'react';
+
 import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import Typography from "@mui/material/Typography";
@@ -8,8 +8,8 @@ import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 
-import {useAccount, useBalance, useContractRead} from "wagmi";
-
+import {useAccount, useBalance, useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
+import { erc20ABI } from "wagmi";
 import { formatEther } from "ethers/lib/utils.js";
 
 import saleAbi from "../../contract/Sale.sol/MarketSales.json";
@@ -17,75 +17,98 @@ import _contract from "../../contract/address.json";
 import { constants } from "ethers";
 
 import e_msg from "../../context/lib/e_msg";
+import { useDataContext } from "./context";
 
 import CustomInput from "../CustomInput";
-import useApprove from "../../context/hook/app/erc20/useApprove";
-import usePurchaseItem from "../../context/hook/app/erc721/usePurchaseItem";
 
-export default ({toggle, tokenId})=>{
-  
+export default ({id})=>{
+    const {globalData, visible, hide} = useDataContext();
+    const {tokenId} = globalData;
     const {address} = useAccount();
 
-    const tokenIdValid = Boolean(tokenId);
+    const isVisible = !!visible[id];
 
-    const {data:sale, ...saleRead} = useContractRead({
+    const {data:item, ...itemRead} = useContractRead({
         abi:saleAbi.abi,
         address:_contract.sale,
         functionName:"ItemForSale",
         args:[tokenId],
-        enabled:tokenIdValid
+        enabled:!!tokenId
     });
     
-    const is_erc20 = saleRead.isSuccess && sale.currency !== constants.AddressZero;
+    const is_erc20 = itemRead.isSuccess && item?.currency != constants.AddressZero;
 
-    const {data:balance} = useBalance({
+    const {data:balance, ...balRead} = useBalance({
         address,
-        token:is_erc20?sale.currency:'',
+        token:is_erc20? item?.currency:'',
         watch:true,
-        enabled:tokenIdValid && saleRead.isSuccess
+        enabled:!!tokenId
     });
 
-    const {allowance, ...approve} = useApprove({
-        address:sale?.currency,
-        amountValue:sale?.amount,
-        spender:_contract.sale,
-        enabled:is_erc20 && Boolean(sale)
+    const {data:allowance, ...allwRead} = useContractRead({
+        abi:erc20ABI,
+        address:item?.currency,
+        functionName:"allowance",
+        args:[address, _contract.sale],
+        enabled:is_erc20,
+        watch:true
     });
 
-    const has_amount = useMemo(()=>
-            saleRead.isSuccess && balance && sale && balance.value.toBigInt()>= sale.amount.toBigInt(),
-            [saleRead.isSuccess, balance, sale]);
+    const has_amount = itemRead.isSuccess && balance?.value.gte(item?.amount);
+    const can_pay = has_amount && (is_erc20? allowance?.gte(item?.amount):true)
 
-    const can_pay = useMemo(()=>
-        has_amount && (is_erc20? Boolean(allowance?.toBigInt() >= sale?.amount?.toBigInt()):true),
-        [has_amount, is_erc20, allowance, sale]);
+    const {config:approveConfig, ...approvePrepare} = usePrepareContractWrite({ 
+        address:item?.currency,
+        abi:erc20ABI,
+        functionName:"approve",
+        args:[_contract.sale, item?.amount],
+        enabled:is_erc20 && isVisible
+    });
 
-    const purchase = usePurchaseItem({
-        item:tokenId,
-        enabled:can_pay,
-        value:is_erc20? 0: sale?.amount
+    const {write:approve, ...approveWrite} = useContractWrite(approveConfig);
+    const waitApprove = useWaitForTransaction({
+        hash:approveWrite.data?.hash
+    })
+
+    const {config:purchaseConfig, ...purchasePrepare} = usePrepareContractWrite({
+        address:_contract.sale,
+        abi:saleAbi.abi,
+        functionName:"purchase",
+        args:[tokenId],
+        enabled:can_pay && isVisible,
+        overrides:{
+            value:is_erc20? 0: item?.amount
+        }
     });
     
-    const _error = saleRead.error || approve.error || purchase.error;
-    
-    const _loading = approve.loading || purchase.loading
+    const {write:purchase, ...purchaseWrite} = useContractWrite(purchaseConfig);
+    const waitPurchase = useWaitForTransaction({
+        hash:approveWrite.data?.hash
+    })
 
-    const salePrice = sale?formatEther(sale?.amount):'- - -';
+    //console.log({purchaseConfig, purchasePrepare, purchaseWrite})
+
+    const _error = itemRead.error || approvePrepare.error || approveWrite.error || 
+                (can_pay && purchasePrepare.error) || purchaseWrite.error||
+                waitApprove.error || waitPurchase.error;
+    
+    const _loading = approveWrite.isLoading || purchaseWrite.isLoading||
+                waitApprove.isLoading || waitPurchase.isLoading;;
 
     return(
-        <Dialog open={true} onClose={_loading?null:toggle}>
+        <Dialog open={isVisible} onClose={()=>hide(id)}>
             <Box p={2} component={Stack} spacing={2}>
                 <Box component={Paper} position="relative" p={1} bgcolor="#ccc">
                     <Typography position="absolute" fontWeight={500}>PRICE AMOUNT</Typography>
                     <Stack width="100%" direction="row" alignSelf="end" alignItems="baseline">
-                        <CustomInput placeholder="0.00" value={salePrice} disabled/>
+                        <CustomInput placeholder="0.00" value={formatEther(item?.amount??0)} disabled/>
                         <Typography fontWeight={600}>{balance?.symbol}</Typography>
                     </Stack>
                 </Box>
                 <Typography>Account Balance: <b>${balance?.formatted}{balance?.symbol}</b></Typography>
             
                 {
-                   approve.success || saleRead.isSuccess && (can_pay?
+                   waitApprove.isSuccess || itemRead.isSuccess && (can_pay?
                     <Alert variant="outlined" severity="info">
                         <Typography>
                             {   is_erc20?
@@ -104,7 +127,7 @@ export default ({toggle, tokenId})=>{
                     </Alert>)
                 }
 
-                {purchase.success && 
+                {waitPurchase.isSuccess && 
                     <Alert variant="outlined">
                         <Typography>Request Successful</Typography>
                     </Alert>
@@ -126,21 +149,22 @@ export default ({toggle, tokenId})=>{
                 }
 
 
-                {purchase.success || is_erc20 && has_amount && !can_pay && 
+                {waitPurchase.isSuccess || is_erc20 && has_amount && !can_pay && 
                     <>
                         <Typography>Give Market Approval to spend token from wallet</Typography>
                         <Button variant="outlined" 
-                            disabled={!approve.write || approve.loading} 
+                            disabled={can_pay || !approve || approveWrite.isLoading || waitApprove.isLoading} 
                             size="large" 
-                            onClick={()=>approve.write?.()}
+                            onClick={()=>approve?.()}
                         >Approve</Button>
                     </>
                 }
 
                 <Button variant="outlined" 
-                    disabled={!can_pay || !purchase.write || purchase.loading || purchase.success} 
+                    disabled={!can_pay || !purchase || purchaseWrite.isLoading || purchaseWrite.isSuccess || 
+                                waitPurchase.isLoading || waitPurchase.isSuccess} 
                     size="large" 
-                    onClick={()=>purchase.write?.()}
+                    onClick={()=>purchase?.()}
                 >Purchase</Button>
             </Box>     
         </Dialog>
