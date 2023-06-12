@@ -23,15 +23,15 @@ export default ()=>{
         address?
             (
             <CardActionArea component={Link} href="/user/me">
-                <Stack p={1} direction="row" sx={{bgcolor:theme=>theme.palette.primary.main}} justifyContent="space-between" alignItems="center">
+                <Stack p={1} direction="row" sx={{bgcolor:"primary.dark"}} justifyContent="space-between" alignItems="center">
                     <Avatar src={temp_c[2]}/>
                     <Box>
-                        <Typography fontWeight="bold" color="#fff">
+                        <Typography fontWeight="bold" color="common.white">
                             {isError?"---":(
                                 isLoading?<Skeleton sx={{backgroundColor:"#ffffff4d"}} width={80}/>:`${data?.formatted?(+data?.formatted).toFixed(3):""} ${data?.symbol??""}`
                             )}
                             </Typography>
-                        <ElTypography maxWidth="15ch" variant="body2" fontStyle="italic" color="#fff">{address}</ElTypography>                            
+                        <ElTypography maxWidth="15ch" variant="body2" fontStyle="italic" color="common.white">{address}</ElTypography>                            
                     </Box>
                 </Stack>
             </CardActionArea>

@@ -36,16 +36,16 @@ export default ({trade})=>{
 
     return (
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <IconButton onClick={toggleSetting}>
+            <IconButton onClick={toggleSetting} sx={{color:"common.white"}} >
                 <Settings/>
             </IconButton>
-            <LoadingButton loading={trade.loading} variant="contained" onClick={btnClick} disabled={!trade.exist||insufficientBalance||!isConnected}>
+            <LoadingButton color="secondary" loading={trade.loading} variant="contained" onClick={btnClick} disabled={!trade.exist||insufficientBalance||!isConnected}>
                 {trade.exist ? 
                 (insufficientBalance?"INSUFFICIENT BALANCE":"PROCEED TO SWAP"):
                 "SWAP QUOTING"
                 }
             </LoadingButton>
-            <IconButton>
+            <IconButton sx={{color:"common.white"}}>
                 <Info/>
             </IconButton>
         </Stack>

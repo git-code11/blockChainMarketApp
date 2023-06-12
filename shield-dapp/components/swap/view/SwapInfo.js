@@ -44,6 +44,9 @@ export const SwapBasicInfo = ({trade})=>{
                 },
                 "tr td:last-of-type":{
                     color:"#fff",
+                },
+                ".MuiTypography-root":{
+                    color:"grey.300"
                 }
             }}
             >
@@ -101,7 +104,7 @@ export const SwapTradeInfo = ({trade})=>{
                 }}
             >
                 <AccordionSummary expandIcon={<ExpandMore/>} color="primary">
-                    <Typography fontWeight="bold">Route Information</Typography>
+                    <Typography fontWeight="bold" color="grey.300">Route Information</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <Stack spacing={1}>
@@ -119,7 +122,14 @@ export const SwapTradeInfo = ({trade})=>{
 const SwapRouteInfo = ({route})=>{
 
     return (
-        <Paper component={Stack} p={1} spacing={1} direction="row" alignItems="center" justifyContent="space-between">
+        <Paper 
+        sx={{
+            bgcolor:"basic.light",
+            ".MuiTypography-root":{
+                color:"primary.dark"
+            }
+        }}
+        component={Stack} p={1} spacing={1} direction="row" alignItems="center" justifyContent="space-between">
             <Stack direction="row" spacing={1}>
                 <Typography variant="subtitle2" fontWeight="bold">{route.percent}%</Typography>
                 <Typography variant="subtitle2" fontWeight="bold">{ROUTE_MAP[route.type]}</Typography>
@@ -132,7 +142,7 @@ const SwapRouteInfo = ({route})=>{
 
 const SwapPathInfo = ({path})=>{
     const _path = useMemo(()=>{
-        return path.map(token=>token.symbol).join("=>")
+        return path.map(token=>token.symbol).join(" ➜ ")
     },[path]);
 
     return (

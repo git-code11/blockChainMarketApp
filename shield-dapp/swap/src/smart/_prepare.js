@@ -1,14 +1,14 @@
 //import { SwapRouter } from '@pancakeswap/smart-router/evm';
 const {SwapRouter} = require("@pancakeswap/smart-router/evm");
-import { TradeType, CurrencyAmount, Percent, Tra} from '@pancakeswap/sdk';
+import { TradeType, CurrencyAmount, Percent,} from '@pancakeswap/sdk';
 import _quoteProvider from './_quoteProvider';
 import _poolProvider from './_poolProvider';
-import { getAllPoolTypes, getSwapRouterAddr, fromVReadableAmount } from './_utils';
+import { getAllPoolTypes, getSwapRouterAddr, fromVReadableAmount, gasPriceWei } from './_utils';
 
 const prepareTradeQuoteParamsConfig  = {
-  gasPriceWei: 10,
-  poolProvider: _poolProvider.onChain,
-  quoteProvider: _quoteProvider.onChain,
+  gasPriceWei,
+  poolProvider: _poolProvider.onChain(),
+  quoteProvider: _quoteProvider.onChain(),
   allowedPoolTypes:getAllPoolTypes()
 }
 

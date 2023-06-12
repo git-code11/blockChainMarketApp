@@ -1,13 +1,5 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 
-const fetchOutput = createAsyncThunk(
-  'swap/fetchOutput',
-  async (_arg, thunkAPI) => {
-    const {input, dev} = thunkAPI.getState().input;
-    
-    return "result"
-  }
-)
 
 const FIXED_NO = 8;
 
@@ -27,8 +19,8 @@ const initialState = {
   },
 
   settings:{
-    tolerance: 100, //100bips 1%
-    deadline: 30, //30 seconds
+    tolerance: 10, //10bips 0.1%
+    deadline: 5, // 5seconds
     pool: { //enabled pool
       V2:true,
       V3:true,
@@ -184,13 +176,10 @@ export const counterSlice = createSlice({
     }
   },
 
-  extraReducers: (builder) => {
+  /* extraReducers: (builder) => {
     // Add reducers for additional action types here, and handle loading state as needed
-    builder.addCase(fetchOutput.fulfilled, (state, action) => {
-      // Add user to the state array
-      state.entities.push(action.payload);
-    })
-  },
+    
+  }, */
 })
 
 // Action creators are generated for each case reducer function

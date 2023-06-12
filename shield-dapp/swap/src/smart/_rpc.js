@@ -3,25 +3,6 @@ import { bsc, bscTestnet, goerli, mainnet } from 'viem/chains';
 
 export const CHAINS = [bsc, bscTestnet, goerli, mainnet]
 
-const DEF_RPC_URL = {
-    [ChainId.BSC_TESTNET]:[
-      bscTestnet.rpcUrls.default.http[0]
-    ],
-    [ChainId.GOERLI]:[
-      goerli.rpcUrls.default.http[0],
-      goerli.rpcUrls.infura.http[0],
-      goerli.rpcUrls.alchemy.http[0]
-    ],
-    [ChainId.BSC]:[
-      bsc.rpcUrls.default.http[0],
-    ],
-    [ChainId.ETHEREUM]:[
-      mainnet.rpcUrls.default.http[0],
-      mainnet.rpcUrls.infura.http[0],
-      mainnet.rpcUrls.alchemy.http[0],
-    ]
-}
-
 export const PUBLIC_RPC_URL = {
     [ChainId.BSC_TESTNET]:[
         

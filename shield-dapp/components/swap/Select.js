@@ -1,7 +1,7 @@
 import {useCallback, useMemo, useState} from 'react';
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
-import { Avatar, Chip, OutlinedInput, Typography, IconButton, Divider } from "@mui/material";
+import { Avatar, Chip, Input, Typography, IconButton, Divider } from "@mui/material";
 import { ListItemAvatar, ListItemText, ListItemButton } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import {FixedSizeList} from "react-window";
@@ -10,7 +10,8 @@ import {useSwapCurrencyAddrList, useSwapCurrency, useSwapCurrencyList } from "..
 import useSwapInput from "../../context/swap/hooks/useSwapInput";
 import useSwapOutput from "../../context/swap/hooks/useSwapOutput";
 import useSwapCtx from "../../context/swap/hooks/useSwapCtx";
-import useTokenLogo from '../../token_logo/useTokenLogo';
+import useTokenLogo from '../../token_info/useTokenLogo';
+
 
 const TokenChip = ({address})=>{
     const currency = useSwapCurrency(address);
@@ -29,9 +30,9 @@ const TokenChip = ({address})=>{
 
     return (
         <Chip
-            onClick={onClick}
-            disabled={disabled}
-            variant="outlined"
+            color="basic"
+            onClick={disabled?null:onClick}
+            variant={disabled?"filled":"outlined"}
             sx={{
                 height:"40px",
                 ".MuiChip-avatar":{
@@ -74,9 +75,11 @@ const TokenSelectItem = ({address, ...props})=>{
             </ListItemAvatar>
             <ListItemText
                 primary={
-                    <Typography fontWeight="bold">{currency?.symbol??"- - -"}</Typography>
+                    <Typography color="grey.300" fontWeight="bold">{currency?.symbol??"- - -"}</Typography>
                 }
-                secondary={currency?.name??"- - - -"}
+                secondary={
+                    <Typography color="grey.400" variant="subtitle2">{currency?.name??"- - - -"}</Typography>
+                }
             />
         </ListItemButton>
     )
@@ -105,22 +108,32 @@ export default ()=>{
     },[searchText, __currencyListAddress, __currencyList]);
 
     return (
-        <Stack px={2} py={1} gap={2} component={Paper} bgcolor="#e4e4e4">
+        <Stack px={2} py={1} gap={2} component={Paper} bgcolor="primary.main">
             <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography fontWeight="bold">Select Token</Typography>
+                <Typography fontWeight="bold" color="grey.400">Select Token</Typography>
                 <IconButton onClick={()=>toggle("select")}>
                     <Close/>
                 </IconButton>
             </Stack>
-            <OutlinedInput value={searchText} onChange={onSearchChange} fullWidth placeholder="Search name or paste address"/>
+            <Input
+            disableUnderline
+            sx={{
+                ".MuiInputBase-input":{
+                    color:"basic.main"
+                }
+            }}
+            color="basic" value={searchText} onChange={onSearchChange} fullWidth placeholder="Search name or paste address"/>
             <Stack>
-                <Typography fontWeight="bold" variant="subtitle1">Common Base</Typography>
+                <Typography color="grey.400" fontWeight="bold" variant="subtitle1" mb={1}>Common Base</Typography>
                 <Stack direction="row" flexWrap="wrap" gap={1}>
                     {__currencyListAddress.slice(0, 5).map(address=><TokenChip key={address} address={address}/>)}
                 </Stack>
             </Stack>
             <Divider/>
-            <Paper>
+            <Paper 
+                sx={{
+                    bgcolor:"primary.dark"
+                }}>
                 <FixedSizeList
                     height={250}
                     width="100%"

@@ -68,7 +68,8 @@ class WorkerProxy {
 
 export const createWorkerGetBestTrade = (quoteWorker) => {
     if(!quoteWorker){
-        quoteWorker = defaultWorker;
+        throw Error("Worker Needed: fix pass getWorker() as argument")
+        //quoteWorker = defaultWorker;
     }
     
     return async (amount, currency, tradeType, { maxHops, maxSplits, allowedPoolTypes, poolProvider, gasPriceWei }) => {
@@ -106,4 +107,4 @@ export const getWorker = ()=>
     ? new WorkerProxy(new Worker(/* webpackChunkName: "quote-worker" */ new URL('./_webq-worker.js', import.meta.url)))
     : undefined
 
-export const defaultWorker = getWorker();
+//export const defaultWorker = getWorker();

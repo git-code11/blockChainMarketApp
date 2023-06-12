@@ -5,10 +5,10 @@ const {SmartRouter, BATCH_MULTICALL_CONFIGS} = require("@pancakeswap/smart-route
 import { viemClients } from './_utils';
 
 const _quoteProvider = {
-    offChain:SmartRouter.createOffChainQuoteProvider(),
-    onChain:SmartRouter.createQuoteProvider({onChainProvider:viemClients}),
-    onChain2:SmartRouter.createQuoteProvider({
-      onChainProvider: viemClients,
+    offChain:SmartRouter.createOffChainQuoteProvider,
+    onChain:(onChainProvider)=>SmartRouter.createQuoteProvider({onChainProvider:onChainProvider??viemClients}),
+    onChain2:(onChainProvider)=>SmartRouter.createQuoteProvider({
+      onChainProvider: onChainProvider??viemClients,
       multicallConfigs: {
         ...BATCH_MULTICALL_CONFIGS,
         [ChainId.BSC]: {

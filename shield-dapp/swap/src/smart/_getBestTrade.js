@@ -1,6 +1,6 @@
 
-import { getWorker, createWorkerGetBestTrade } from './_web_worker';
-import _poolProvider, { CandidatePoolCache, globalCandidatePoolCache } from './_poolProvider';
+import { createWorkerGetBestTrade } from './_web_worker';
+import _poolProvider, {  globalCandidatePoolCache } from './_poolProvider';
 import { _BaseTradeCache } from './_cacheLib';
 import axios from 'axios';
 

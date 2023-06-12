@@ -17,9 +17,8 @@ export default ()=>{
                         <Button variant="contained" 
                             size="small"
                             key={chain.id}
-                            color="success"
-                            disabled={chain.id === method.chainId}
-                            onClick={()=>method.update(chain.id)}
+                            color={chain.id === method.chainId?"basic":"secondary"}
+                            onClick={chain.id === method.chainId?null:()=>method.update(chain.id)}
                             >
                                 { CHAIN_NAME[chain.id] }
                             </Button>

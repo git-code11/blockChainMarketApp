@@ -13,7 +13,6 @@ import VerifyWalletModal from './VerifyWalletModal';
 
 const AppBar = styled(MuiAppBar)(({theme})=>({
     backdropFilter:"blur(15px)",
-    //backgroundColor:theme.palette.secondary.dark,//"transparent",
 }));
 
 
@@ -21,7 +20,7 @@ const Drawer = styled(MuiDrawer)(()=>({
     "& .MuiDrawer-paper":{
         width:"300px",
         maxWidth:"80vw",
-        backgroundColor:"#fff",//"transparent",
+        //backgroundColor:"#fff",//"transparent",
     }
 }));
 
@@ -35,8 +34,8 @@ export default ()=>{
                     <Avatar variant="square" src="/logo.png"/>
                     <Typography mx={1} flexGrow={1} fontSize="large" fontWeight="bold" color="secondary" fontStyle="italic">ShieldPact</Typography>
                     <ConnectIcon/>
-                    <IconButton onClick={()=>setOpen(true)}>
-                        <MenuRounded fontSize="large" sx={{color:"#fff"}}/>
+                    <IconButton sx={{color:"common.white"}} onClick={()=>setOpen(true)}>
+                        <MenuRounded fontSize="large" />
                     </IconButton>
                 </Toolbar>
             </AppBar>
@@ -44,7 +43,7 @@ export default ()=>{
             <Drawer open={open} onClose={()=>setOpen(false)}>
                 <Stack justifyContent="space-between" height="100%">
                     <Box>
-                        <Toolbar sx={{bgcolor:theme=>theme.palette.primary.main, pr:2}} disableGutters>
+                        <Toolbar sx={{bgcolor:"primary.dark", pr:2}} disableGutters>
                             <Avatar variant="square" src="/logo.png"/>
                             <Typography mx={1} flexGrow={1} fontSize="large" fontWeight="bold" color="secondary" fontStyle="italic">ShieldPact</Typography>
                             <IconButton color="error" onClick={()=>setOpen(false)}>

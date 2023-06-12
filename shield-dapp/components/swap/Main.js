@@ -1,4 +1,4 @@
-import {useEffect} from 'react';
+//import {useEffect} from 'react';
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -21,13 +21,13 @@ export default ()=>{
     
     const {loading, error} = trade;
     
-    useEffect(()=>{
+/*     useEffect(()=>{
         console.log("My Trade", trade.data);
-    },[trade.data])
+    },[trade.data]) */
     
 
     return (
-        <Stack component={Paper} gap={1} p={2} bgcolor="#536269">
+        <Stack component={Paper} gap={1} p={2} bgcolor="primary.dark">
             <Stack alignItems="center">
                 <SwapChainSelect/>
             </Stack>
@@ -37,7 +37,8 @@ export default ()=>{
                         <IconButton 
                         onClick={reverse}
                         sx={{
-                            fontWeight:"bold"
+                            fontWeight:"bold",
+                            color:"common.white"
                         }}>
                             <ArrowDownward/>
                         </IconButton>

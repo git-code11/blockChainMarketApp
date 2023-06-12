@@ -1,21 +1,10 @@
-import { ChainId, Native, WNATIVE } from "@pancakeswap/sdk";
-import { ethereumTokens, 
-            bscTokens, 
-            bscTestnetTokens, 
-            goerliTestnetTokens
-    } from "@pancakeswap/tokens";
+import { Native, WNATIVE } from "@pancakeswap/sdk";
 
 import {useMemo} from 'react';
 import useSwapChain from "./useSwapChain";
+import {_CHAIN_TOKEN_LIST} from '../../../token_info/token_list';
 
 
-
-const _CHAIN_TOKEN_LIST = {
-    [ChainId.ETHEREUM]:ethereumTokens,
-    [ChainId.BSC]:bscTokens,
-    [ChainId.BSC_TESTNET]:bscTestnetTokens,
-    [ChainId.GOERLI]:goerliTestnetTokens
-}
 
 const _TOKEN_LIST = Object.entries(_CHAIN_TOKEN_LIST).reduce(
     (_map, _data)=>{

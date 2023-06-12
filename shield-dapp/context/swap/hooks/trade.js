@@ -2,7 +2,7 @@ import {useMemo, useCallback, createContext, useContext, useEffect} from 'react'
 
 import {
         TradeCache, bestTrades, 
-        CandidatePoolCache, poolProviders, quoteProviders,
+        CandidatePoolCache, quoteProviders,
         utils as SmartUtils, getWorker, prepareTradeQuoteParams,
         TradeType
 
@@ -16,11 +16,18 @@ import { useDebounce } from 'use-debounce';
 import useSwapChainChanged from './useSwapChainChanged';
 
 
-const { getPoolTypes, gasPriceWei, amountFixed, Transformer } = SmartUtils;
+const { getPoolTypes, amountFixed, Transformer } = SmartUtils;
 
+const quoteProvider = quoteProviders.offChain();
 const poolCache1 = new CandidatePoolCache();
+const tradeCache1 = new TradeCache(bestTrades.cache.main(poolCache1))
+
+/* 
+const quoteProvider = quoteProviders.onChain();
 const worker1 = getWorker();
-const tradeCache1 = new TradeCache(bestTrades.cache.main(poolCache1, worker1))
+const tradeCache1 = new TradeCache(bestTrades.cache.worker(poolCache1, worker1))
+ */
+
 
 /**
  * NOTE: 
@@ -77,7 +84,7 @@ const useUpdateCurrentTradeState = ()=>{
     const serializeTrade = useSerializeTrade();
 
     return useCallback(trade=>{
-        console.log("TRADE _UPDATE")
+        //console.log("TRADE _UPDATE")
         if(trade){
             dispatch(actions.tradeChange({
                 input:{
@@ -117,7 +124,7 @@ const usePrepareQuoteParams = ({
             tradeType:TradeType.EXACT_INPUT,
             config:{
                 allowedPoolTypes,
-                gasPriceWei
+                quoteProvider
             }
         }),
     [amountIn, currencyIn, currencyOut, allowedPoolTypes, _enabledQuote]);
@@ -173,7 +180,7 @@ const useSwapTradeWrap = ()=>{
             return null;
         const _trade = await _getBestTradeFunc({forceUpdate, args});
         
-        console.log("SUCCES TRADE", _trade);
+        //console.log("SUCCES TRADE", _trade);
         return _trade;
     },[_getBestTradeFunc]);
 
@@ -213,7 +220,7 @@ export const useSwapTradeUpdated = ()=>{
     const trade = useSwapTrade();
     
     useEffect(()=>{
-        console.log("calling trade update");
+        //console.log("calling trade update");
         trade.update();
     },[trade.update]);
 

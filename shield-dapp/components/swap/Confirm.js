@@ -15,8 +15,8 @@ import e_msg from "../../context/lib/e_msg";
 import {LoadingButton} from "@mui/lab";
 import useSwapTx from "../../context/swap/hooks/useSwapTx";
 import useSwapTrade from "../../context/swap/hooks/trade";
-import useTokenLogo from "../../token_logo/useTokenLogo";
-
+import useTokenLogo from "../../token_info/useTokenLogo";
+import {red} from "@mui/material/colors"
 
 const SwapRecieveToken = ({amount})=>{
 
@@ -27,9 +27,9 @@ const SwapRecieveToken = ({amount})=>{
         <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Stack gap={1} direction="row" alignItems="center">
                 <Avatar src={token_logo} sx={{bgcolor:"#444"}}/>
-                <Typography fontFamily="monospace" fontSize="24px" fontWeight="bold">{value}</Typography>
+                <Typography fontFamily="monospace" fontSize="24px" fontWeight="bold" color="grey.400">{value}</Typography>
             </Stack>
-            <Typography fontSize="20px" fontWeight="bold">{amount.currency.symbol}</Typography>
+            <Typography fontSize="20px" fontWeight="bold" color="grey.400">{amount.currency.symbol}</Typography>
         </Stack>
     );
 }
@@ -42,7 +42,7 @@ const SwapRecieve = ({trade})=>{
         <Stack gap={2}>
             <SwapRecieveToken amount={trade.inputAmount}/>
             <SwapRecieveToken amount={trade.outputAmount}/>            
-            <Typography fontStyle="italic">
+            <Typography fontStyle="italic" color="grey.400">
                 Output is estimated.
                 You will recieve at least {minAmountOut} {symbolOut} or 
                 transaction will revert
@@ -136,11 +136,12 @@ const SwapSendTxContainer = ({trade, getCalldata, enabled=true})=>{
     return (
         btnEnabled &&
             <LoadingButton size="large" variant="contained"
+                color="basic"
                 disabled={!Boolean(method.sendTransaction) || method.success || method.loading}
                 loading={method.loading}
                 onClick={()=>method.sendTransaction?.()}
             >
-                <span>Confirm Swap</span>
+                <b>Confirm Swap</b>
             </LoadingButton>
     )
 }
@@ -155,10 +156,10 @@ export default ()=>{
     
     return (
         trade &&
-        <Stack gap={2} p={2} bgcolor="#e4e4e4" component={Paper}>
+        <Stack gap={2} p={2} bgcolor="primary.main" component={Paper}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography fontWeight="bold">Confirm Swap</Typography>
-                <IconButton onClick={toggleClose}>
+                <Typography fontWeight="bold" color="grey.400">Confirm Swap</Typography>
+                <IconButton onClick={toggleClose} sx={{color:red[500]}}>
                     <Close/>
                 </IconButton>
             </Stack>

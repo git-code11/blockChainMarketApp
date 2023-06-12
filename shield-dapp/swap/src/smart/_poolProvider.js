@@ -6,8 +6,8 @@ import { _BaseCandidatePoolCache, _BasePoolCache } from './_cacheLib';
 
 
 const _poolProvider = {
-    onChain: SmartRouter.createPoolProvider({
-      onChainProvider:viemClients
+    onChain: (onChainProvider)=>SmartRouter.createPoolProvider({
+      onChainProvider:onChainProvider??viemClients
     }),
     static:(candidatePools)=>SmartRouter.createStaticPoolProvider(candidatePools)
 }

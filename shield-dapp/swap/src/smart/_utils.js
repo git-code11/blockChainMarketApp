@@ -12,7 +12,7 @@ import { parseUnits as vparseUnits, formatUnits as vformatUnits} from 'viem'
 //     [ChainId.BSC_TESTNET]: 'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-chapel',
 // }
 
-import { CHAINS, PUBLIC_RPC_URL } from './_rpc';
+import { CHAINS } from './_rpc';
 
 export const MAP_ID_CHAIN = CHAINS.reduce((_map, _chain)=>({..._map,[_chain.id]:_chain}),{});
 
@@ -23,7 +23,7 @@ export const CHAIN_NAME = {
   [ChainId.ETHEREUM]:"Ethereum"
 }
 
-export const viemClients = ({ chainId }) => {
+/* export const viemClients = ({ chainId }) => {
     return createPublicClient({
         chain: MAP_ID_CHAIN[chainId],
         transport:fallback(
@@ -41,6 +41,18 @@ export const viemClients = ({ chainId }) => {
             batchSize: 1024 * 200,
           }
         }
+    })
+} */
+
+export const viemClients = ({ chainId }) => {
+    return createPublicClient({
+        chain: MAP_ID_CHAIN[chainId],
+        transport:http(),
+       /*  batch: {
+          multicall: {
+            batchSize: 1024 * 200,
+          }
+        } */
     })
 }
 

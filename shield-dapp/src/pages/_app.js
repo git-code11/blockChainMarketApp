@@ -4,6 +4,7 @@ import Head from 'next/head'
 import ContextProvider from "../../context/provider";
 import NavBar from "../../components/NavBar";
 import '../../node_modules/sal.js/dist/sal.css';
+import LoadingScreen from '../../components/LoadingScreen';
 
 
 export default function App({ Component, pageProps }) {
@@ -20,6 +21,7 @@ export default function App({ Component, pageProps }) {
         <link rel="manifest" href="/site.webmanifest"></link>
       </Head>
       <ContextProvider pageProps={pageProps}>
+        <LoadingScreen/>
         <NavBar/>
         <Component {...pageProps}/>
       </ContextProvider>

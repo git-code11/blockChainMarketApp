@@ -26,7 +26,7 @@ const Box = styled(MuiBox)(({theme})=>({
         height:"100%",
         position:"absolute",
         transition:theme.transitions.create('transform',{duration:500}),
-        backgroundImage:"linear-gradient(100deg, #13131d, #0398ed)",
+        backgroundImage:`linear-gradient(100deg, #13131d, #0398ed)`,
         backgroundRepeat:"repeat-x",
         borderRadius:theme.spacing(2),
     },

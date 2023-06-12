@@ -4,7 +4,7 @@ import { isMainThread, parentPort } from 'node:worker_threads';
 const { SmartRouter } = require("@pancakeswap/smart-router/evm");
 
 import _quoteProvider from './_quoteProvider'
-
+import { gasPriceWei as utilGasPriceWei } from './_utils';
 const { parseCurrency, parseCurrencyAmount, parsePool, serializeTrade } = SmartRouter.Transformer
 
 // export type WorkerEvent = [
@@ -15,7 +15,7 @@ const { parseCurrency, parseCurrencyAmount, parsePool, serializeTrade } = SmartR
 //   },
 // ]
 
-const onChainQuoteProvider = _quoteProvider.onChain;
+const onChainQuoteProvider = _quoteProvider.onChain();
 
 if(isMainThread){
   console.log("Running program in Main Thread");
@@ -60,9 +60,7 @@ parentPort.once('message', (event) => {
 
     const pools = candidatePools.map((pool) => parsePool(chainId, pool))
 
-    const gasPrice = gasPriceWei
-      ? BigInt(gasPriceWei)
-      : async () => BigInt(await (await viemClients({ chainId }).getGasPrice()).toString())
+    const gasPrice = gasPriceWei ? BigInt(gasPriceWei): utilGasPriceWei
 
     SmartRouter.getBestTrade(currencyAAmount, currencyB, tradeType, {
       gasPriceWei: gasPrice,
