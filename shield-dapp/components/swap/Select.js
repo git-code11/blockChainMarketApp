@@ -11,7 +11,7 @@ import useSwapInput from "../../context/swap/hooks/useSwapInput";
 import useSwapOutput from "../../context/swap/hooks/useSwapOutput";
 import useSwapCtx from "../../context/swap/hooks/useSwapCtx";
 import useTokenLogo from '../../token_info/useTokenLogo';
-
+import {red} from "@mui/material/colors"
 
 const TokenChip = ({address})=>{
     const currency = useSwapCurrency(address);
@@ -111,7 +111,7 @@ export default ()=>{
         <Stack px={2} py={1} gap={2} component={Paper} bgcolor="primary.main">
             <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Typography fontWeight="bold" color="grey.400">Select Token</Typography>
-                <IconButton onClick={()=>toggle("select")}>
+                <IconButton onClick={()=>toggle("select")} sx={{color:red[700]}}>
                     <Close/>
                 </IconButton>
             </Stack>

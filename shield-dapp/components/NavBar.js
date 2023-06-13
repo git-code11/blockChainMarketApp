@@ -59,6 +59,8 @@ export default ()=>{
                             <ListItemButton component={Link} href="/nft_create">Create NFT</ListItemButton>
                             <Divider variant="middle"/>
                             <ListItemButton component={Link} href="/swap">Swap Exchange</ListItemButton>
+
+                            <LaunchPadMenu/>
                         </List>
                     </Box>
                     <BalanceBar/>
@@ -66,5 +68,19 @@ export default ()=>{
             </Drawer>
             <VerifyWalletModal/>
         </Box>
+    )
+}
+
+const LaunchPadMenu = ()=>{
+
+    return (
+        <>
+            <Divider variant="middle"/>
+            <ListItemButton component={Link} href="/launch/create">Create Pad</ListItemButton>
+            <Divider variant="middle"/>
+            <ListItemButton component={Link} href="/launch/token">Create Token</ListItemButton>
+            <Divider variant="middle"/>
+            <ListItemButton component={Link} href="/launch/list">Pad List</ListItemButton>
+        </>
     )
 }
