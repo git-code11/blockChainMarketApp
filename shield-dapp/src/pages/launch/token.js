@@ -1,11 +1,19 @@
+import {useMemo} from 'react';
 import LaunchTokenForm from "../../../components/launchpad/LaunchTokenForm";
 
-import {Container, TableContainer, Table, TableHead, TableBody, TableRow, TableCell } from "@mui/material";
+import {Container, TableContainer, Table, TableHead, TableBody, TableRow, TableCell,
+     Skeleton, CircularProgress, Stack, Box
+} from "@mui/material";
+import { useToken } from "wagmi";
+import useListCreatedERC20 from "../../../context/hook/app/factory/erc20/useListCreatedERC20";
+import { formatUnits } from 'ethers/lib/utils.js';
+
+
 
 export default ()=>{
 
     return (
-        <Container>
+        <Container sx={{my:4}}>
             <LaunchTokenForm/>
             <CreatedTokenTable/>
         </Container>
@@ -14,8 +22,14 @@ export default ()=>{
 
 
 const CreatedTokenTable = ()=>{
-
+    const {data, isLoading} = useListCreatedERC20({});
+    
     return (
+        <Box my={3}>
+        {isLoading ?
+        <Stack alignItems="center">
+            <CircularProgress/>
+        </Stack>:
         <TableContainer>
             <Table>
                 <TableHead>
@@ -28,15 +42,30 @@ const CreatedTokenTable = ()=>{
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    <TableRow>
-                        <TableCell>0x328abc399f0330399400399</TableCell>
-                        <TableCell>Custom</TableCell>
-                        <TableCell>CUST</TableCell>
-                        <TableCell>18</TableCell>
-                        <TableCell>1920</TableCell>
-                    </TableRow>
+                    {data?.map(address=><TokenModel key={address} address={address}/>)}
                 </TableBody>
             </Table>
         </TableContainer>
+        }
+        </Box>
     );
+}
+
+
+const TokenModel = ({address})=>{
+    const {data, isLoading} = useToken({
+        address
+    });
+    
+    const Loading = useMemo(()=><Skeleton width={100}/>,[]);
+
+    return(
+        <TableRow>
+            <TableCell>{isLoading?Loading:data.address}</TableCell>
+            <TableCell>{isLoading?Loading:data.name}</TableCell>
+            <TableCell>{isLoading?Loading:data.symbol}</TableCell>
+            <TableCell>{isLoading?Loading:data.decimals}</TableCell>
+            <TableCell>{isLoading?Loading:formatUnits(data.totalSupply.value, data.decimals)}</TableCell>
+        </TableRow>
+    )
 }

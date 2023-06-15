@@ -1,38 +1,62 @@
-import {useCallback} from 'react';
+import {useCallback, useMemo} from 'react';
 import { LoadingButton } from "@mui/lab";
-import { Container, Stack } from "@mui/material";
+import { Box, Stack, Typography, Alert } from "@mui/material";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import CreateTokenForm from './form/CreateTokenForm';
 
 import * as yup from 'yup';
 import { yupResolver } from "@hookform/resolvers/yup";
+import useCreateERC20 from '../../context/hook/app/factory/erc20/useCreateERC20';
+import { parseAddress } from '../../context/hook/app/factory/utils';
+import e_msg from '../../context/lib/e_msg';
+import { useAccount } from 'wagmi';
+
+
+const getCreatedTokenAddress = reciept => parseAddress(reciept.logs[1].topics[2]);
 
 const FormContainer = ()=>{
-    const {handleSubmit} = useFormContext();
+    const {handleSubmit, watch} = useFormContext();
+
+    const {isConnected} = useAccount();
+    const params = watch();
+    const {write, loading, error, success, reciept} = useCreateERC20({params});
+
+    const createdTokenAddress = useMemo(()=>reciept && getCreatedTokenAddress(reciept), [reciept]);
 
     const onSubmit = useCallback((data, e)=>{
         e.preventDefault();
         console.log({data})
-    },[]);
+        write();
+    },[write]);
+    
 
     return (
-        <Container 
-            sx={{
-                my:3
-            }}
-            component="form"
+        <form
             autoComplete='off'
             onSubmit={handleSubmit(onSubmit)}>
-            <CreateTokenForm/>
-            <Stack alignItems="center" mt={2}>
+            <CreateTokenForm disabled={loading}/>
+            <Stack alignItems="center" mt={2} spacing={3}>
+                {
+                    error && <Alert variant="error">{e_msg(error)}</Alert>
+                }
+
+                {   success &&
+                    <Alert variant="success">
+                        <Typography color="success">
+                            SuccessFul: <small>{createdTokenAddress}</small>
+                        </Typography>
+                    </Alert>
+                }
                 <LoadingButton
+                loading={loading}
+                disabled={!isConnected}
                 type="submit"
-                loadingPosition="end" size="large" variant='contained'>
+                size="large" variant='contained'>
                     <span>Create Token</span>
                 </LoadingButton>
             </Stack>
-        </Container>
+        </form>
     )
 }
 
@@ -44,10 +68,18 @@ const schema = yup.object({
 }).required();
 
 
+const defaultValues = {
+    name:"",
+    symbol:"",
+    decimals:18,
+    totalSupply:10000
+}
+
 export default ()=>{
     const methods = useForm({
         resolver:yupResolver(schema),
-        reValidateMode:"onChange"
+        mode:"onChange",
+        defaultValues
     });
 
     return (

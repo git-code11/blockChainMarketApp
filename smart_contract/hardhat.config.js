@@ -23,14 +23,12 @@ module.exports = {
       url: "https://bsc-dataseed1.binance.org",
       chainId:56,
       accounts:[process.env.WALLET_KEY]
-      //specify wallet private key
-      //specify production=true at .env
     },
   },
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
-    apiKey: "5VG7WSQQNKEZCVPW1JXASE9UZKIJ8HZP5Y"
+    apiKey: process.env.ETHERSCAN_API
   },
   solidity: {
     version: "0.8.15",
