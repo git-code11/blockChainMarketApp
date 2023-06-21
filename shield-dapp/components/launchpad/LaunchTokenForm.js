@@ -1,22 +1,25 @@
-import {useCallback, useMemo} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import { LoadingButton } from "@mui/lab";
-import { Box, Stack, Typography, Alert } from "@mui/material";
+import { Stack, Typography, Alert } from "@mui/material";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import CreateTokenForm from './form/CreateTokenForm';
 
-import * as yup from 'yup';
 import { yupResolver } from "@hookform/resolvers/yup";
 import useCreateERC20 from '../../context/hook/app/factory/erc20/useCreateERC20';
 import { parseAddress } from '../../context/hook/app/factory/utils';
 import e_msg from '../../context/lib/e_msg';
 import { useAccount } from 'wagmi';
+import { createTokenSchema } from './data/schema';
+import { createTokenDefValue } from './data/defaultValues';
+
 
 
 const getCreatedTokenAddress = reciept => parseAddress(reciept.logs[1].topics[2]);
 
 const FormContainer = ()=>{
-    const {handleSubmit, watch} = useFormContext();
+
+    const {handleSubmit, watch, formState:{isValid}} = useFormContext();
 
     const {isConnected} = useAccount();
     const params = watch();
@@ -29,6 +32,8 @@ const FormContainer = ()=>{
         console.log({data})
         write();
     },[write]);
+
+    
     
 
     return (
@@ -60,26 +65,11 @@ const FormContainer = ()=>{
     )
 }
 
-const schema = yup.object({
-    name:yup.string().required(),
-    symbol:yup.string().required(),
-    decimals:yup.number().required(),
-    totalSupply:yup.number().required()
-}).required();
-
-
-const defaultValues = {
-    name:"",
-    symbol:"",
-    decimals:18,
-    totalSupply:10000
-}
-
 export default ()=>{
     const methods = useForm({
-        resolver:yupResolver(schema),
+        resolver:yupResolver(createTokenSchema),
         mode:"onChange",
-        defaultValues
+        defaultValues:createTokenDefValue
     });
 
     return (

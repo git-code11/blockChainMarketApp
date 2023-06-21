@@ -28,6 +28,18 @@ library LaunchCal{
        return ( (capped_ * saleRate_) * (BPS + bnbFeeBps_) ) / BPSBPS;
     }
 
+    //No of token for dex
+    function preDexAmount(
+    uint256 capped_, //y
+    uint256 dexRate_, //r
+    uint16 dexBps_ //b
+    )
+    internal pure
+    returns (uint256) //x
+    {
+       return (capped_ * dexRate_ * dexBps_)/BPSBPS;
+    }
+
     //No of token as Fee
     function tkFeeAmount(
     uint256 capped_, 

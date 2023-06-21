@@ -1,9 +1,28 @@
-import { Box, Stack, Typography, Table, TableBody, TableCell, TableRow } from "@mui/material";
-import { useToken } from "wagmi";
-import { useDebounce } from "use-debounce";
-import { useFormContext } from "react-hook-form";
+import { Box, Stack, Typography, CircularProgress, InputAdornment, FormLabel,
+    MenuItem,
+    Alert
+} from "@mui/material";
 
-import {Input} from '.'
+import {Input, InputWithLaunchSymbol, RadioInput, useFormTokenDetails} from '.'
+
+import currencylist from '../../../currency-list';
+
+const FEEOPTION = (tkSym)=>({
+    0:`1${tkSym} + 5% of sold`,
+    1:`1${tkSym} + 2% of sold + 2% of token`
+});
+
+const BNBFEEOPTION = FEEOPTION("BNB");
+
+
+const FeeTypes = ()=>{
+    return (
+        <Box>
+            <FormLabel>Creation Pool FeeTier</FormLabel>
+            <RadioInput name="token.feeTier" data={BNBFEEOPTION}/>
+        </Box>
+    )
+}
 
 export default ()=>{
     
@@ -11,41 +30,16 @@ export default ()=>{
     <Box>
         <Typography variant="h6" mb={1}>Token Information</Typography>
         <Stack spacing={2}>
-            <Input label="Token Address" name="token.address"/>
-            <TokenDetails/>
+            <InputWithLaunchSymbol label="Token Address" name="token.address" helperText="NOTE:prefers token with decimals 18 for rate accuracy"/>
+            <Input label="Buying Currency" name="token.buyToken" select>
+                {
+                    Object.entries(currencylist).map(([key, value])=>
+                        <MenuItem key={value} value={value}>{key}</MenuItem>
+                    )
+                }
+            </Input>
+            <FeeTypes/>
         </Stack>
     </Box>
-    )
-}
-
-
-const TokenDetails = ()=>{
-    const methods = useFormContext();
-    const {address} = methods.getValues();
-    const [debounceToken] = useDebounce(address, 1000);
-
-    const {data} = useToken({
-        address:debounceToken
-    });
-
-    return (
-        data && <Table>
-            <TableBody>
-                <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>{data.name}</TableCell>
-                </TableRow>
-
-                <TableRow>
-                    <TableCell>Symbol</TableCell>
-                    <TableCell>{data.symbol}</TableCell>
-                </TableRow>
-
-                <TableRow>
-                    <TableCell>TotalSupply</TableCell>
-                    <TableCell>{data.totalSupply}</TableCell>
-                </TableRow>
-            </TableBody>
-        </Table>
     )
 }

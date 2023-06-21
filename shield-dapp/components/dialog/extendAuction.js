@@ -22,6 +22,9 @@ import * as yup from "yup";
 
 import TextField from '../ControlledTextField';
 import useExtendAuction from '../../context/hook/app/erc721/useExtendAuction';
+import { extendAuctionSchema } from './data/schema';
+import { extendAuctionDefValue } from './data/defaultValues';
+
 
 const schema = yup.object({
     extendTime:yup.number().min(1).required()
@@ -32,10 +35,8 @@ export default ({tokenId, toggle})=>{
     
     const methods = useForm({
         mode:"onChange",
-        defaultValues:{
-            extendTime:1
-        },
-        resolver: yupResolver(schema)
+        defaultValues:extendAuctionDefValue,
+        resolver: yupResolver(extendAuctionSchema)
     });
     const _formValid = methods.formState.isValid;
     const {extendTime:_value} = _formValid?methods.getValues():{};

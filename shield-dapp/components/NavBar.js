@@ -11,6 +11,9 @@ import ConnectIcon from "./ConnectIcon";
 import BalanceBar from "./BalanceBar";
 import VerifyWalletModal from './VerifyWalletModal';
 
+import {useAccount} from 'wagmi'
+
+
 const AppBar = styled(MuiAppBar)(({theme})=>({
     backdropFilter:"blur(15px)",
 }));
@@ -51,17 +54,7 @@ export default ()=>{
                             </IconButton>
                         </Toolbar>
                         <Divider/>
-                        <List sx={{"& .MuiListItemButton-root":{cursor:"pointer"}}}>
-                            <ListItemButton component={Link} href="/home">Home</ListItemButton>
-                            <Divider variant="middle"/>
-                            <ListItemButton component={Link} href="/explore/0">Explore</ListItemButton>
-                            <Divider variant="middle"/>
-                            <ListItemButton component={Link} href="/nft_create">Create NFT</ListItemButton>
-                            <Divider variant="middle"/>
-                            <ListItemButton component={Link} href="/swap">Swap Exchange</ListItemButton>
-
-                            <LaunchPadMenu/>
-                        </List>
+                        <MenuList/>
                     </Box>
                     <BalanceBar/>
                 </Stack>
@@ -71,16 +64,39 @@ export default ()=>{
     )
 }
 
-const LaunchPadMenu = ()=>{
+const MenuList = ()=>{
+
+    
 
     return (
+        <List sx={{"& .MuiListItemButton-root":{cursor:"pointer"}}}>
+            <ListItemButton component={Link} href="/home">Home</ListItemButton>
+            <Divider variant="middle"/>
+            <ListItemButton component={Link} href="/explore/0">Explore</ListItemButton>
+            <Divider variant="middle"/> 
+            <ListItemButton component={Link} href="/swap">Swap Exchange</ListItemButton>
+            <Divider variant="middle"/>
+            <ListItemButton component={Link} href="/launch/list">Launch List</ListItemButton>
+            <Divider variant="middle"/>
+            <AccountNeededMenu/>
+        </List>
+    )
+}
+
+
+const AccountNeededMenu = ()=>{
+    const {isConnected} = useAccount();
+
+    return isConnected?
         <>
+            <ListItemButton component={Link} href="/nft_create">Create NFT</ListItemButton>
+            <Divider variant="middle"/>
+            <ListItemButton component={Link} href="/launch/list/created">Created Launch</ListItemButton>
             <Divider variant="middle"/>
             <ListItemButton component={Link} href="/launch/create">Create Pad</ListItemButton>
             <Divider variant="middle"/>
             <ListItemButton component={Link} href="/launch/token">Create Token</ListItemButton>
-            <Divider variant="middle"/>
-            <ListItemButton component={Link} href="/launch/list">Pad List</ListItemButton>
         </>
-    )
+        :null;
+      
 }

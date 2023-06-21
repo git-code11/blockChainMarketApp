@@ -58,6 +58,7 @@ contract PadFactory is Ownable{
             [uint16(200), uint16(200)], 
             [300, 0]
         ];
+    uint256 public fee = 5678;
 
     event PadCreated(address indexed creator, address indexed launch);
 
@@ -67,6 +68,9 @@ contract PadFactory is Ownable{
         weth = weth_;
     }
 
+    function setFee(uint256 fee_) external onlyOwner {
+        fee = fee_;
+    }
 
     function padSize() public view returns(uint256){
         return _padCount.current();
@@ -81,22 +85,21 @@ contract PadFactory is Ownable{
     }
 
     function createpad(LaunchPadParams memory params) external payable{
-        require(msg.value == 1 ether, "Pay 1 BNB Fee");
+        require(msg.value == fee, "Pay factory Fee");
          
         _padCount.increment();
         uint256 newId = _padCount.current();
-        bool isBNBPayType = params.buyToken == address(0x0);
         LaunchPad.InitializeParams memory init_params =  LaunchPad.InitializeParams({
             feeReciever:owner(),
             manager:manager,
             managerWeth:managerWeth,
+            weth:weth,
             dexBps:params.dexBps,
             bnbFeeBps:FeeOptions[params.feeTier][0],
             tkFeeBps:FeeOptions[params.feeTier][1],
-            buyToken:isBNBPayType?weth:params.buyToken,
+            buyToken:params.buyToken,
             launchToken:params.launchToken,
             ihash:params.ihash,
-            payType:isBNBPayType?PaymentType.BNB:PaymentType.BUSD,
             enabledwhitelisted:params.whiteListEnabled && false
         });
 
@@ -114,6 +117,8 @@ contract PadFactory is Ownable{
         PredictAmountParams memory p_params = PredictAmountParams({
             capped:params.capped,
             saleRate:params.saleRate,
+            dexRate:params.dexRate,
+            dexBps:params.dexBps,
             feeTier:params.feeTier
         });
         uint256 launchTokenAmount = predictAmount(p_params);
@@ -125,6 +130,8 @@ contract PadFactory is Ownable{
     struct PredictAmountParams{
         uint256 capped;
         uint256 saleRate;
+        uint256 dexRate;
+        uint16 dexBps;
         uint8 feeTier;
     }
 
@@ -138,6 +145,11 @@ contract PadFactory is Ownable{
             params.capped, 
             params.saleRate,
             FeeOptions[params.feeTier][1]
+        ) + 
+        LaunchCal.preDexAmount(
+            params.capped,
+            params.dexRate,
+            params.dexBps
         );
     }
 

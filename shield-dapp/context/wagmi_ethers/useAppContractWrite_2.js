@@ -10,7 +10,8 @@ export default ({
     address,
     functionName,
     abi,
-    args
+    args,
+    ...props
     })=>{
 
  
@@ -19,7 +20,8 @@ export default ({
         address,
         abi,
         functionName,
-        args
+        args,
+        ...props
     });
     
     const wait = useWaitForTransaction({

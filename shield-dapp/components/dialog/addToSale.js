@@ -15,7 +15,7 @@ import { TextField as MuiTextField, MenuItem, DialogActions, DialogContent} from
 import { useForm, FormProvider, useController} from "react-hook-form";
 
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from "yup";
+
 import { parseEther } from 'ethers/lib/utils.js';
 import exchangeCurrency from'../../currency-list';
 
@@ -23,31 +23,8 @@ import {useDebounce} from 'use-debounce';
 import useApprove from '../../context/hook/app/erc721/useApprove';
 import useAddToMarket from '../../context/hook/app/erc721/useAddToMarket';
 import TextField from '../ControlledTextField';
-
-const schema = yup.object({
-    amount: yup.number().moreThan(0, "Invalid Price").required("Set Price"),
-    currency: yup.string().required("required"),
-    duration: yup.number().min(0, "invalid").required("required"),
-}).required();
-
-/* const TextField = ({name, ...props})=>{
-    const {field, fieldState:{error}} = useController({name})
-
-    return (
-        <MuiTextField
-            {...props}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            value={field.value}
-            name={field.name}
-            inputRef={field.ref}
-            //error={!!error}
-            helperText={error?.message}
-            FormHelperTextProps={{error:!!error}}
-        />
-    )
-} */
-
+import { addToSaleSchema } from "./data/schema";
+import { addToSaleDefValue } from "./data/defaultValues";
 
 const FormSection = ()=>{
 
@@ -75,12 +52,8 @@ export default ({tokenId, toggle})=>{
 
     const methods = useForm({
         mode:"onChange",
-        defaultValues:{
-            amount:1,
-            currency:constants.AddressZero,
-            duration:0
-        },
-        resolver: yupResolver(schema)
+        defaultValues:addToSaleDefValue,
+        resolver: yupResolver(addToSaleSchema)
     });
 
     const formValid = methods.formState.isValid;

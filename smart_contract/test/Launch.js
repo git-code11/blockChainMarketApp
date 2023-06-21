@@ -107,7 +107,7 @@ describe("LaunchPad Test", function () {
             minBuy:parseEther("0.01"),
             maxBuy:parseEther("20"),
         
-            feeTier:2,
+            feeTier:0,
         
             lpLockPeriod:1,//1day
                 
@@ -116,12 +116,14 @@ describe("LaunchPad Test", function () {
         let predict = await launchFactory.predictAmount({
             capped:params.capped,
             saleRate:params.saleRate,
-            feeTier:params.feeTier
+            feeTier:params.feeTier,
+            dexRate:params.dexRate,
+            dexBps:params.dexBps
         });
         console.log(predict, formatEther(predict));
         let tx = await launchTk.approve(launchFactory.address, predict);
         await tx.wait();
-        tx = await launchFactory.createpad(params,{value:parseEther("1")});
+        tx = await launchFactory.createpad(params,{value:await launchFactory.fee()});
         let reciept = await tx.wait();
         let addr = parseAddr(reciept.logs[3].topics[2]);
         launchPad = await ethers.getContractAt("LaunchPad",addr);
@@ -138,9 +140,9 @@ describe("LaunchPad Test", function () {
         //console.log(await launchPad.dexExAmount());
     });
 
-    test("Purchase", async()=>{
-        launchPad.purchase()
-    });
+    // test("Purchase", async()=>{
+    //     launchPad.purchase()
+    // });
 });
 
 

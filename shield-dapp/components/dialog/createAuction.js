@@ -18,7 +18,7 @@ import {DialogActions, DialogContent} from "@mui/material";
 import { useForm, FormProvider, useFormContext} from "react-hook-form";
 
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from "yup";
+
 import { parseEther } from 'ethers/lib/utils.js';
 
 import {useDebounce} from 'use-debounce';
@@ -28,14 +28,8 @@ import useApprove from '../../context/hook/app/erc721/useApprove';
 import useCreateAuction from '../../context/hook/app/erc721/useCreateAuction';
 import TextField from '../ControlledTextField';
 
-const schema = yup.object({
-    reserve: yup.number().positive().required("Set Reserve Price"),
-    startTime: yup.date(),
-    endTime:yup.date().required("End Date Required"),
-    diffTime: yup.number().positive().required("invalid"),//for unscheduled mode
-    scheduled:yup.boolean()
-}).required();
-
+import { createAuctionSchema } from './data/schema';
+import { createAuctionDefValue } from './data/defaultValues';
 
 const ScheduledField = ()=>{
     const methods = useFormContext();
@@ -74,14 +68,8 @@ export default ({tokenId, toggle})=>{
 
     const methods = useForm({
         mode:"onChange",
-        defaultValues:()=>new Promise(resolve=>resolve({
-            reserve:1,
-            scheduled:false,
-            startTime:(new Date).toISOString().split('T')[0],
-            endTime:(new Date(Date.now() + DIFFTIME)).toISOString().split('T')[0],
-            diffTime:24//24hrs default
-        })),
-        resolver: yupResolver(schema)
+        defaultValues:createAuctionDefValue,
+        resolver: yupResolver(createAuctionSchema)
     });
 
     const formValid = /*methods.formState.isDirty &&*/ methods.formState.isValid;

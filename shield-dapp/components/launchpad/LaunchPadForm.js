@@ -1,4 +1,4 @@
-import {useCallback} from 'react';
+import {useCallback, useState} from 'react';
 import { LoadingButton } from "@mui/lab";
 import { Container, Stack } from "@mui/material";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -7,17 +7,26 @@ import TokenForm from './form/TokenForm';
 import LaunchForm from './form/LaunchForm';
 import LaunchInfoForm from './form/LaunchInfoForm';
 
-import * as yup from 'yup';
 import { yupResolver } from "@hookform/resolvers/yup";
-import { utils } from "ethers";
+
+import { createLaunchPadSchema } from './data/schema';
+import { createLaunchDefValue } from './data/defaultValues';
+import LaunchFormStep from './form/LaunchFormStep';
+
 
 const FormContainer = ()=>{
+    const [open, setOpen] = useState(false);
+    const toggleClose = useCallback(()=>setOpen(e=>!e),[]);
+    
     const {handleSubmit} = useFormContext();
 
     const onSubmit = useCallback((data, e)=>{
         e.preventDefault();
+        toggleClose();
         console.log({data})
     },[]);
+
+    
 
     return (
         <Container 
@@ -34,56 +43,23 @@ const FormContainer = ()=>{
                 <LaunchInfoForm/>
             </Stack>
             <Stack alignItems="center">
-                <LoadingButton loadingPosition="end" size="large" variant='contained'
+                <LoadingButton  size="large" variant='contained'
                     type="submit"
                 >
                     <span>Create LaunchPad</span>
                 </LoadingButton>
             </Stack>
+
+            {open && <LaunchFormStep onClose={toggleClose}/>}
         </Container>
     )
 }
 
-const tokenSchema = yup.object({
-    address:yup.string().test({
-        name:"validate Token",
-        message:"Invalid Token Address Checksum",
-        test:(value)=>utils.isAddress(value)
-    })
-});
-
-const detailSchema = yup.object({
-    logoUrl:yup.string().required(),
-    web:yup.string().required(),
-    social:yup.string(),
-    desc:yup.string().required(),
-    hash:yup.string()//to hold uploaded cid
-}).required();
-
-const launchSchema = yup.object({
-    preSale:yup.number().required(),
-    dexSale:yup.number().required(),
-    capped:yup.number().required(),
-    minBuy:yup.number().required(),
-    maxBuy:yup.number().required(),
-    swapLiquidityPercent:yup.number().required(),
-    startTime:yup.date().required(),
-    endTime:yup.date().required(),
-    lockUp:yup.number().required(),
-}).required();
-
-
-const schema = yup.object({
-    token:tokenSchema,
-    launch:launchSchema,
-    detail:detailSchema,
-}).required();
-
-
 export default ()=>{
     const methods = useForm({
-        resolver:yupResolver(schema),
-        reValidateMode:"onChange"
+        resolver:yupResolver(createLaunchPadSchema),
+        mode:"onChange",
+        defaultValues:createLaunchDefValue
     });
 
     return (

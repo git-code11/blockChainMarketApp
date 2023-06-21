@@ -1,6 +1,7 @@
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
+import MuiGlobalStyles from '@mui/material/GlobalStyles';
 
 const color = [
   "#fb4e02",
@@ -23,20 +24,40 @@ const theme = createTheme({
         light:"#54cbff",
         contrastText:"#171717"
       }
+    },
+    zIndex:{
+      high:1055
     }
 });
 
 
 //console.log(theme);
+const GlobalStyles = ({theme})=>
+  <MuiGlobalStyles
+    styles={{
+      body:{
+        backgroundColor:theme.palette.background.paper,
+        color:theme.palette.text.primary,
+        boxSizing:"border-box",
+        a:{
+          textDecoration:"none"
+        },
+      }
+    }}
+  />
+
+const cssBaseLine = <CssBaseline enableColorScheme={true}/>
 
 export default ({children})=>{
 
     return (
         <ThemeProvider theme={theme}>
-            <CssBaseline enableColorScheme={true}/>
-            <Box sx={{backgroundColor:"background.paper", color:"text.primary", minHeight:"100vh", boxSizing:"border-box", "& a":{textDecoration:"none"}}}>
+            <GlobalStyles theme={theme}/>
+            {cssBaseLine}
+            {/* <Box sx={{minHeight:"100vh"}}> */}
                 {children}
-            </Box>
+            {/* </Box> */}
+          
         </ThemeProvider>
     );
 }

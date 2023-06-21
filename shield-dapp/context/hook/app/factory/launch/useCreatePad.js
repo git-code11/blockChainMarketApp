@@ -1,30 +1,54 @@
-const params = {
-    ihash:"Pad Hash",
-    launchToken:launchTk.address,
-    buyToken:buyTk.address,
-    startTime:Math.round(Date.now()/1000),
-    endTime:Math.round(Date.now()/1000) + 60*60*1,//1hr
+import useAppContractWrite_2 from "../../../../wagmi_ethers/useAppContractWrite_2";
+import padFactory from "../../../../../contract/PadFactory.sol/PadFactory.json";
+import _contract from "../../../../../contract/address.json"
+import {_1inputToOutputValueBps, to_pBips} from '../utils';
+import { parseEther } from "ethers/lib/utils.js";
 
-    capped:parseEther("20"),
-    saleRate:sellRate,//parseEther("1"),
-    dexRate:dexRate,
-    dexBps:7000,//70%
 
-    minBuy:parseEther("0.01"),
-    maxBuy:parseEther("20"),
+export default ({
+    address=_contract.padFactory,
+    params,
+    value
+    })=>{
+    
+    const method = useAppContractWrite_2({
+        address,
+        abi:padFactory.abi,
+        functionName:"createpad",
+        args:[params],
+        overrides:{
+            value
+        }
+    });
 
-    feeTier:2,
-
-    lpLockPeriod:1,//1day
-        
-    whiteListEnabled:false,
+    return method;
 }
-let predict = await launchFactory.predictAmount({
-    capped:params.capped,
-    saleRate:params.saleRate,
-    feeTier:params.feeTier
-});
-console.log(predict, formatEther(predict));
-let tx = await launchTk.approve(launchFactory.address, predict);
-await tx.wait();
-tx = await launchFactory.createpad(params,{value:parseEther("1")});
+
+const toDate = d=>(new Date(d));
+export const prepareCreatePadParams = (data, outputDecimals=18)=>{
+    // console.log({prepare:data});
+    const params = {
+        ihash:data.ihash,
+        launchToken:data.launchToken,
+        buyToken:data.buyToken,
+        startTime:Math.round(toDate(data.startTime).getTime()/1000),
+        endTime:Math.round(toDate(data.endTime).getTime()/1000),
+    
+        capped:parseEther(data.capped.toString()),
+        saleRate:_1inputToOutputValueBps(data.saleRate.toString(), outputDecimals),
+        dexRate:_1inputToOutputValueBps(data.dexRate.toString(), outputDecimals),
+        dexBps:to_pBips(Number(data.dexBps)),//70%
+        minBuy:parseEther(data.minBuy.toString()),
+        maxBuy:parseEther(data.maxBuy.toString()),
+    
+        feeTier:Number(data.feeTier),
+    
+        lpLockPeriod:Number(data.lpLockPeriod),//1day
+            
+        whiteListEnabled:Boolean(data.whiteListEnabled),
+    }
+
+    console.log({pr:params})
+
+    return params;
+}

@@ -9,8 +9,8 @@ export default ({disabled})=>{
             <Stack spacing={3}>
                 <Input label="Name" name="name" disabled={disabled}/>
                 <Input label="Symbol" name="symbol" disabled={disabled}/>
-                <Input label="Decimals" name="decimals" disabled={disabled}/>
-                <Input label="Total Supply" name="totalSupply" disabled={disabled}/>
+                <Input label="Decimals" name="decimals" disabled={disabled} type="number"/>
+                <Input label="Total Supply" name="totalSupply" disabled={disabled} type="number"/>
             </Stack>
         </Box>
     )

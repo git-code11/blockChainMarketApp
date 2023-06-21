@@ -4,6 +4,7 @@ pragma solidity 0.8.15;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "./LaunchCal.sol";
 import "../TransferHelper.sol";
 import "../IWETH.sol";
@@ -47,7 +48,7 @@ enum PaymentType{BNB, BUSD} //BNB = WBNB
 contract LaunchPad is Liquidity, Ownable{
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    address dexRouter;
+    address weth;
     address payable feeReciever;
 
     uint16 bnbFeeBps;
@@ -55,7 +56,7 @@ contract LaunchPad is Liquidity, Ownable{
 
     Info private info;
 
-    mapping(address => uint256) private investedAmount;
+    mapping(address => uint256) public investedAmount;
 
     EnumerableSet.AddressSet private allWhiteListed;
 
@@ -120,18 +121,18 @@ contract LaunchPad is Liquidity, Ownable{
         address feeReciever;
         address manager;
         address managerWeth;
+        address weth;
         uint16 dexBps;
         uint16 bnbFeeBps;
         uint16 tkFeeBps;
         address buyToken;//The token for exchange like BUSD
         address launchToken;
         string ihash;
-        PaymentType payType;
         bool enabledwhitelisted;
     }
 
     function initialize(InitializeParams memory params) external{
-
+        weth = params.weth;
         feeReciever = payable(params.feeReciever);
         setManager(params.manager, params.managerWeth);
 
@@ -142,7 +143,7 @@ contract LaunchPad is Liquidity, Ownable{
         info.buyToken = params.buyToken;
         info.launchToken = params.launchToken;
         info.ihash = params.ihash;
-        info.payType = params.payType;
+        info.payType = (params.buyToken == address(0x0))?PaymentType.BNB:PaymentType.BUSD;
         info.whiteListEnabled = params.enabledwhitelisted;
     }
 
@@ -233,16 +234,23 @@ contract LaunchPad is Liquidity, Ownable{
         uint256 amountIn = info.payType == PaymentType.BNB?msg.value:amountIn_;
         uint256 amountOut = __purchaseToken(amountIn);
 
+        //TODO:
+        //Be able to transfer only required spendable amount
+        uint256 remainingLaunchToken = info.tokenTotal - info.tokenSold;
+        if(remainingLaunchToken < amountOut){
+            revert("Not enought launchToken");
+        }
+
         //TODO: transfer buytoken to contract
         //TODO: transfer launchtoken to buyer
 
         if(info.payType == PaymentType.BNB){
-            TransferHelper.safeTransferETH(info.buyToken, msg.value);
+            TransferHelper.safeTransferETH(weth, msg.value);
         }else{
             TransferHelper.safeTransferFrom(info.buyToken, msg.sender, address(this), amountIn);
         }
 
-        TransferHelper.safeTransfer(info.buyToken, msg.sender, amountOut);
+        TransferHelper.safeTransfer(info.launchToken, msg.sender, amountOut);
 
         emit PurchasedToken(msg.sender, amountIn, amountOut);
     }
@@ -253,7 +261,10 @@ contract LaunchPad is Liquidity, Ownable{
         
         uint256 newCapped;//current balance of buytoken
         if(info.payType == PaymentType.BNB){
-            newCapped = address(this).balance;
+            newCapped = IWETH(weth).balanceOf(address(this));
+
+            //TODO: Unwrap for Native Transfer
+            IWETH(weth).withdraw(newCapped);
         }else{
             newCapped = IERC20(info.buyToken).balanceOf(address(this));
         }
@@ -265,10 +276,12 @@ contract LaunchPad is Liquidity, Ownable{
                     bnbFeeBps,
                     tkFeeBps
                 );
-        //TODO: Unwrap for Native Transfer
-        if(info.payType == PaymentType.BNB){
-            IWETH(info.buyToken).withdraw(IWETH(info.buyToken).balanceOf(address(this))); 
-        }
+        
+        //TODO: remove already implemented
+        // //TODO: Unwrap for Native Transfer
+        // if(info.payType == PaymentType.BNB){
+        //     IWETH(weth).withdraw(newCapped); 
+        // }
 
         //TODO: add to dex
         _addDex(amounts[1]);
@@ -301,7 +314,7 @@ contract LaunchPad is Liquidity, Ownable{
         //TODO: transfer remenant token to admin
         uint256 remainingLaunchToken = IERC20(info.launchToken).balanceOf(address(this));
         if(remainingLaunchToken > 0){
-            TransferHelper.safeTransfer(info.buyToken, msg.sender, remainingLaunchToken);
+            TransferHelper.safeTransfer(info.launchToken, msg.sender, remainingLaunchToken);
         }
     }
 
@@ -385,8 +398,21 @@ contract LaunchPad is Liquidity, Ownable{
         return LaunchCal.amountOut(amount, info.saleRate);
     }
 
+    function saleExAmountIn(uint256 amountOut) public view returns (uint256){
+        return LaunchCal.amountIn(amountOut, info.saleRate);
+    }
+
     function dexExAmount(uint256 amount) public view returns (uint256){
         return LaunchCal.amountOut(amount, info.dexRate);
+    }
+
+    receive() external payable {
+        //to able withdrawal from weth
+        //TODO: block non-contract address from sending direct value
+        if(!Address.isContract(msg.sender)){
+            //purchase(msg.value);
+            revert("Call purchase direct");
+        }
     }
 }
 

@@ -5,5 +5,5 @@
     "weth":"0x558ffe0b5bb82d4501a8F579F3F15D30AE0fCd2A",
     "auction":"0x6bfB461CeaBf3A862Ff44c132D464DFc81fE9fb7",
     "tokenFactory":"0xc2c73725464D4723279d160f43AC58FD87d8a577",
-    "launchFactory":"0xa1e970eb5cD6f127d0A319E9b6aD5bE36176e0eD"
+    "padFactory":"0x725e36f93168FFcc9c61e96a2Fc45CBbe1bd5fef"
 }
