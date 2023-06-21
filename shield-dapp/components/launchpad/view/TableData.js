@@ -16,7 +16,7 @@ export default ({header, data})=>{
                 <TableBody>
                     {
                         Object.entries(data).map(([key, value])=>
-                            <TableRow>
+                            <TableRow key={key}>
                                 <TableCell>{key}</TableCell>
                                 <TableCell>{value}</TableCell>
                             </TableRow>
