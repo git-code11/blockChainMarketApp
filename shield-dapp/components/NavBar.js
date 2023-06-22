@@ -85,9 +85,9 @@ const MenuList = ()=>{
 
 
 const AccountNeededMenu = ()=>{
-   // const {isConnected} = useAccount();
+   const {isConnected} = useAccount();
 
-    return //isConnected?
+    return isConnected?
         <>
             <ListItemButton component={Link} href="/nft_create">Create NFT</ListItemButton>
             <Divider variant="middle"/>
@@ -97,6 +97,6 @@ const AccountNeededMenu = ()=>{
             <Divider variant="middle"/>
             <ListItemButton component={Link} href="/launch/token">Create Token</ListItemButton>
         </>
-       // :null;
+       :null;
       
 }
