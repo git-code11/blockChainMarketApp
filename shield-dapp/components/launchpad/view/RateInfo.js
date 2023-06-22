@@ -51,10 +51,11 @@ export default ({
                 </Stack>
             </Stack>
 
-            <Typography variant="consolas" 
+        { investedAmountStr &&
+    <Typography variant="consolas" 
                 varaint="h6"
                 textAlign="center" fontWeight="bold">Invested ➜ {investedAmountStr}{buySym}</Typography>
-
+    }
             <Typography variant="consolas" 
                 varaint="h6"
                 textAlign="center" fontWeight="bold">Remains ➜ {remainAmountStr}{buySym}</Typography>
