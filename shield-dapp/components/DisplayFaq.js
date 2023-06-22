@@ -8,17 +8,17 @@ import Sal,{useSal} from "./SalBox";
 const FaqData = [
     {
         text1:"Set Up Your Wallet",
-        text2:"Powerful features and inclusions, which makes ShieldPact standout, easily customizable and scalable.",
+        text2:"Setting up a DeFI wallet is the first step to embarking on your blockchain journey.",
         icon:"/images/icon/wallet.png"
     },
     {
         text1:"Add your NFT's",
-        text2:"We've made the template fully responsive, so it looks great on all devices: desktop, tablets and.",
+        text2:"Use our robust NFT minter to design and launch your NFT project.",
         icon:"/images/icon/save.png"
     },
     {
         text1:"Sell Your NFT's",
-        text2:"I throw myself down among the tall grass by the stream as I lie close to the earth NFT's.",
+        text2:"Publish your NFT project and share across social media, let the world knows you have arrived.",
         icon:"/images/icon/share.png"
     }
 ]

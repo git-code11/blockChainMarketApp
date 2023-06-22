@@ -9,12 +9,11 @@ export default ({name, ...props})=>{
             {...props}
             onChange={field.onChange}
             onBlur={field.onBlur}
-            value={field.value}
+            value={field.value===undefined?"":field.value}
             name={field.name}
             inputRef={field.ref}
-            //error={!!error}
+            error={Boolean(error)}
             helperText={error?.message}
-            FormHelperTextProps={{error:!!error}}
         />
     )
 }

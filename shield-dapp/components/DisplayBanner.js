@@ -18,11 +18,11 @@ const BackGroundPlay = styled('video',{shouldForwardProp:prop=>prop!="invert"})(
     },
     right:invert?0:"auto",
     zIndex:-1,
-    transform:`translate(${invert?50:-50}%)`
+    transform:`translate(${invert?/* 50:-50 */45:-45}%)`
 }));
 
-const Screen = styled(Paper)(({theme})=>({
-    minHeight:"65vmin",
+const Screen = styled(/* Paper */Box)(({theme})=>({
+    minHeight:"90vmin",
     padding:theme.spacing(2),
     position:"relative",
     zIndex:1,
@@ -34,10 +34,14 @@ const Screen = styled(Paper)(({theme})=>({
         position:"absolute",
         width:"100%",
         height:"100%",
-        backgroundColor:"#0033444a",
+        backgroundColor:"#00222e42"/* "#0033444a" */,
         
     }
 }))
+
+const BANNER_TEXT = "Partner with us to create and showcase your NFT!"
+//Partner with one of the world’s largest retailers to showcase your brand and products.
+
 
 const DisplayScreen = ()=>{
     const vRef = useRef();
@@ -57,13 +61,15 @@ const DisplayScreen = ()=>{
         <Screen component={Stack} justifyContent="center" alignItems="center" textAlign="center">
             <BackGroundPlay ref={vRef} src="/banner.mp4" muted loop/>
             {isMd && <BackGroundPlay invert ref={vRef2} src="/banner.mp4" muted loop/>}
-            <Box position="relative" mb={6}>
-                <Typography variant={isMd?"h3":"h4"} mb={3}>Discover Digital Art,<br/>Collect and Sell Your Specific NFTs.</Typography>
-                <Typography variant={isMd?"h5":"body1"}>Partner with one of the world’s largest retailers to showcase your brand and products.</Typography>
-            </Box>
-            
-            <Button component={Link} href="/explore/0" size="large" color="primary" variant="contained">Explore</Button>
-            
+            <Stack position="relative" spacing={4}>
+                <Typography variant={isMd?"h3":"h4"}>
+                    Discover Digital Art,<br/>Collect and Sell Your Specific NFTs.
+                </Typography>
+                <Typography variant={isMd?"h5":"h6"}>
+                    {BANNER_TEXT}
+                </Typography>
+                <Button sx={{alignSelf:"center"}} component={Link} href="/explore/0" size="large" color="primary" variant="contained">Explore</Button>
+            </Stack>
         </Screen>
     );
 }

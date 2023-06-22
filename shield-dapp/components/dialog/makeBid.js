@@ -65,11 +65,11 @@ export default ({tokenId, toggle})=>{
 
     const can_proceed = useMemo(()=>{
         if(balance && auction && value){
-            const _balance = balance.value.toBigInt();
-            const _reserve = auction.reserve.toBigInt();
-            const _price = auction.price.toBigInt();
-            const _value = value.toBigInt();
-            return _balance >= value && _reserve <= _value && _price < _value;
+            const _balance = balance.value;
+            const _reserve = auction.reserve;
+            const _price = auction.price;
+            //const _value = value;
+            return _balance >= value && _reserve <= _value && _price < value;
         }
         return false;
     }
@@ -93,7 +93,7 @@ export default ({tokenId, toggle})=>{
                         <Typography fontWeight={600}>{currency?.symbol}</Typography>
                     </Stack>
                 </Box>
-                <Typography>Last Bid Amount: <b>{auction?.price?.gt(0)?formatEther(auction?.price):formatEther(auction?.reserve||0)}{currency?.symbol}</b></Typography>
+                <Typography>Last Bid Amount: <b>{auction?.price > 0?formatEther(auction?.price):formatEther(auction?.reserve||0)}{currency?.symbol}</b></Typography>
                 <Typography>Account Balance: <b>{balance?.formatted}{currency?.symbol}</b></Typography>
                 <Alert variant="outlined" severity="info">
                     <Typography>

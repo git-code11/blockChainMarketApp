@@ -6,12 +6,8 @@ import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
-import {useContractRead, useContractWrite, usePrepareContractWrite, useWaitForTransaction} from "wagmi";
-
-import auctionAbi from "../../contract/Auction.sol/MarketAuction.json";
-import nftAbi from "../../contract/NFT.sol/NFT.json";
 import _contract from "../../contract/address.json";
-import { constants, BigNumber } from "ethers";
+
 
 import e_msg from "../../context/lib/e_msg";
 import {DialogActions, DialogContent} from "@mui/material";
@@ -45,13 +41,16 @@ const FormSection = ()=>{
     return (
         <Stack spacing={3}>
             <TextField name="reserve" type="number" label="Reserve amount"/>
-            {isScheduled?
+            
+            {
+                isScheduled?
                 <>
-                    <TextField name="startTime" label="Start Time" type="date"/>
-                    <TextField name="endTime" label="End Time" type="date"/>
+                    <TextField  name="startTime" label="Start Time" type="datetime-local"/>
+                    <TextField name="endTime" label="End Time" type="datetime-local"/>
                 </>:
-                <TextField name="diffTime" label="Duration Period (hrs)"/>
+                <TextField name="diffTime" type="number" label="Duration Period (hrs)"/>
             }
+        
             <Stack direction="row">
                 <Typography varaint="caption">scheduled</Typography>
                 <ScheduledField/>
@@ -60,7 +59,30 @@ const FormSection = ()=>{
     );
 }
 
-const DIFFTIME = 7 * 24 * 60 * 60 * 1000///7days
+
+
+const prepareFormValue = (formValid, formValue)=>{
+    let value = [];
+    const _formValid = Boolean(formValid && formValue.reserve && formValue.diffTime);
+    if(_formValid){
+        const f_startTime = Math.round(Date.parse(formValue.startTime)/1000);
+        const f_endTime = Math.round(Date.parse(formValue.endTime)/1000);
+        const f_diffTime = formValue.scheduled?
+                                Math.abs(f_endTime - f_startTime):
+                                formValue.diffTime*3600//hrs to secs
+        
+        value = [ 
+                parseEther(formValue.reserve.toString()),
+                [
+                    formValue.scheduled?f_startTime:0,
+                    f_diffTime
+                ],
+                formValue.scheduled
+            ];
+    }
+
+    return [value, _formValid];
+}
 
 export default ({tokenId, toggle})=>{
     
@@ -71,37 +93,14 @@ export default ({tokenId, toggle})=>{
         defaultValues:createAuctionDefValue,
         resolver: yupResolver(createAuctionSchema)
     });
+    const _formValue = methods.watch();
 
-    const formValid = /*methods.formState.isDirty &&*/ methods.formState.isValid;
+    const _formValid = /*methods.formState.isDirty &&*/ methods.formState.isValid;
 
-    const _formValue = formValid?methods.getValues():{};
-    
-    const _rformValue = useMemo(()=>{
-        if(formValid){
-            const f_startTime = Math.round(Date.parse(_formValue.startTime)/1000);
-            const f_endTime = Math.round(Date.parse(_formValue.endTime)/1000);
-            const f_diffTime = _formValue.scheduled?
-                                    Math.abs(f_endTime - f_startTime):
-                                    (_formValue.diffTime??24)*3600//hrs to secs
-            return (
-             [   
-                [ 
-                    parseEther(_formValue.reserve.toString()),
-                    [
-                        _formValue.scheduled?f_startTime:0,
-                        f_diffTime
-                    ],
-                    _formValue.scheduled
-                ],
-            formValid
-            ]
-            );
-        }
-        return [[], formValid]
-    },[_formValue, formValid]);
+    const _prepFormValue = useMemo(()=>prepareFormValue(_formValid, _formValue),[_formValue, _formValid]);
 
     
-    const [[formValue, dformValid]] = useDebounce(_rformValue, 500);
+    const [[formValue, formValid]] = useDebounce(_prepFormValue, 500);
 
 
     const approve = useApprove({
@@ -110,7 +109,7 @@ export default ({tokenId, toggle})=>{
         enabled:tokenIdIsValid
     });
     
-    const createAuctionEnabled = tokenIdIsValid && dformValid && approve.isApproved;
+    const createAuctionEnabled = tokenIdIsValid && formValid && approve.isApproved;
     const create = useCreateAuction({
         item:tokenId,
         formArgs:formValue,

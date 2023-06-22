@@ -1,5 +1,5 @@
 import { constants } from "ethers"
-
+import { formatDate } from "../../../context/lib";
 
 export const createTokenDefValue = {
     name:"",
@@ -15,7 +15,7 @@ export const purchaseLaunchDefValue = ({buyToken, minBuy})=>async()=>({
 });
 
 const toDay = 1000 * 60 * 60 * 24;
-const formatDate = date=>date.toISOString().split(/:\d+\.\d+Z/)[0]
+//const formatDate = date=>date.toISOString().split(/:\d+\.\d+Z/)[0]
 export const createLaunchDefValue = async ()=>({
     token:{
         address:"0x67D495D90b0CF6cFa990659FF980A49D27eCaDD1",

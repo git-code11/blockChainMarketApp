@@ -7,7 +7,7 @@ export default ({address})=>{
     const {data, isLoading} = usePadInfoByAddress({
         address
     });
-    console.log({data})
+    
 
     const {data:buyToken, isLoading:btkLoading} = useCurrency(data?.buyToken);
 

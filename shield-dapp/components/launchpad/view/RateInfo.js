@@ -49,19 +49,21 @@ export default ({
                     <Typography variant="subtitle2" fontFamily="consolas">{`${tokenSold} ${launchSym}`}</Typography>
                     <Typography variant="subtitle2" fontFamily="consolas">{`${tokenTotal} ${launchSym}`}</Typography>
                 </Stack>
-            </Stack>
 
-        { investedAmountStr &&
-    <Typography variant="consolas" 
-                varaint="h6"
-                textAlign="center" fontWeight="bold">Invested ➜ {investedAmountStr}{buySym}</Typography>
-    }
-           
-{remainAmountStr &&
-<Typography variant="consolas" 
-                varaint="h6"
-                textAlign="center" fontWeight="bold">Remains ➜ {remainAmountStr}{buySym}</Typography>
-    }
+                { investedAmountStr &&
+                    <Typography variant="consolas" 
+                        varaint="body2"
+                        textAlign="center" fontWeight="bold">Invested ➜ {investedAmountStr}{buySym}</Typography>
+                }
+            
+                { remainAmountStr &&
+                    <Typography variant="consolas" 
+                        varaint="body2"
+                        textAlign="center" fontWeight="bold">Remains ➜ {remainAmountStr}{buySym}</Typography>
+                }
+
+            </Stack>
+            
         </Stack>
     )
 }

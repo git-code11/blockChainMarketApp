@@ -43,6 +43,26 @@ import Backdrop from '@mui/material/Backdrop';
 import TimeBox from '../../../components/TimeBox';
 
 
+const useAuctionClose = (startTime, diffTime)=>{
+    const [closed] = useSetTimeout(
+        (_cb, close)=>{
+            if(startTime && diffTime && startTime > 0){
+                let result = Date.now() > (startTime + diffTime)*1000;
+                if(result)
+                    close();
+                _cb(result);
+                return;
+            }
+
+            if(startTime === 0)
+                close();
+            _cb(false);
+        }, 2000, false, [startTime, diffTime]
+    );
+
+    return closed;
+}
+
 const ContainerWrapper =  ({tokenId})=>{
     
     const {toggleId} = useModal();
@@ -98,6 +118,7 @@ const ContainerWrapper =  ({tokenId})=>{
 
     const {data:token} = useCurrency(saleData?.currency);
     const {data:native} = useCurrency();
+    
 
     const {data:fdata, ...ipfs} = useIpfsData(uri);
     const ipsLoading = !fdata || ipfs.isLoading;
@@ -106,26 +127,11 @@ const ContainerWrapper =  ({tokenId})=>{
         Boolean(auctionData) ? [auctionData.startTime.toNumber(), auctionData.diffTime.toNumber()]:[]
         ,[auctionData]);
 
-    const [auctionClosed] = useSetTimeout(
-        (_cb, close)=>{
-            if(auctionStartTime && auctionDiffTime &&
-                auctionStartTime > 0){
-                let result = Date.now() > (auctionStartTime + auctionDiffTime)*1000;
-                if(result)
-                    close();
-                _cb(result);
-                return;
-            }
-
-            if(auctionStartTime === 0)
-                close();
-            _cb(false);
-        }, 2000, false, [auctionStartTime, auctionDiffTime]
-    );
+    const auctionClosed = useAuctionClose(auctionStartTime, auctionDiffTime);
 
     if(!Boolean(tokenId) || isLoading){
         return (    
-            <Backdrop in={true}>
+            <Backdrop open={true}>
                 <CircularProgress size={50}/>
             </Backdrop>
                 );
@@ -133,19 +139,19 @@ const ContainerWrapper =  ({tokenId})=>{
     
     if(error || ipfs.error){
         return (
-            <Backdrop in={true}>
-            <Typography color="error">
-                {error?
-                    e_msg(error)||"An Error Occured Reloading required":
-                    e_msg(ipfs.error)||"An Error Occured While Fetching Ipfs Data"
+            <Backdrop open={true}>
+                <Typography color="error">
+                    {error?
+                        e_msg(error)||"An Error Occured Reloading required":
+                        e_msg(ipfs.error)||"An Error Occured While Fetching Ipfs Data"
+                    }
+                </Typography>
+                {
+                    error?
+                    <Button disabled={!tokenId} onClick={()=>info.refetch()} variant="outlined">Retry</Button>:
+                    <Button disabled={!tokenId} onClick={()=>ipfs.mutate()} variant="outlined">Reload</Button>
                 }
-            </Typography>
-            {
-                error?
-                <Button disabled={!tokenId} onClick={()=>info.refetch()} variant="outlined">Retry</Button>:
-                <Button disabled={!tokenId} onClick={()=>ipfs.mutate()} variant="outlined">Reload</Button>
-            }
-        </Backdrop>
+            </Backdrop>
         );
     }
     
@@ -200,7 +206,7 @@ const ContainerWrapper =  ({tokenId})=>{
                 <Typography fontWeight="bold">Auction</Typography>
                 <Typography><b>{numberOfBidPlaced}</b> Bid Placed</Typography>
             </Stack>
-            <Typography fontWeight="bold" variant="h5" textAlign="end">
+            <Typography component="div" fontWeight="bold" variant="h5" textAlign="end">
                 <TimeBox start={auctionStartTime} gap={auctionDiffTime}/>
             </Typography>
         </Stack>
@@ -246,39 +252,42 @@ const ContainerWrapper =  ({tokenId})=>{
 
         
 
-        { user === owner ?
+        { 
+            user === owner && 
+            <Stack spacing={2}>
+                {itemOnSale && 
+                    <Button variant="contained" onClick={()=>toggleId("removeFromSale")}>Clear Market Value</Button>}
+                <Button variant="contained" onClick={()=>toggleId("addToSale")}>Set MarketValue</Button>
+                <Button variant="contained" onClick={()=>toggleId("createAuction")}>Create Auction</Button>
+            </Stack>
+        }
+        
+        {
+            user !== owner &&
+            <Stack spacing={2}>
+                {itemOnAuction &&
+                    <>
+                    <Button variant="contained" fontWeight="bold" 
+                        color="primary" onClick={()=>toggleId('makeBid')}>Place a Bid</Button>
+                    
+                    {allowedToExtendAuction && 
+                        <Button variant="contained" color="secondary" onClick={()=>toggleId("extendAuction")}>Extend Auction</Button>
+                    }
 
-        <Stack spacing={2}>
-            {itemOnSale && 
-                <Button variant="contained" onClick={()=>toggleId("removeFromSale")}>Clear Market Value</Button>}
-            <Button variant="contained" onClick={()=>toggleId("addToSale")}>Set MarketValue</Button>
-            <Button variant="contained" onClick={()=>toggleId("createAuction")}>Create Auction</Button>
-        </Stack>
-        :
-        <Stack spacing={2}>
-            {itemOnAuction &&
-                <>
-                <Button variant="contained" fontWeight="bold" 
-                    color="primary" onClick={()=>toggleId('makeBid')}>Place a Bid</Button>
-                
-                {allowedToExtendAuction && 
-                    <Button variant="contained" color="secondary" onClick={()=>toggleId("extendAuction")}>Extend Auction</Button>
+                    {allowedToCloseAuction &&
+                        <Button variant="contained" color="secondary" onClick={()=>toggleId("closeAuction")}>Close Auction</Button>
+                        }
+                    </>
+                        
+                }
+                {itemOnSale &&
+                    <Button variant="contained" color="secondary" onClick={()=>toggleId("purchase")}>Buy Now</Button>
                 }
 
-                {allowedToCloseAuction &&
-                    <Button variant="contained" color="secondary" onClick={()=>toggleId("closeAuction")}>Close Auction</Button>
-                    }
-                </>
-                    
-            }
-            {itemOnSale &&
-                <Button variant="contained" color="secondary" onClick={()=>toggleId("purchase")}>Buy Now</Button>
-            }
-
-            {!itemOnAuction &&
-                <Button variant="contained" color="secondary" onClick={()=>toggleId("offer")}>Make an offer</Button>
-            }
-        </Stack>
+                {/* !itemOnAuction &&
+                    <Button variant="contained" color="secondary" onClick={()=>toggleId("offer")}>Make an offer</Button>
+                */}
+            </Stack>
         }
 
         <Box>

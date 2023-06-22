@@ -26,6 +26,8 @@ import TextField from '../ControlledTextField';
 import { addToSaleSchema } from "./data/schema";
 import { addToSaleDefValue } from "./data/defaultValues";
 
+//TODO:fix addToSale
+
 const FormSection = ()=>{
 
     return (
@@ -39,12 +41,27 @@ const FormSection = ()=>{
                 }
             </TextField>
             <Stack>
-                <TextField name="duration" label="duration (in hours)"/>
+                <TextField name="duration" label="duration (in hours)" type="number"/>
                 <Typography varaint="caption">use &#34;0&#34; to represent infinty</Typography>
             </Stack>
         </Stack>
     );
 }
+
+
+const prepareFormValue = (formValid, formValue)=>{
+    let value = [];
+    const _formValid = Boolean(formValid && formValue.amount)
+    if(_formValid){
+        value = [
+            formValue.currency,
+            parseEther(formValue.amount.toString()),
+            formValue.duration && BigNumber.from(formValue.duration*3600)
+        ]
+    }
+    return [value, _formValid];
+}
+
 
 export default ({tokenId, toggle})=>{
     
@@ -56,16 +73,12 @@ export default ({tokenId, toggle})=>{
         resolver: yupResolver(addToSaleSchema)
     });
 
-    const formValid = methods.formState.isValid;
-
-    const _formValue = formValid?methods.getValues():{};
+    const _formValue = methods.watch();
+    const _formValid = methods.formState.isValid;
     
-    const _rformValue = useMemo(()=>
-        formValid ? [[_formValue.currency, _formValue.amount && parseEther(_formValue.amount.toString()),
-                    _formValue.duration && BigNumber.from(_formValue.duration*3600)], formValid]:[[], formValid],
-        [_formValue, formValid]);
+    const _prepFormValue = useMemo(()=>prepareFormValue(_formValid, _formValue),[_formValue, _formValid]);
 
-    const [[formValue, dformValid]] = useDebounce(_rformValue, 500);
+    const [[formValue, formValid]] = useDebounce(_prepFormValue, 500);
 
     const approve = useApprove({
         item:tokenId,
@@ -73,7 +86,8 @@ export default ({tokenId, toggle})=>{
         enabled:tokenIdIsValid
     });
     
-    const addToMarketEnabled = approve.isApproved && tokenIdIsValid && dformValid;
+    const addToMarketEnabled = approve.isApproved && tokenIdIsValid && formValid;
+   
     const market = useAddToMarket({
         item:tokenId,
         formArgs:formValue,
@@ -81,7 +95,7 @@ export default ({tokenId, toggle})=>{
     });
 
     
-    const _error = approve.error || (addToMarketEnabled && market.error);
+    const _error = approve.error || market.error;
     
     const _loading = approve.loading|| market.loading;
  
@@ -116,7 +130,7 @@ export default ({tokenId, toggle})=>{
                         </Alert>
                     }       
 
-                    {market.isSuccess && 
+                    {market.success && 
                         <Alert>Successfully</Alert>
                     }
 

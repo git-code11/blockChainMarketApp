@@ -8,29 +8,33 @@ import DisplayFaq from "../../components/DisplayFaq";
 
 import ListPriceSection from '../../components/ListPriceSection';
 
-import {parseUnits} from 'ethers/lib/utils';
 
 export default ()=>{
     
     return (
-        <Container component={Stack} spacing={4} sx={{mt:4, mb:3}}>
+        <Box sx={{mb:3}}>
             <DisplayBanner/>
-            
-           {/* 
-           <Box>
-                <Typography variant="h4" fontWeight="bold" mb={5}>Live Biding</Typography>
-                <SwipeableDisplay/>
-            </Box>
-            */}
 
-            <Box>
-                <Typography variant="h4" mb={8} fontWeight="bold">Create and Sell Your NFT</Typography>
-                <DisplayFaq/>
-            </Box>
             
-            <ListPriceSection/>
-            
-        </Container>
+            <Container component={Stack} spacing={4} sx={{mt:5}}>
+                
+                {/* 
+                <Box>
+                    <Typography variant="h4" fontWeight="bold" mb={5}>Live Biding</Typography>
+                    <SwipeableDisplay/>
+                </Box>
+                */}
+    
+                <Box>
+                    <Typography variant="h4" mb={8} fontWeight="bold">Create and Sell Your NFT</Typography>
+                    <DisplayFaq/>
+                </Box>
+                
+                <ListPriceSection/>
+                
+            </Container>
+ 
 
+        </Box>
     );
 }

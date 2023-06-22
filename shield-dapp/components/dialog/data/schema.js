@@ -7,13 +7,12 @@ export const addToSaleSchema = yup.object({
 }).required();
 
 
-
 export const createAuctionSchema = yup.object({
     reserve: yup.number().positive().required("Set Reserve Price"),
-    startTime: yup.date(),
+    startTime: yup.date().required("Start Date Required"),
     endTime:yup.date().required("End Date Required"),
     diffTime: yup.number().positive().required("invalid"),//for unscheduled mode
-    scheduled:yup.boolean()
+    scheduled:yup.boolean().required()
 }).required();
 
 

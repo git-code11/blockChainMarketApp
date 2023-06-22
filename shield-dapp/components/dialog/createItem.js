@@ -27,7 +27,7 @@ export default ({modal, form})=>{
     const {address:ownerAddr} = useAccount();
     const creatorAddr = ownerAddr;
 
-    const formValue = form.getValues();
+    const formValue = form.watch();
     
     //no deadline (duration for sale of item)
     const duration = 0;
