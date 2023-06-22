@@ -54,7 +54,7 @@ export default ({address})=>{
                     <Card>
                         <CardContent>
                             {
-                                isConnected &&
+                                /*isConnected &&*/
                                 <RateInfo data={parsedData} investedAmount={investedAmount} remainAmount={remainAmount}/>
                             }
                             
