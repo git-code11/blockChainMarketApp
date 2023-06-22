@@ -52,8 +52,8 @@ export default ({children})=>{
 
     return (
         <ThemeProvider theme={theme}>
-            <GlobalStyles theme={theme}/>
-            {cssBaseLine}
+      {/* <GlobalStyles theme={theme}/>*/}
+            {/*cssBaseLine*/}
             {/* <Box sx={{minHeight:"100vh"}}> */}
                 {children}
             {/* </Box> */}
