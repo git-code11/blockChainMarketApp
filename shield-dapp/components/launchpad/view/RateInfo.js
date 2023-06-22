@@ -56,9 +56,12 @@ export default ({
                 varaint="h6"
                 textAlign="center" fontWeight="bold">Invested ➜ {investedAmountStr}{buySym}</Typography>
     }
-            <Typography variant="consolas" 
+           
+{remainAmountStr &&
+<Typography variant="consolas" 
                 varaint="h6"
                 textAlign="center" fontWeight="bold">Remains ➜ {remainAmountStr}{buySym}</Typography>
+    }
         </Stack>
     )
 }
