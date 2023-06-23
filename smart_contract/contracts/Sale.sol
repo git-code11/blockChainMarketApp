@@ -30,6 +30,9 @@ contract MarketSales is Ownable{
         uint256 deadline;
     }
     
+    uint16 constant BPS = 10000;
+    uint16 public purchaseTaxBps = 100;
+    uint256 public mintFee = 0;
 
     mapping(uint256=>ListPrice) public ItemForSale;
 
@@ -51,6 +54,14 @@ contract MarketSales is Ownable{
         //1. Check For Market Approval on Item
         require(nft.getApproved(item) == address(this), "Market require Approval from Owner");
         _;
+    }
+
+    function updatePurchaseTaxBps(uint16 taxBps) external onlyOwner{
+        purchaseTaxBps = taxBps;
+    }
+
+    function updateMintFee(uint256 fee_) external onlyOwner{
+        mintFee = fee_;
     }
 
     function updateNft(address nft_) external onlyOwner{
@@ -100,14 +111,18 @@ contract MarketSales is Ownable{
         if(sale.currency == address(0)){
             //payment is made througn native Token (BNB)
             require(msg.value == sale.amount, "Incorrect price");
-            TransferHelper.safeTransferETH(sale.seller, sale.amount);
+            uint256 tax = (msg.value * purchaseTaxBps)/BPS;
+            TransferHelper.safeTransferETH(sale.seller, msg.value - tax);
             //pay tax here
+            TransferHelper.safeTransferETH(this.owner(), tax);
 
         }else{
             //payment made through ERC20 Token
             require(IERC20(sale.currency).allowance(msg.sender, address(this)) >= sale.amount, "Incorrect price");
-            TransferHelper.safeTransferFrom(sale.currency, msg.sender, sale.seller, sale.amount);
+            uint256 tax = (msg.value * purchaseTaxBps)/BPS;
+            TransferHelper.safeTransferFrom(sale.currency, msg.sender, sale.seller, sale.amount - tax);
             //pay tax here
+            TransferHelper.safeTransferFrom(sale.currency, msg.sender, this.owner(), tax);
         }
 
         //3. Transfer Items
@@ -154,9 +169,13 @@ contract MarketSales is Ownable{
     }
 
 
-    function createItem(address creator, address owner, string memory cid, uint256 amount, address currency, uint256 deadline) external returns(uint256){
+    function createItem(address creator, address owner, string memory cid, uint256 amount, address currency, uint256 deadline) external payable returns(uint256){
         //TODO: pay minting fee
         uint256 item = nft.create(creator, owner, cid);
+        if(mintFee > 0){
+            require(msg.value == mintFee, "Invalid minting fee");
+            TransferHelper.safeTransferETH(this.owner(), mintFee);
+        }
 
         if(amount > 0){
             _addToMarket(msg.sender, item, currency, amount, deadline);

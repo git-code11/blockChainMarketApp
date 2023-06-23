@@ -10,6 +10,8 @@ import "../TransferHelper.sol";
 import "../IWETH.sol";
 import "./Liquidity.sol";
 
+import "hardhat/console.sol";
+
 struct Info{
     uint256 startTime;
     uint256 endTime;
@@ -66,6 +68,9 @@ contract LaunchPad is Liquidity, Ownable{
     event AddedToDex(uint256 lpToken, uint256 lockStartTime);
     event ClaimedLpToken(address creator, uint256 amount);
     event WhiteListed(address client);
+
+    error InsufficientLaunchToken(string message, uint256 remaining);
+
 
     modifier hasStarted(){
         require(info.startTime < block.timestamp, "has not started");
@@ -217,13 +222,15 @@ contract LaunchPad is Liquidity, Ownable{
                         && investedAmount[msg.sender] + amount <= info.maxBuy, "Unable to purchase due to limit boundaries");
         
         uint256 launchTokenAmount =  saleExAmount(amount);
+        //TODO:
+        //Be able to transfer only required spendable amount
         require(remainingToken() >= launchTokenAmount, "Not Enought Token");
 
         if(investedAmount[msg.sender] == 0){
             info.totalParticipant += 1;//add new person
         }
         
-        investedAmount[msg.sender] += launchTokenAmount;
+        investedAmount[msg.sender] += amount;
         info.tokenSold += launchTokenAmount;
 
         return launchTokenAmount;
@@ -234,12 +241,14 @@ contract LaunchPad is Liquidity, Ownable{
         uint256 amountIn = info.payType == PaymentType.BNB?msg.value:amountIn_;
         uint256 amountOut = __purchaseToken(amountIn);
 
-        //TODO:
-        //Be able to transfer only required spendable amount
-        uint256 remainingLaunchToken = info.tokenTotal - info.tokenSold;
-        if(remainingLaunchToken < amountOut){
-            revert("Not enought launchToken");
-        }
+        // //TODO:
+        // //Be able to transfer only required spendable amount
+        // uint256 remainingLaunchToken = info.tokenTotal - info.tokenSold;
+        // if(remainingLaunchToken < amountOut){
+        //     //revert InsufficientLaunchToken("Not enought launchToken ", remainingLaunchToken);
+        //     console.log("Remain", remainingLaunchToken);
+        //     revert("Not enought launchToken ");
+        // }
 
         //TODO: transfer buytoken to contract
         //TODO: transfer launchtoken to buyer
@@ -276,6 +285,7 @@ contract LaunchPad is Liquidity, Ownable{
                     bnbFeeBps,
                     tkFeeBps
                 );
+        //console.log(amounts[0],amounts[1],amounts[2], amounts[3]);
         
         //TODO: remove already implemented
         // //TODO: Unwrap for Native Transfer
@@ -302,19 +312,19 @@ contract LaunchPad is Liquidity, Ownable{
         
         if(info.payType == PaymentType.BNB){
             if(address(this).balance > 0){
-                TransferHelper.safeTransferETH(msg.sender, address(this).balance);
+                TransferHelper.safeTransferETH(this.owner(), address(this).balance);
             }
         }else{
             uint256 _balance = IERC20(info.buyToken).balanceOf(address(this));
             if(_balance > 0){
-                TransferHelper.safeTransfer(info.buyToken, msg.sender, _balance);
+                TransferHelper.safeTransfer(info.buyToken, this.owner(), _balance);
             }
         }
         
         //TODO: transfer remenant token to admin
         uint256 remainingLaunchToken = IERC20(info.launchToken).balanceOf(address(this));
         if(remainingLaunchToken > 0){
-            TransferHelper.safeTransfer(info.launchToken, msg.sender, remainingLaunchToken);
+            TransferHelper.safeTransfer(info.launchToken, this.owner(), remainingLaunchToken);
         }
     }
 
@@ -361,12 +371,12 @@ contract LaunchPad is Liquidity, Ownable{
         info.lpCompleted = true;
         //TODO: transfer Lp token to owner Lptoken
         if(removeDex_){
-            transferLp(msg.sender, info.lpToken);
+            transferLp(this.owner(), info.lpToken);
         }else{
             _removeDex();
         }
         
-        emit ClaimedLpToken(msg.sender, info.lpToken);
+        emit ClaimedLpToken(this.owner(), info.lpToken);
     }
 
     /**

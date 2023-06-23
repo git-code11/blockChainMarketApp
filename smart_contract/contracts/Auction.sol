@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "hardhat/console.sol";
 
 import "./TransferHelper.sol";
@@ -34,6 +35,9 @@ contract MarketAuction is Ownable, IERC721Receiver {
         uint256 price;
     }
 
+    uint16 constant BPS = 10000;
+    uint16 public taxBps = 100;
+
     mapping(address => EnumerableSet.UintSet) private ownedItemsForAuction;
 
     EnumerableSet.UintSet private allItemsForAuction;
@@ -46,11 +50,16 @@ contract MarketAuction is Ownable, IERC721Receiver {
 
     event AuctionEvent(uint256 item);
 
+
     constructor(address nft_, address weth_){
         nft = IERC721(nft_);
         weth = IWETH(weth_);
     }
     
+    function updateTaxBps(uint16 taxBps_) external onlyOwner{
+        taxBps = taxBps_;
+    }
+
     function updateNft(address nft_) external onlyOwner{
         nft = IERC721(nft_);
     }
@@ -132,8 +141,10 @@ contract MarketAuction is Ownable, IERC721Receiver {
             nft.safeTransferFrom(address(this), acn.topBidder, item);
             //TODO: transfer token to auction creator
             weth.withdraw(acn.price);
-            TransferHelper.safeTransferETH(acn.creator, acn.price);
+            uint256 tax = (acn.price*taxBps)/BPS;
+            TransferHelper.safeTransferETH(acn.creator, acn.price - tax);
             //TODO: pay tax fee
+            TransferHelper.safeTransferETH(this.owner(), tax);
         }else{
             //TODO: transfer nft  back to owner
             nft.safeTransferFrom(address(this), acn.creator, item);
@@ -189,6 +200,9 @@ contract MarketAuction is Ownable, IERC721Receiver {
 
     receive() external payable {
         //to able withdrawal from weth
+        if(!Address.isContract(msg.sender)){
+            revert("only contract allowed");
+        }
     }
 
 }

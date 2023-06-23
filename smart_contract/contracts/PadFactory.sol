@@ -123,7 +123,7 @@ contract PadFactory is Ownable{
         });
         uint256 launchTokenAmount = predictAmount(p_params);
         TransferHelper.safeTransferFrom(params.launchToken, msg.sender, address(newPad), launchTokenAmount);
-
+        newPad.transferOwnership(msg.sender);
         emit PadCreated(msg.sender, pads[newId]);
     }
 
