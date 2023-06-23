@@ -72,7 +72,6 @@ const useSaveData  = ({detail}, setCID)=>{
 const useCreate = ({token, launch, detail}, outputDecimals)=>{
 
     const fee = useFeeAmount({});
-
     const params = useMemo(()=>
         prepareCreatePadParams({
             ihash:detail.cid,
@@ -92,13 +91,14 @@ const useCreate = ({token, launch, detail}, outputDecimals)=>{
             whiteListEnabled:launch.enablewhitelist
         },
         outputDecimals)
-    ,[token, launch, detail, outputDecimals]);
-
+    ,[token, launch, detail.cid, outputDecimals]);
+    //console.log({c:params})
 
     const method = useCreatePad({
         params,
         value:fee.data
     });
+    //console.log({cr:method});
 
     return {...method, loading:method.loading||fee.isLoading, fee:fee.data};
 }
@@ -114,12 +114,12 @@ export default ({onClose})=>{
 
     //const cid = ipfs.data || data.detail.cid;
     const cid = ipfs.data //if reupload on close
-    //console.log({cidi:ipfs.data, cid})
+    console.log({cidi:ipfs.data, cid:data.detail.cid})
     const token = useToken({
         address:data.token.address
     });
 
-    const params1 = useMemo(()=>predictAmountParams({
+    const params1 = useMemo(()=> predictAmountParams({
         capped:data.launch.capped,
         saleRate:data.launch.preSale,
         feeTier:data.token.feeTier,
@@ -182,7 +182,7 @@ export default ({onClose})=>{
 
     },[activeId, ipfs.error, approve.error, predict.error, create.error]);
 
-    const padAddress = useMemo(()=>create.reciept && parseAddress(create.reciept.logs[3].topics[2]),[create.reciept]);
+    const padAddress = useMemo(()=>create.reciept && parseAddress(create.reciept.logs[4].topics[2]),[create.reciept]);
 
     return (
         <Dialog open={true} onClose={(_loading||create.success)?null:onClose} maxWidth="xs" fullWidth>
