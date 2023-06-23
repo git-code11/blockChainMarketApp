@@ -4,12 +4,19 @@ import {FavoriteRounded} from "@mui/icons-material"
 import { red } from '@mui/material/colors';
 import {Image as ScalableImage, Box as ScalableBox} from "../Scalable";
 import ElTypography from "../ElTypography";
-import { formatUnits } from 'ethers/lib/utils.js';
+import { formatEther } from 'ethers/lib/utils.js';
 
 import { temp_c } from '../../temp';
+import useGetTickPrice from '../../context/hook/useGetTickPrice';
 
 export default ({loading, image, name, creator, sale, currency, tokenId })=>{
     
+    const salePrice =  sale && Number(formatEther(sale?.amount));
+    const sTickPrice = useGetTickPrice({currency, amount:salePrice});
+    
+    const salePriceStr = salePrice && Number(salePrice.toFixed(6));
+    const sTickPriceStr = sTickPrice && sTickPrice?.toFixed(2);
+
     return (
             <ScalableBox>
                 <Paper component={Stack} sx={{p:1.5, pb:2, borderRadius:2, pb:0.5}} spacing={1}>
@@ -39,8 +46,8 @@ export default ({loading, image, name, creator, sale, currency, tokenId })=>{
                     <Stack justifyContent="space-between" direction="row">
                         <Typography variant="subtitel">{loading?<Skeleton width={50}/>:"Price"}</Typography>
                         <Stack>
-                            <Typography fontWeight="bold" variant="body1">{loading?<Skeleton width={95}/>:Number(formatUnits(sale?.amount||0)).toFixed(6).toString()} {loading?'':currency?.symbol}</Typography>
-                            <Typography variant="body2">{loading?<Skeleton width={100}/>:`~$${(sale?.amount||0)/200}`}</Typography>
+                            <Typography fontWeight="bold" variant="body1">{loading?<Skeleton width={95}/>:salePriceStr} {loading?'':currency?.symbol}</Typography>
+                            <Typography variant="body2">{loading?<Skeleton width={100}/>:`~$${sTickPriceStr}`}</Typography>
                         </Stack>
                     </Stack>
 

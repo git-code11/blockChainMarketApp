@@ -9,7 +9,17 @@ import {temp_c} from "../../temp";
 
 import TimeBox from '../TimeBox';
 
+import useGetTickPrice from '../../context/hook/useGetTickPrice';
+
 export default ({tokenId, loading, name, image, auction, currency, creator})=>{
+
+    const percentIncrease = auction && auction.reserve && (auction.price/auction.reserve)?.toFixed(2);
+    const price = auction && Number(formatEther(auction.price > 0 ? auction.price:auction.reserve));
+    const aTickPrice = useGetTickPrice({currency, amount:price});
+    
+    const priceStr = price && Number(price.toFixed(6));
+    const aTickPriceStr = aTickPrice && aTickPrice?.toFixed(2);
+
 
     return (
         <ScalableBox height="100%">
@@ -36,7 +46,7 @@ export default ({tokenId, loading, name, image, auction, currency, creator})=>{
                                 <Skeleton width={30} height={30}/>:
                                 <BlurDarkBox component={Typography} fontWeight="bold" color="#fff" p={0.25} bgcolor="grey.200" >
                                     {/*Number(auction?.price?.div(auction?.reserve))?.toFixed(2)*/}
-                                    {Number(auction?.price/auction?.reserve)?.toFixed(2)}x
+                                    {percentIncrease}x
                                 </BlurDarkBox>
                             }
                         </Box>
@@ -66,7 +76,8 @@ export default ({tokenId, loading, name, image, auction, currency, creator})=>{
                     <Stack justifyContent="space-between" alignItems="center" direction="row">
                         <Stack>
                             <Typography variant="subtite2">{loading?<Skeleton width={75}/>:"Current Bid"}</Typography>
-                            <Typography variant="h5" fontWeight="bold">{loading?<Skeleton width={75}/>:formatEther(auction?.price.gt(0)?auction?.price:auction?.reserve)}{loading?"":currency?.symbol}</Typography>
+                            <Typography variant="body2">{aTickPriceStr && `~$${aTickPriceStr}`}</Typography>
+                            <Typography variant="h6" fontWeight="bold">{loading?<Skeleton width={75}/>:priceStr}{loading?"":currency?.symbol}</Typography>
                         </Stack>
 
                         {loading?

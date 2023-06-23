@@ -31,12 +31,26 @@ export const useApiSymbolsPrice = (pairs)=>{
 
 //https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT
 export const useApiSymbolPrice = (pair)=>{
-    const API_URL =  `https://api.binance.com/api/v3/ticker/price?symbol=${pair && pair.toUpperCase()}`
+    const API_URL =  `https://api.binance.com/api/v3/ticker/price?symbol=${pair && pair?.toUpperCase()}`
     const methods = useSWR(pair?API_URL:null, fetcher);
     return {...methods, loading:methods.isLoading};
 }
 
-export const useTickerPrice = ({symbol, base="USDT"})=>{
-    const notBase = symbol?.toUpperCase() !== base?.toUpperCase();
-    return useApiSymbolPrice( notBase && symbol && (symbol+base));
+export const useTickerPrice = ({symbol, base="USDT", enabled=true})=>{
+    const notBase = symbol?.toUpperCase() !== base?.toUpperCase() && enabled;
+    const isUsdt = symbol?.toUpperCase() === "USDT";
+    const {data, ...method} =  useApiSymbolPrice( notBase && symbol && (symbol+base));
+    console.log({isUsdt, symbol})
+    return {...method, 
+            data:isUsdt?{price:1}:data}
+}
+
+export const useSwapTickerPrice = ({currency, enabled})=>{
+    const symbol = Boolean(currency?.isNative)?(TICKER_ID[currency?.chainId]):currency?.symbol
+    const {data} = useTickerPrice({
+        symbol,
+        enabled
+    });
+
+    return data && Number(data?.price)
 }
