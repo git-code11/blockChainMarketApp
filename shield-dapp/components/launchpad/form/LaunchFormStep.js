@@ -114,7 +114,7 @@ export default ({onClose})=>{
 
     //const cid = ipfs.data || data.detail.cid;
     const cid = ipfs.data //if reupload on close
-    console.log({cidi:ipfs.data, cid:data.detail.cid})
+   // console.log({cidi:ipfs.data, cid:data.detail.cid})
     const token = useToken({
         address:data.token.address
     });
