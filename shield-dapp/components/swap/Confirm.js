@@ -93,7 +93,7 @@ const SwapApproveContainer = ({trade, getCalldata})=>{
             </LoadingButton>
         }
 
-        <SwapSendTxContainer {...{trade, getCalldata}} enabled={approve.isApproved}/>
+        <SwapSendTxContainer {...{trade, getCalldata}} enabled={approve.isApproved || trade.inputAmount.currency.isNative}/>
         
         </Stack>
     )

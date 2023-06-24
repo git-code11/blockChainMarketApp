@@ -5,7 +5,7 @@ import { constants } from "ethers"
  */
 const _list = {
     "BNB":constants.AddressZero,
-    "USDT":"0x0fB5D7c73FA349A90392f873a4FA1eCf6a3d0a96"
+    "BUSD":"0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"
 }
 
 export default _list;

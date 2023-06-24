@@ -40,7 +40,7 @@ const FormSection = ()=>{
 
     return (
         <Stack spacing={3}>
-            <TextField name="reserve" type="number" label="Reserve amount"/>
+            <TextField name="reserve" type="number" label="Reserve Amount (bnb)"/>
             
             {
                 isScheduled?

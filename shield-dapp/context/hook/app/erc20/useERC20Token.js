@@ -4,7 +4,7 @@ import { ChainId } from "@pancakeswap/sdk";
 import { bsc, bscTestnet, mainnet, goerli } from "wagmi/chains";
 import { useMemo } from "react";
 import { constants, utils } from "ethers";
-
+import mainConfig from '../../../../mainConfig'
 
 const CHAINS = {
     [ChainId.BSC_TESTNET]:bsc,
@@ -16,10 +16,12 @@ const CHAINS = {
 /**
  * To show that constants.AddressZero should be identified as native token
  */
+
+const _defaultChainId = mainConfig.mainActiveChain;
 export default ({
     address,
     enabled=true,
-    chainId=97,
+    chainId=_defaultChainId,
 })=>{
 
     const {chain} = useNetwork();
