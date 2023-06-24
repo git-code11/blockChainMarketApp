@@ -76,6 +76,12 @@ contract NFT is ERC721, ERC721Enumerable, ERC721URIStorage, AccessControl{
         return super.tokenURI(tokenId);
     }
 
+    //only owner is allowed to update URI
+    function updateTokenURI(uint256 tokenId, string memory cid) external returns(uint256){
+        require(msg.sender == ownerOf(tokenId), "Only currenct owner allowed to update URI");
+        _setTokenURI(tokenId, cid);
+    }
+
 
     /**
      * @dev See {ERC721-_burn}.
