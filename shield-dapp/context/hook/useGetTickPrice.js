@@ -2,7 +2,7 @@ import { useSwapTickerPrice } from '../swap/hooks/binanceTicker';
 import { constants } from 'ethers';
 
 export default ({currency, amount})=>{
-    console.log({currency})
+    //console.log({currency})
     const _currency = currency &&
         ({
             symbol:currency?.symbol,

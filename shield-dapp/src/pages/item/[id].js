@@ -119,7 +119,7 @@ const ContainerWrapper =  ({tokenId})=>{
     const {data:token} = useCurrency(saleData?.currency);
     const {data:native} = useCurrency();
     
-
+    //console.log({uri, owner});
     const {data:fdata, ...ipfs} = useIpfsData(uri);
     const ipsLoading = !fdata || ipfs.isLoading;
 

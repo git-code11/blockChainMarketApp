@@ -53,7 +53,7 @@ export default ({modal, form})=>{
                                     
     const [debouncedToSaleArgs] = useDebounce(toSaleArgs, 500);
     
-    const _toSaleEnabled = Boolean(cid);
+    const _toSaleEnabled = Boolean(cid) && !ipfs.error && ipfs.data;
     
     const toSale = useCreateItem({
         args:debouncedToSaleArgs,

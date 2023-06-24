@@ -7,8 +7,8 @@ import { constants, utils } from "ethers";
 import mainConfig from '../../../../mainConfig'
 
 const CHAINS = {
-    [ChainId.BSC_TESTNET]:bsc,
-    [ChainId.BSC]:bscTestnet,
+    [ChainId.BSC_TESTNET]:bscTestnet,
+    [ChainId.BSC]:bsc,
     [ChainId.ETHEREUM]:mainnet,
     [ChainId.GOERLI]:goerli
 }

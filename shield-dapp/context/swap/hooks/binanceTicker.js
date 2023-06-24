@@ -40,7 +40,7 @@ export const useTickerPrice = ({symbol, base="USDT", enabled=true})=>{
     const notBase = symbol?.toUpperCase() !== base?.toUpperCase() && enabled;
     const isUsdt = symbol?.toUpperCase() === "USDT";
     const {data, ...method} =  useApiSymbolPrice( notBase && symbol && (symbol+base));
-    console.log({isUsdt, symbol})
+    //console.log({isUsdt, symbol})
     return {...method, 
             data:isUsdt?{price:1}:data}
 }

@@ -14,8 +14,8 @@ export default ({loading, image, name, creator, sale, currency, tokenId })=>{
     const salePrice =  sale && Number(formatEther(sale?.amount));
     const sTickPrice = useGetTickPrice({currency, amount:salePrice});
     
-    const salePriceStr = salePrice && Number(salePrice.toFixed(6));
-    const sTickPriceStr = sTickPrice && sTickPrice?.toFixed(2);
+    const salePriceStr = salePrice ?Number(salePrice.toFixed(6)):"";
+    const sTickPriceStr = sTickPrice ? sTickPrice?.toFixed(2):"";
 
     return (
             <ScalableBox>
@@ -47,7 +47,7 @@ export default ({loading, image, name, creator, sale, currency, tokenId })=>{
                         <Typography variant="subtitel">{loading?<Skeleton width={50}/>:"Price"}</Typography>
                         <Stack>
                             <Typography fontWeight="bold" variant="body1">{loading?<Skeleton width={95}/>:salePriceStr} {loading?'':currency?.symbol}</Typography>
-                            <Typography variant="body2">{loading?<Skeleton width={100}/>:`~$${sTickPriceStr}`}</Typography>
+                            <Typography variant="body2">{loading?<Skeleton width={100}/>:(sTickPriceStr && `~$${sTickPriceStr}`)}</Typography>
                         </Stack>
                     </Stack>
 

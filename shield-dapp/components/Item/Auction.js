@@ -17,7 +17,7 @@ export default ({tokenId, loading, name, image, auction, currency, creator})=>{
     const price = auction && Number(formatEther(auction.price > 0 ? auction.price:auction.reserve));
     const aTickPrice = useGetTickPrice({currency, amount:price});
     
-    const priceStr = price && Number(price.toFixed(6));
+    const priceStr = price ? Number(price.toFixed(6)):"";
     const aTickPriceStr = aTickPrice ? aTickPrice?.toFixed(2):"";
 
 
