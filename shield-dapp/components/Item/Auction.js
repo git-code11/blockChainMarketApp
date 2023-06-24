@@ -18,7 +18,7 @@ export default ({tokenId, loading, name, image, auction, currency, creator})=>{
     const aTickPrice = useGetTickPrice({currency, amount:price});
     
     const priceStr = price && Number(price.toFixed(6));
-    const aTickPriceStr = aTickPrice && aTickPrice?.toFixed(2);
+    const aTickPriceStr = aTickPrice ? aTickPrice?.toFixed(2):"";
 
 
     return (

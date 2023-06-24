@@ -3,16 +3,18 @@ pragma solidity >=0.7.5;
 pragma abicoder v2;
 
 import '@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol';
+import '@openzeppelin/contracts/utils/math/Math.sol';
 import '../INonfungiblePositionManager.sol';
 import '../TransferHelper.sol';
 import '../TickMath.sol';
 
 contract Liquidity is IERC721Receiver {
 
-    uint24 public constant poolFee = 3000;
+    uint24 public constant poolFee = 2500;
 
     INonfungiblePositionManager private nonfungiblePositionManager;
     address managerWeth;
+    uint160 Q64_92 = 2**92;
 
     function setManager(
         address _nonfungiblePositionManager,
@@ -51,14 +53,24 @@ contract Liquidity is IERC721Receiver {
         // Approve the position manager
         TransferHelper.safeApprove(token0_, address(nonfungiblePositionManager), amount0_);
         TransferHelper.safeApprove(token1_, address(nonfungiblePositionManager), amount1_);
+        
+
+        uint160 sqrtPriceX96 = uint160(Math.sqrt( Math.mulDiv(amount1_, Q64_92, amount0_) ));
+        nonfungiblePositionManager.createAndInitializePoolIfNecessary(
+                token0_,
+                token1_,
+                poolFee,
+                sqrtPriceX96
+            );
+        
 
         INonfungiblePositionManager.MintParams memory params =
             INonfungiblePositionManager.MintParams({
                 token0: token0_,
                 token1: token1_,
                 fee: poolFee,
-                tickLower: TickMath.MIN_TICK,
-                tickUpper: TickMath.MAX_TICK,
+                tickLower: -400,
+                tickUpper: 400,
                 amount0Desired: amount0_,
                 amount1Desired: amount1_,
                 amount0Min: 0,

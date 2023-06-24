@@ -103,7 +103,7 @@ export const SwapTradeInfo = ({trade})=>{
                     bgcolor:"transparent"
                 }}
             >
-                <AccordionSummary expandIcon={<ExpandMore/>} color="primary">
+                <AccordionSummary expandIcon={<ExpandMore sx={{color:"common.white"}}/>} color="primary">
                     <Typography fontWeight="bold" color="grey.300">Route Information</Typography>
                 </AccordionSummary>
                 <AccordionDetails>

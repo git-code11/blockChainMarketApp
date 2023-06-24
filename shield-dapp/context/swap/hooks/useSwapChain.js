@@ -2,11 +2,13 @@ import {useCallback, useMemo} from 'react'
 import { useSelector, useDispatch } from "react-redux"
 import {actions} from '../reducer';
 import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
-import { utils as SmartUtils } from '../../../swap/src/smart';
+//import { utils as SmartUtils } from '../../../swap/src/smart';
 
-const {MAP_ID_CHAIN} = SmartUtils;
+//const {MAP_ID_CHAIN} = SmartUtils;
 
-const swapChainIds = Object.keys(MAP_ID_CHAIN).map(Number);
+import ctxConfig from "../../config"
+
+const swapChainIds = Object.keys(ctxConfig.activeIdChains).map(Number);
 
 export default ()=>{
     const data = useSelector(state=>state.swap.chainId);

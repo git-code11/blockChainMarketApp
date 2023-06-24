@@ -1,12 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
-
+import _contract from "../../contract/address.json"
+import mainConfig from '../../mainConfig'
 
 const FIXED_NO = 8;
 
 const initialState = {
   status:"idle",
   error:null,
-  chainId:97,
+  chainId:mainConfig.mainActiveChain,
 
   input: {
     amount:0,
@@ -38,8 +39,8 @@ const initialState = {
   },
 
   admin:{
-    account:"0x47207ECD6a722547ec42ee899d2b8973f707090d",//test Admin
-    feeBips:10 // 0.1% or 10bps
+    account:mainConfig.admin,//"0x47207ECD6a722547ec42ee899d2b8973f707090d",//test Admin
+    feeBips:mainConfig.swapFeeBps//10 // 0.1% or 10bps
   },
   
   dev:{

@@ -23,7 +23,7 @@ export const WETH_ABI = [
   'function withdraw(uint wad) public',
 ]
 
-
+//For test purpose not used in production
 export const WALLET_KEY = process.env.WALLET_KEY;
 export const RPCURL = "https://data-seed-prebsc-1-s1.binance.org:8545";
 export const ADMIN = "0x47207ECD6a722547ec42ee899d2b8973f707090d"

@@ -11,10 +11,13 @@ import WalletOutlined from '@mui/icons-material/WalletOutlined';
 import { useAccount} from 'wagmi';
 import { useWeb3Modal } from "@web3modal/react";
 import useAuth from "../context/hook/user/useAuth";
-import {bscTestnet} from 'wagmi/chains'
-;
 
-const DEFAULT_CHAIN_ID = 97;
+import mainConfig from "../mainConfig";
+import ctxConfig from "../context/config"
+
+const DEFAULT_CHAIN_ID = mainConfig.mainActiveChain;
+
+const _defChain = ctxConfig.activeIdChains;
 
 export default ()=>{
     const { isOpen, open, setDefaultChain} = useWeb3Modal();
@@ -23,7 +26,7 @@ export default ()=>{
     const { status, isConnected } = useAccount();
 
     useEffect(()=>{
-        setDefaultChain(bscTestnet);
+        setDefaultChain(_defChain[DEFAULT_CHAIN_ID]);
     },[]);
 
     //console.log("my token", data, error, isLoading);

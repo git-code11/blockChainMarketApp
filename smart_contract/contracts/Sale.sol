@@ -111,15 +111,15 @@ contract MarketSales is Ownable{
         if(sale.currency == address(0)){
             //payment is made througn native Token (BNB)
             require(msg.value == sale.amount, "Incorrect price");
-            uint256 tax = (msg.value * purchaseTaxBps)/BPS;
-            TransferHelper.safeTransferETH(sale.seller, msg.value - tax);
+            uint256 tax = (sale.amount * purchaseTaxBps)/BPS;
+            TransferHelper.safeTransferETH(sale.seller, sale.amount - tax);
             //pay tax here
             TransferHelper.safeTransferETH(this.owner(), tax);
 
         }else{
             //payment made through ERC20 Token
             require(IERC20(sale.currency).allowance(msg.sender, address(this)) >= sale.amount, "Incorrect price");
-            uint256 tax = (msg.value * purchaseTaxBps)/BPS;
+            uint256 tax = (sale.amount * purchaseTaxBps)/BPS;
             TransferHelper.safeTransferFrom(sale.currency, msg.sender, sale.seller, sale.amount - tax);
             //pay tax here
             TransferHelper.safeTransferFrom(sale.currency, msg.sender, this.owner(), tax);

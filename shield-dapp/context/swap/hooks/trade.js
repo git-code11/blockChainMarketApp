@@ -18,7 +18,7 @@ import useSwapChainChanged from './useSwapChainChanged';
 
 const { getPoolTypes, amountFixed, Transformer } = SmartUtils;
 
-const quoteProvider = quoteProviders.offChain();
+const quoteProvider = quoteProviders.onChain();
 const poolCache1 = new CandidatePoolCache();
 const tradeCache1 = new TradeCache(bestTrades.cache.main(poolCache1))
 

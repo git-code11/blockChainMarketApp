@@ -1,7 +1,9 @@
 
 
-export const ADMIN = "";
+const config = {
+    admin:"0x6592b3ae337bD50010FBc63907FB2dC92a450502",//0x4733190cC4208aE26512b4F941895F1c25A2Bd50
+    swapFeeBps:100,
+    mainActiveChain:97//56
+}
 
-export const SWAP_FEE_BPS = 100;
-
-export const DEFAULT_CHAIN = 97;
+export default config;

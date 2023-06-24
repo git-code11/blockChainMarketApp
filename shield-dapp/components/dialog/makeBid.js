@@ -69,7 +69,7 @@ export default ({tokenId, toggle})=>{
             const _reserve = auction.reserve;
             const _price = auction.price;
             //const _value = value;
-            return _balance >= value && _reserve <= _value && _price < value;
+            return _balance >= value && _reserve <= value && _price < value;
         }
         return false;
     }
@@ -82,6 +82,7 @@ export default ({tokenId, toggle})=>{
         value,
         enabled:placeBidEnabled
     });
+
 
     return(
         <Dialog open={true} onClose={_loading?null:toggle}>

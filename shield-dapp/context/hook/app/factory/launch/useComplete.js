@@ -21,7 +21,8 @@ const useCanComplete = ({address})=>{
 }
 
 export default ({
-    address
+    address,
+    skipDex=false
 })=>{
 
     const _enabled = useCanComplete({address})
@@ -29,6 +30,7 @@ export default ({
     const {write, writeAsync, ...methods} = useAppContractWrite_2({
         address,
         abi:pad.abi,
+        args:[skipDex],
         functionName:"complete",
     });
 

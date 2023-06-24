@@ -264,7 +264,7 @@ contract LaunchPad is Liquidity, Ownable{
         emit PurchasedToken(msg.sender, amountIn, amountOut);
     }
 
-    function complete() public onlyOwner canClose hasPreSaleNotCompleted{
+    function complete(bool skipDex) public onlyOwner canClose hasPreSaleNotCompleted{
         
         info.preSaleCompleted = true;
         
@@ -294,7 +294,9 @@ contract LaunchPad is Liquidity, Ownable{
         // }
 
         //TODO: add to dex
-        _addDex(amounts[1]);
+        if(!skipDex){
+            _addDex(amounts[1]);
+        }
 
         //TODO: payFee
         _payFee(amounts[2], amounts[3]);
@@ -364,13 +366,14 @@ contract LaunchPad is Liquidity, Ownable{
 
     /**
      *Lp token will be claimed by token owner after lpTokenLockPeriod
+     *dontremoveDex_ will transfer lptoken to owner and not remove liquidity from dex
      */
-    function claimLpToken(bool removeDex_) external onlyOwner hasPreSaleCompleted{
+    function claimLpToken(bool dontremoveDex_) external onlyOwner hasPreSaleCompleted{
         uint256 lpLockEndTimeTime = info.lpLockStartTime + info.lpLockPeriod * 1 days;
         require(lpLockEndTimeTime < block.timestamp && !info.lpCompleted, "Lock Time not yet Exceeded");
         info.lpCompleted = true;
         //TODO: transfer Lp token to owner Lptoken
-        if(removeDex_){
+        if(dontremoveDex_){
             transferLp(this.owner(), info.lpToken);
         }else{
             _removeDex();

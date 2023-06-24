@@ -95,8 +95,9 @@ contract MarketAuction is Ownable, IERC721Receiver {
 
         //enable more time for unscheduled auction
         //TODO: ONLY EXTEND WHEN COMPLETED AND ALSO FROM block.timestamp
-        //acn.diffTime = block.timestamp + extraTime - acn.startTime
-        acn.diffTime += extraTime;
+        require(acn.startTime + acn.diffTime < block.timestamp, "Auction still has time");
+        acn.diffTime = block.timestamp + extraTime - acn.startTime;
+        //acn.diffTime += extraTime;
 
         emit AuctionEvent(item);
     }

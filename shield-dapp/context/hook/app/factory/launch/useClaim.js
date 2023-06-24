@@ -22,7 +22,8 @@ const useCanClaim = ({address})=>{
 }
 
 export default ({
-    address
+    address,
+    dontRemoveDex=false
 })=>{
 
     const _enabled = useCanClaim({address})
@@ -30,7 +31,8 @@ export default ({
     const {write, writeAsync, ...methods} = useAppContractWrite_2({
         address,
         abi:pad.abi,
-        functionName:"claim",
+        args:[dontRemoveDex],
+        functionName:"claimLpToken",
     });
 
     return {

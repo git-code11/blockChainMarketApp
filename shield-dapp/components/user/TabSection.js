@@ -10,7 +10,7 @@ import AuctionTab from './tabs/Auction';
 
 export default ()=>{
     const containerRef = useRef(null);
-    const [value, setValue] = useState(2);
+    const [value, setValue] = useState(0);
     
     return (  
             <Box ref={containerRef}>
@@ -31,8 +31,6 @@ const TabMenu = ({value, setValue})=>{
             <Tab selected label="Created"/>
             <Tab label="Owned"/>
             <Tab label="Auction"/>
-            <Tab label="Offer"/>
-            <Tab label="Transaction"/>
         </Tabs>
     )
 }

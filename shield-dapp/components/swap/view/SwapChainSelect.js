@@ -1,9 +1,10 @@
 import { Button, ButtonGroup } from "@mui/material";
 import useSwapChain from "../../../context/swap/hooks/useSwapChain";
 import { MAP_ID_CHAIN, CHAIN_NAME } from "../../../swap/src/smart/_utils";
+import ctxConfig from "../../../context/config";
 
-const defaultChains = Object.values(MAP_ID_CHAIN);
-
+//const defaultChains = Object.values(MAP_ID_CHAIN);
+const defaultChains = ctxConfig.activeChains;
 
 export default ()=>{
     

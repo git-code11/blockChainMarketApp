@@ -12,6 +12,7 @@ import nftAbi from "../../../contract/NFT.sol/NFT.json";
 import auctionAbi from "../../../contract/Auction.sol/MarketAuction.json";
 import _contract from "../../../contract/address.json";
 import { useIpfsData } from "../../../context/hook/ipfs";
+import e_msg from '../../../context/lib/e_msg';
 
 export default ()=>{
     const {isReady} = useRouter();
@@ -32,7 +33,7 @@ export default ()=>{
     if(data?.eq(0) || isError){
         return (
         <Stack pb={1} alignItems="center" spacing={1}>
-            <Typography>No entries{`:${error?.message??""}`}</Typography>
+            <Typography>No entries{`:${e_msg(error)}`}</Typography>
             {isError && <Button variant="outlined" disabled={isLoading || isRefetching} onClick={()=>refetch()}>Reload</Button>}
         </Stack>
         )
