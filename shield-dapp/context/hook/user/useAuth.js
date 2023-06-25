@@ -26,8 +26,6 @@ export default ()=>{
 
     const {call:signIn, ...signInProps} = usePromise(_signIn);
     const {call:getNonce, ...getNonceProps} = usePromise(_getNonce);
-
-const {nonce, sig} = getNonceProps.data || {};
     
     useEffect(()=>{
         getNonce();
@@ -38,6 +36,8 @@ const {nonce, sig} = getNonceProps.data || {};
         getNonce();}
     },[getNonceProps.error]);
 
+    const {nonce, sig} = getNonceProps.data || {};
+
     const __wagmi_connect = useConnect();
     const __wagmi_disconnect = useDisconnect();
     const __wagmi_account = useAccount();
@@ -45,15 +45,15 @@ const {nonce, sig} = getNonceProps.data || {};
     const __wagmi_signMessage = useSignMessage();
 
     const verify = async ()=>{
-       // const {address} = getAccount();
-        //const {chain} = getNetwork();
+        const {address} = getAccount();
+        const {chain} = getNetwork();
         //const {nonce, sig} = (await getNonce(address))||{};
 
-const {address} = __wagmi_account;
-        const {chain} = __wagmi_network;
+//const {address} = __wagmi_account;
+        //const {chain} = __wagmi_network;
         
-        if(! (nonce && address && chain) )
-            return;
+        if(!nonce){
+            return;}
         const _message = getMessage(address, nonce, chain.id);
         const signature = await __wagmi_signMessage.signMessageAsync({message:_message.prepareMessage()});
         const result = await signIn('credentials', {message:JSON.stringify(_message), signature, sig, redirect: false});
