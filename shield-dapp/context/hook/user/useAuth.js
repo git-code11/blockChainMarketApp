@@ -1,11 +1,12 @@
 import {useCallback, useEffect} from "react";
-import { getAccount, getNetwork } from "wagmi/actions";
+import { getAccount, getNetwork, fetchSigner } from "wagmi/actions";
 import { useAccount, useDisconnect, useConnect, useSignMessage , useNetwork } from "wagmi";
 import { getMessage } from "../../../services/lib/siwes";
 import { useSession, signIn as __signIn, signOut, getCsrfToken } from "next-auth/react";
 import usePromise from "../usePromise";
 import axios from 'axios';
 
+import useAppSignMessage from "../../wagmi_ethers/useAppSignMessage";
 
 const _signIn = async (...args)=>{
     const result = await __signIn(...args);
@@ -18,49 +19,38 @@ const CLEAR_ERROR_TIMEOUT = 60000 //60 sec
 
 
 const _getNonce = (uid)=>axios.post('/api/nonce',{uid}).then(response=>response.data);
+if(global)
+    global.cc = fetchSigner;
 
 export default ()=>{
-    const session = useSession();
-    const isAuthenticated = session.status === "authenticated";
-    
-
-    const {call:signIn, ...signInProps} = usePromise(_signIn);
-    const {call:getNonce, ...getNonceProps} = usePromise(_getNonce);
-    
-    useEffect(()=>{
-        getNonce();
-    },[]);
-    
-    useEffect(()=>{
-        if(getNonceProps.error){
-        getNonce();}
-    },[getNonceProps.error]);
-
-    const {nonce, sig} = getNonceProps.data || {};
 
     const __wagmi_connect = useConnect();
     const __wagmi_disconnect = useDisconnect();
     const __wagmi_account = useAccount();
-    const __wagmi_network = useNetwork();
-    const __wagmi_signMessage = useSignMessage();
-
-    const verify = async ()=>{
-        const {address} = getAccount();
-        const {chain} = getNetwork();
-        //const {nonce, sig} = (await getNonce(address))||{};
-
-//const {address} = __wagmi_account;
-        //const {chain} = __wagmi_network;
-        
-        if(!nonce){
-            return;}
-        const _message = getMessage(address, nonce, chain.id);
-        const signature = await __wagmi_signMessage.signMessageAsync({message:_message.prepareMessage()});
-        const result = await signIn('credentials', {message:JSON.stringify(_message), signature, sig, redirect: false});
-        
-    };
+    const __wagmi_signMessage = useAppSignMessage();
+    
+    const session = useSession();
+    
+    const {call:signIn, ...signInProps} = usePromise(_signIn);
+    const {call:getNonce, ...getNonceProps} = usePromise(_getNonce);
 
     
+    const verify = async()=>{
+        const {address} = getAccount();
+        const {chain} = getNetwork();
+        const {nonce, sig} = (await getNonce(address))||{};
+        console.log({nonce, sig});
+        if(!nonce && !address){
+            return;
+        }
+        const _message = getMessage(address, nonce, chain.id);
+        const _preparedMessage = _message.prepareMessage();
+        const signature = await __wagmi_signMessage.sign(_preparedMessage);
+
+        const result = await signIn('credentials', {message:JSON.stringify(_message), signature, sig, redirect: false});    
+    };
+
+    const isAuthenticated = session.status === "authenticated";
 
     const connect = useCallback((props)=>{
         if(!__wagmi_account.isConnected)

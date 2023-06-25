@@ -6,6 +6,9 @@ import { ethereumTokens,
     goerliTestnetTokens
 } from "@pancakeswap/tokens";
 
+import { getBNBTokens, getETHTokens, getWrapTokens } from "./swap-tokens";
+
+
 const moreTokensBSC = [
     {
         name:"MATIC BEP20",
@@ -23,6 +26,7 @@ const moreTokensBSC = [
     },
 ];
 
+const moreTokensETH = [];
 
 const moreTokensBSC_Testnet = [
     {
@@ -34,17 +38,7 @@ const moreTokensBSC_Testnet = [
     }
 ];
 
-const _TK_BSC = moreTokensBSC.reduce((acc, tk)=>{
-    acc[tk.symbol.toLocaleLowerCase()] = new ERC20Token(
-        tk.chainId,
-        tk.address,
-        tk.decimals,
-        tk.symbol,
-        tk.name
-    );
-    return acc
-    }, {}
-);
+
 
 const _TK_BSC_TEST = moreTokensBSC_Testnet.reduce((acc, tk)=>{
     acc[tk.symbol.toLocaleLowerCase()] = new ERC20Token(
@@ -58,9 +52,39 @@ const _TK_BSC_TEST = moreTokensBSC_Testnet.reduce((acc, tk)=>{
     }, {}
 );
 
+const bsc_list = [...getBNBTokens(), ...moreTokensBSC];
+const eth_list = [...getETHTokens(), ...moreTokensETH];
+const __bnb_symbol_tokens = getWrapTokens(bsc_list);
+
+const __eth_symbol_tokens = getWrapTokens(eth_list);
+
+const bnb_symbol_tokens = __bnb_symbol_tokens();
+
+const eth_symbol_tokens = __eth_symbol_tokens();
+
+export const getLogoURI = (token)=>{
+    const {address, symbol} = token || {};
+    if(!Boolean(address && symbol)){
+        return null;
+    }
+    
+    for(let list of [bsc_list, eth_list]){
+        let found = list.find(tk=>
+            tk.address.toLowerCase() === address.toLowerCase()||
+            tk.symbol.toLowerCase() === symbol.toLowerCase()
+        );
+        if(found){
+            return found.logoURI;
+        }
+    }
+
+    return null;
+}
+
+
 export const _CHAIN_TOKEN_LIST = {
-    [ChainId.ETHEREUM]:ethereumTokens,
-    [ChainId.BSC]:{...bscTokens, ..._TK_BSC},
+    [ChainId.ETHEREUM]:eth_symbol_tokens,
+    [ChainId.BSC]:bnb_symbol_tokens,
     [ChainId.BSC_TESTNET]:{...bscTestnetTokens, ..._TK_BSC_TEST},
     [ChainId.GOERLI]:goerliTestnetTokens
 }

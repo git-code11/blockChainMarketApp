@@ -89,7 +89,7 @@ const ItemContainer  = ({index})=>{
         enabled:readProps.isSuccess
     });
 
-    const {data:currency, ...tokenOpt} = useCurrency(data?.[2].currency);
+    const {data:currency, ...tokenOpt} = useCurrency(data?.[2]?.currency);
    
     const {data:idata, ...ipfs} = useIpfsData(data?.[0]);
     
