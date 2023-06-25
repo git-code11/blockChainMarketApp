@@ -95,7 +95,7 @@ export default ({modal, form})=>{
     const approve = useApprove({
         item:tokenId,
         spender:_contract.sale,
-        enabled:needApproval && toSale.success
+        enabled:needApproval && toSale.success && Boolean(tokenId)
     });
 
     // side effect to call when created token needs approval to be added to market

@@ -12,7 +12,7 @@ import { parseUnits as vparseUnits, formatUnits as vformatUnits} from 'viem'
 //     [ChainId.BSC_TESTNET]: 'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-chapel',
 // }
 
-import { CHAINS } from './_rpc';
+import { CHAINS, PUBLIC_RPC_URL } from './_rpc';
 
 export const MAP_ID_CHAIN = CHAINS.reduce((_map, _chain)=>({..._map,[_chain.id]:_chain}),{});
 
@@ -23,7 +23,7 @@ export const CHAIN_NAME = {
   [ChainId.ETHEREUM]:"Ethereum"
 }
 
-/* export const viemClients = ({ chainId }) => {
+const viemClients1 = ({ chainId }) => {
     return createPublicClient({
         chain: MAP_ID_CHAIN[chainId],
         transport:fallback(
@@ -36,15 +36,15 @@ export const CHAIN_NAME = {
                 rank:false
             }
         ),
-        batch: {
+        /* batch: {
           multicall: {
             batchSize: 1024 * 200,
           }
-        }
+        } */
     })
-} */
+}
 
-export const viemClients = ({ chainId }) => {
+const viemClients2 = ({ chainId }) => {
     return createPublicClient({
         chain: MAP_ID_CHAIN[chainId],
         transport:http(),
@@ -57,12 +57,13 @@ export const viemClients = ({ chainId }) => {
 }
 
 
-// export const v3Clients = {
-//     [ChainId.ETHEREUM]: new GraphQLClient(V3_SUBGRAPH_URLS[ChainId.ETHEREUM]),
-//     [ChainId.GOERLI]: new GraphQLClient(V3_SUBGRAPH_URLS[ChainId.GOERLI]),
-//     [ChainId.BSC]: new GraphQLClient(V3_SUBGRAPH_URLS[ChainId.BSC]),
-//     [ChainId.BSC_TESTNET]: new GraphQLClient(V3_SUBGRAPH_URLS[ChainId.BSC_TESTNET]),
-// }
+export const viemClients = (arg)=>{
+
+  if(chainId ===ChainId.BSC){
+    return viemClients1(arg);
+  }
+  return viemClients2(arg);
+};
 
 export const gasPriceWei = ({chainId})=>viemClients({chainId:chainId??ChainId.BSC}).getGasPrice();
 
