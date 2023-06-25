@@ -1,6 +1,6 @@
 import {useCallback, useEffect} from "react";
 import { getAccount, getNetwork } from "wagmi/actions";
-import { useAccount, useDisconnect, useConnect, useSignMessage  } from "wagmi";
+import { useAccount, useDisconnect, useConnect, useSignMessage , useNetwork } from "wagmi";
 import { getMessage } from "../../../services/lib/siwes";
 import { useSession, signIn as __signIn, signOut, getCsrfToken } from "next-auth/react";
 import usePromise from "../usePromise";
@@ -27,25 +27,40 @@ export default ()=>{
     const {call:signIn, ...signInProps} = usePromise(_signIn);
     const {call:getNonce, ...getNonceProps} = usePromise(_getNonce);
 
+const {nonce, sig} = getNonceProps.data || {};
     
+    useEffect(()=>{
+        getNonce();
+    },[]);
+    
+    useEffect(()=>{
+        if(getNonceProps.error){
+        getNonce();}
+    },[getNonceProps.error]);
+
+    const __wagmi_connect = useConnect();
+    const __wagmi_disconnect = useDisconnect();
+    const __wagmi_account = useAccount();
+    const __wagmi_network = useNetwork();
     const __wagmi_signMessage = useSignMessage();
 
-    const verify = useCallback(async ()=>{
-        const {address} = getAccount();
-        const {chain} = getNetwork();
-        const {nonce, sig} = (await getNonce(address))||{};
+    const verify = async ()=>{
+       // const {address} = getAccount();
+        //const {chain} = getNetwork();
+        //const {nonce, sig} = (await getNonce(address))||{};
+
+const {address} = __wagmi_account;
+        const {chain} = __wagmi_network;
         
-        if(!nonce)
+        if(! (nonce && address && chain) )
             return;
         const _message = getMessage(address, nonce, chain.id);
         const signature = await __wagmi_signMessage.signMessageAsync({message:_message.prepareMessage()});
         const result = await signIn('credentials', {message:JSON.stringify(_message), signature, sig, redirect: false});
         
-    },[session]);
+    };
 
-    const __wagmi_connect = useConnect();
-    const __wagmi_disconnect = useDisconnect();
-    const __wagmi_account = useAccount();
+    
 
     const connect = useCallback((props)=>{
         if(!__wagmi_account.isConnected)
