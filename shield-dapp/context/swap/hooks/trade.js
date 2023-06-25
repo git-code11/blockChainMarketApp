@@ -20,7 +20,9 @@ const { getPoolTypes, amountFixed, Transformer } = SmartUtils;
 
 const quoteProvider = quoteProviders.onChain();
 const poolCache1 = new CandidatePoolCache();
-const tradeCache1 = new TradeCache(bestTrades.cache.main(poolCache1))
+//const tradeCache1 = new TradeCache(bestTrades.cache.main(poolCache1))
+const tradeCache1 = new TradeCache(bestTrades.cache.api(poolCache1))
+
 
 /* 
 const quoteProvider = quoteProviders.onChain();
