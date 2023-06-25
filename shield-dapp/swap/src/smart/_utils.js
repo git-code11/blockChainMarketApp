@@ -58,8 +58,8 @@ const viemClients2 = ({ chainId }) => {
 
 
 export const viemClients = (arg)=>{
-
-  if(chainId ===ChainId.BSC){
+  const useV1 = false;
+  if(chainId ===ChainId.BSC && useV1){
     return viemClients1(arg);
   }
   return viemClients2(arg);
