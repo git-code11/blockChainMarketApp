@@ -147,14 +147,14 @@ const ContainerWrapper =  ({modal})=>{
                     </Grid>
                     
 
-                    <Grid container spacing={2} direction={{xs:"column", md:"row"}}>
+                    {/* <Grid container spacing={2} direction={{xs:"column", md:"row"}}>
                         <Grid md={6}>
                             <TextInput label="Item Size" fullWidth name="properties.size"/>
                         </Grid>
                         <Grid md={6}>
                             <TextInput label="Item Properties" fullWidth name="properties.more"/>
                         </Grid>
-                    </Grid>
+                    </Grid> */}
                         
                     <Grid  container spacing={2} direction={{xs:"column", md:"row"}}>
                         <Grid md={6}>
