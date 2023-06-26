@@ -24,6 +24,41 @@ const moreTokensBSC = [
         address:"0x4E6345e00B8DA9b12dcF81D585D15Ea9924B3E80",
         chainId:56
     },
+    {
+        name:"CZ vs WAGNER",
+        symbol:"CZWAG",
+        decimals:8,
+        address:"0xA7335f7a770ae0880Dac072Ccc4232c40fe22F4b",
+        chainId:56
+    },
+    {
+        name:"Shido Inu",
+        symbol:"SHIDO",
+        decimals:18,
+        address:"0x733Af324146DCfe743515D8D77DC25140a07F9e0",
+        chainId:56
+    },
+    {
+        name:"Binance-Peg BSC-USD",
+        symbol:"BSC-USD",
+        decimals:18,
+        address:"0x55d398326f99059fF775485246999027B3197955",
+        chainId:56
+    },
+    {
+        name:"SGO",
+        symbol:"SGO",
+        decimals:18,
+        address:"0x9321Bc6185AdC9b9cb503cC211E17cB311C3Fa95",
+        chainId:56
+    },
+    {
+        name:"Harmony ONE",
+        symbol:"ONE",
+        decimals:18,
+        address:"0x03fF0ff224f904be3118461335064bB48Df47938",
+        chainId:56
+    }
 ];
 
 const moreTokensETH = [];

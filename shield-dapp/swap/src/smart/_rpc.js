@@ -19,6 +19,7 @@ export const PUBLIC_RPC_URL = {
     ],
     [ChainId.BSC]:[
         'https://rpc.ankr.com/bsc',
+        "https://bsc-mainnet.nodereal.io/v1/e45cb8af438441b0a6dfad9c03224636",
         'https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3',
         'https://bsc-mainnet.public.blastapi.io',
         'https://koge-rpc-bsc.48.club',

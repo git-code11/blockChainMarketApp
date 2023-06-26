@@ -1,6 +1,6 @@
 import {useEffect, useCallback, useState, useMemo} from "react";
 import Router from "next/router";
-import { Button, Stack, Typography} from "@mui/material";
+import { Button, DialogActions, DialogContent,Stack, Typography} from "@mui/material";
 
 import Dialog from "@mui/material/Dialog";
 import Link from "@mui/material/Link";
@@ -99,75 +99,84 @@ export default ({modal, form})=>{
     });
 
     // side effect to call when created token needs approval to be added to market
-    useEffect(()=>{
+    /* useEffect(()=>{
         if(needApproval && !(approve.isApproved || approve.loading || approve.success || Boolean(approve.error)) && toSale.success){
             approve.write?.();
         }
-    },[approve, toSale.success, needApproval]);
-    
+    },[approve, toSale.success, needApproval]) */;
+    const approveBtnEnabled = needApproval && !(approve.isApproved || approve.success) && toSale.success && Boolean(tokenId);
+
+
     const hasLoading = ipfs.loading  || toSale.loading || approve.loading
 
     //modal can only be toggled off only when upload is made
     return (
         <Dialog open={modal.visible} onClose={()=>Boolean(hasLoading || cid)?null:modal.toggle()} fullWidth>
-            <Stack p={2.5} spacing={2}>
-                <Stack>
-                    <StepSection>
-                        <StepImage
-                            loading={ipfs.loading}
-                            status={(ipfs.data && "success") || (ipfs.error && "error")}
-                        />
-                        <Stack>
-                            <Typography>Upload to server</Typography>
-                            {ipfs.error && 
-                                <>
-                                    <Alert severity="error">{ipfs.error?.message}</Alert>
-                                    <Typography component={Link} onClick={onUpload} variant="caption">Retry Uploading to server</Typography>
-                                </>
-                            }
-                        </Stack>
-                    </StepSection>
-
-                    <StepSection>
-                        <StepImage
-                            loading={toSale.loading}
-                            status={(toSale.success &&"success") || (Boolean(toSale.error) && "error")}
-                        />
-                        <Stack>
-                            <Typography>Add To market</Typography>
-                            {Boolean(toSale.error) &&
-                                <>
-                                    <Alert severity="error">{e_msg(toSale.error)}</Alert>
-                                    <Typography disabled={!toSale.write} component={Link} onClick={()=>toSale.write?.()} variant="caption">retry</Typography>
-                                </>
-                            }
-                        </Stack>
-                    </StepSection>
-
-                    {needApproval &&
-                    <StepSection>
-                        <StepImage
-                            loading={approve.loading}
-                            status={(approve.success &&"success") || (Boolean(approve.error) && "error")}
-                        />
-                        <Stack>
-                            <Typography>Give Market Permission</Typography>
-                            { Boolean(approve.error) &&
+            <DialogContent>
+                <Stack p={2.5} spacing={2}>
+                    <Stack>
+                        <StepSection>
+                            <StepImage
+                                loading={ipfs.loading}
+                                status={(ipfs.data && "success") || (ipfs.error && "error")}
+                            />
+                            <Stack>
+                                <Typography>Upload to server</Typography>
+                                {ipfs.error && 
                                     <>
-                                        <Alert severity="error">{e_msg(approve.error)}</Alert>
-                                        <Typography disabled={!approve.write} component={Link} onClick={()=>approve.write?.()} variant="caption">retry</Typography>
+                                        <Alert severity="error">{ipfs.error?.message}</Alert>
+                                        <Typography component={Link} onClick={onUpload} variant="caption">Retry Uploading to server</Typography>
                                     </>
-                            }
+                                }
                             </Stack>
-                    </StepSection>
+                        </StepSection>
+
+                        <StepSection>
+                            <StepImage
+                                loading={toSale.loading}
+                                status={(toSale.success &&"success") || (Boolean(toSale.error) && "error")}
+                            />
+                            <Stack>
+                                <Typography>Add To market</Typography>
+                                {Boolean(toSale.error) &&
+                                    <>
+                                        <Alert severity="error">{e_msg(toSale.error)}</Alert>
+                                        <Typography disabled={!toSale.write} component={Link} onClick={()=>toSale.write?.()} variant="caption">retry</Typography>
+                                    </>
+                                }
+                            </Stack>
+                        </StepSection>
+
+                        {needApproval &&
+                        <StepSection>
+                            <StepImage
+                                loading={approve.loading}
+                                status={(approve.success &&"success") || (Boolean(approve.error) && "error")}
+                            />
+                            <Stack>
+                                <Typography>Give Market Permission</Typography>
+                                { Boolean(approve.error) &&
+                                        <>
+                                            <Alert severity="error">{e_msg(approve.error)}</Alert>
+                                            <Typography disabled={!approve.write} component={Link} onClick={()=>approve.write?.()} variant="caption">retry</Typography>
+                                        </>
+                                }
+                                </Stack>
+                        </StepSection>
+                        }
+                    </Stack>
+                    {   //if the token is approved or tosale was created without approval the preview
+                        (approve.success || (!needApproval && toSale.success))?
+                        <Button variant="outlined" onClick={()=>Router.replace(`/item/${tokenId?.toString()}`)}>Preview</Button>:
+                        <Button disabled={Boolean(ipfs.data || ipfs.loading)} variant="outlined" onClick={onUpload}>Proceed</Button>
                     }
                 </Stack>
-                {   //if the token is approved or tosale was created without approval the preview
-                    (approve.success || (!needApproval && toSale.success))?
-                    <Button variant="outlined" onClick={()=>Router.replace(`/item/${tokenId?.toString()}`)}>Preview</Button>:
-                    <Button disabled={Boolean(ipfs.data || ipfs.loading)} variant="outlined" onClick={onUpload}>Proceed</Button>
+            </DialogContent>
+            <DialogActions>
+                {approveBtnEnabled && 
+                    <Button disabled={approve.success||approve.loading} onClick={()=>approve.write?.()}>Approve</Button>
                 }
-            </Stack>
+            </DialogActions>
         </Dialog>
      )
 }
