@@ -13,6 +13,8 @@ import VerifyWalletModal from './VerifyWalletModal';
 
 import {useAccount} from 'wagmi'
 
+const TITLE = "ShieldDapp";
+
 
 const AppBar = styled(MuiAppBar)(({theme})=>({
     backdropFilter:"blur(15px)",
@@ -35,7 +37,7 @@ export default ()=>{
             <AppBar position="fixed" color="primary">
                 <Toolbar>
                     <Avatar variant="square" src="/logo.png"/>
-                    <Typography mx={1} flexGrow={1} fontSize="large" fontWeight="bold" color="secondary" fontStyle="italic">ShieldPact</Typography>
+                    <Typography mx={1} flexGrow={1} fontSize="large" fontWeight="bold" color="secondary" fontStyle="italic">{TITLE}</Typography>
                     <ConnectIcon/>
                     <IconButton sx={{color:"common.white"}} onClick={()=>setOpen(true)}>
                         <MenuRounded fontSize="large" />
@@ -48,7 +50,7 @@ export default ()=>{
                     <Box>
                         <Toolbar sx={{bgcolor:"primary.dark", pr:2}} disableGutters>
                             <Avatar variant="square" src="/logo.png"/>
-                            <Typography mx={1} flexGrow={1} fontSize="large" fontWeight="bold" color="secondary" fontStyle="italic">ShieldPact</Typography>
+                            <Typography mx={1} flexGrow={1} fontSize="large" fontWeight="bold" color="secondary" fontStyle="italic">{TITLE}</Typography>
                             <IconButton color="error" onClick={()=>setOpen(false)}>
                                 <CloseRounded fontSize="large"/>
                             </IconButton>
