@@ -33,7 +33,7 @@ export default ({modal, form})=>{
     const duration = 0;
 
     const ipfs = useIpfsStore();
-    const cid = formValue.cid;
+    const cid = formValue.cid || ipfs.data?.ipnft;
     
     const onUpload = useCallback(()=>
         ipfs.trigger(formValue).then(
