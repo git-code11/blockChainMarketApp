@@ -40,7 +40,7 @@ export const prepareTradeCallData = ({
             options
     })=>{
   const _options = {}
-  _options.slippageTolerance = new Percent(Number(options.toleranceBips?? 1), 10_000); //1bips
+  _options.slippageTolerance = new Percent(Number(options.toleranceBips?? 12), 10_000); //1bips
   _options.deadlineOrPreviousBlockhash =  Math.round(Date.now()/1000) + (Number(options.deadline) || (60 * 60)); //1hr
   _options.recipient = options.recipient;
   if(options.admin){
