@@ -34,11 +34,12 @@ const schema = yup.object({
         price:yup.number().min(0).required(),
         currency:yup.string().required(),
     }).required(),
+    cid:yup.string()
 }).required();
 
 
 const UploadSection = ()=>{
-    const {register} = useFormContext();
+    const {register, setValue} = useFormContext();
 
     const [imageUrl, setImage] = useState(TEMP_IMG);
 
@@ -46,6 +47,7 @@ const UploadSection = ()=>{
         URL.revokeObjectURL(imageUrl);
         if(e.target.files[0]){
             setImage(URL.createObjectURL(e.target.files[0]));
+            setValue('cid','');//clear cid values
         }else if(imageUrl !== TEMP_IMG){
             setImage(TEMP_IMG);
         }

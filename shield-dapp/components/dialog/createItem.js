@@ -18,7 +18,7 @@ import { parseEther } from "ethers/lib/utils.js";
 import {  useAccount, useContractEvent } from "wagmi";
 import e_msg from "../../context/lib/e_msg";
 
-import { useDebounce } from "use-debounce";
+//import { useDebounce } from "use-debounce";
 import useCreateItem from "../../context/hook/app/erc721/useCreateItem";
 import useApprove from "../../context/hook/app/erc721/useApprove";
 
@@ -51,12 +51,14 @@ export default ({modal, form})=>{
                                     formValue.sale.currency, duration],
                         [creatorAddr, ownerAddr, cid, form.sale, duration]);
                                     
-    const [debouncedToSaleArgs] = useDebounce(toSaleArgs, 500);
-    
-    const _toSaleEnabled = Boolean(cid) && !ipfs.error && ipfs.data;
-    
+    //const [debouncedToSaleArgs] = useDebounce(toSaleArgs, 500);
+    //no need for debounce due to no fast changing input
+    const dependenyIpfscall  = Boolean(ipfs.data);// set true to enable caching
+    const _toSaleEnabled = Boolean(cid && !ipfs.error) && dependenyIpfscall;//
+    //console.log({toSaleArgs, _toSaleEnabled});
+
     const toSale = useCreateItem({
-        args:debouncedToSaleArgs,
+        args:toSaleArgs,
         enabled:_toSaleEnabled
     });
 
@@ -109,11 +111,13 @@ export default ({modal, form})=>{
 
     const hasLoading = ipfs.loading  || toSale.loading || approve.loading
 
+    const enablePreviewBtn = (approve.success || (!needApproval && toSale.success));
+
     //modal can only be toggled off only when upload is made
     return (
-        <Dialog open={modal.visible} onClose={()=>Boolean(hasLoading || cid)?null:modal.toggle()} fullWidth>
+        <Dialog open={modal.visible} onClose={()=>Boolean(hasLoading || cid)?null:modal.toggle()} fullWidth maxWidth="xs">
             <DialogContent>
-                <Stack p={2.5} spacing={2}>
+                <Stack spacing={2}>
                     <Stack>
                         <StepSection>
                             <StepImage
@@ -165,18 +169,26 @@ export default ({modal, form})=>{
                         </StepSection>
                         }
                     </Stack>
-                    {   //if the token is approved or tosale was created without approval the preview
-                        (approve.success || (!needApproval && toSale.success))?
-                        <Button variant="outlined" onClick={()=>Router.replace(`/item/${tokenId?.toString()}`)}>Preview</Button>:
-                        <Button disabled={Boolean(ipfs.data || ipfs.loading)} variant="outlined" onClick={onUpload}>Proceed</Button>
-                    }
+                    <Stack spacing={0.5}>
+                        {   //if the token is approved or tosale was created without approval the preview
+                            enablePreviewBtn?
+                            <Button variant="outlined" onClick={()=>Router.replace(`/item/${tokenId?.toString?.()}`)}>Preview</Button>:
+                            <Button disabled={Boolean(ipfs.data || ipfs.loading)} variant="outlined" onClick={onUpload}>Proceed</Button>
+                        }
+
+                        {approveBtnEnabled && 
+                            <Button disabled={approve.success||approve.loading} onClick={()=>approve.write?.()}>Approve</Button>
+                        }
+
+                        
+                        <Button 
+                            variant="outlined"
+                            disabled={hasLoading||enablePreviewBtn} onClick={()=>modal.toggle()}>Quit</Button>
+
+                    </Stack>
+
                 </Stack>
             </DialogContent>
-            <DialogActions>
-                {approveBtnEnabled && 
-                    <Button disabled={approve.success||approve.loading} onClick={()=>approve.write?.()}>Approve</Button>
-                }
-            </DialogActions>
         </Dialog>
      )
 }

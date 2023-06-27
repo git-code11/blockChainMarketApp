@@ -50,6 +50,7 @@ export const prepareTradeCallData = ({
     };
   }
   
+  
   const chainId = _chainId || trade.inputAmount.currency.chainId || trade.outputAmount.currency.chainId;
   const callParams = SwapRouter.swapCallParameters(trade,  _options)
   const swapRouterAddress = getSwapRouterAddr(chainId);

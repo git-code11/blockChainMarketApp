@@ -11,7 +11,7 @@ import Warning from "@mui/icons-material/Warning";
 const StepSectionContainer = styled((props)=><Stack direction="row" spacing={2} {...props}/>)(()=>({
     position:"relative",
     paddingBottom:"30px",
-    alignItems:"center",
+    alignItems:"top",
     "&:before":{
         content:'""',
         position:"absolute",
