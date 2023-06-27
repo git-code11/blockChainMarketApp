@@ -12,8 +12,8 @@ import { useDeserializeTrade } from "./trade";
 const _selector = createSelector(state=>state.swap,
     swap=>({
         serializedTrade:swap.tradeVault,
-        slippageTolerance:swap.settings.tolerance,
-        deadlineOrPreviousBlockhash:swap.settings.deadline,
+        toleranceBips:swap.settings.tolerance,
+        deadline:swap.settings.deadline*60,//minute to seconds
         admin:swap.admin.account,
         feeBips:swap.admin.feeBips
     })

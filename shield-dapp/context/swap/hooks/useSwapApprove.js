@@ -39,7 +39,7 @@ export default ({chainId, address: tokenAddress}, amountValue, spender, maxAppro
         address:tokenAddress,
         abi:erc20ABI,
         functionName:"approve",
-        args:[spender, approveAmount && BigNumber.from(approveAmount)],
+        args:[spender, approveAmount?BigNumber.from(approveAmount):null],
         enabled: enableApprove && __enabled,
         chainId:chainId
     });

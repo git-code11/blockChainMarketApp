@@ -34,6 +34,10 @@ const Input = styled(props=><MuiInput color='basic' {...props}/>)(({theme})=>({
     }
 }));
 
+
+const bpsToPercent = d=>d/100;
+const percentToBps = d=>d*100;
+
 const Tolerance = ()=>{
     const {data, update} = useSwapSettings();
     const updateSlip = useCallback((tolerance)=>{
@@ -41,14 +45,16 @@ const Tolerance = ()=>{
         update({tolerance});
     },[update]);
 
+
+
     return (
         <Stack gap={1}>
-            <Typography color="grey.400">Slippage Tolerance <i>(bips&lt; 0.1% &gt;)</i></Typography>
+            <Typography color="grey.400">Slippage Tolerance <i>(bips&lt; 0.01% &gt;)</i></Typography>
             <Stack direction="row" justifyContent="space-between">
-                {[1, 10, 20, 30].map(i=>
+                {[3, 5, 10, 15, 20].map(i=>//1bps = 0.01 
                             <Button key={i} variant="outlined"
-                                    onClick={()=>updateSlip(i)}
-                                    color={data.tolerance === i?"basic":"secondary"}
+                                    onClick={()=>updateSlip(percentToBps(i))}
+                                    color={bpsToPercent(data.tolerance) === i?"basic":"secondary"}
                                     >{i}
                                 </Button>
                         )}
@@ -59,7 +65,7 @@ const Tolerance = ()=>{
                 endAdornment={
                     <InputAdornment position="end">
                         <Typography variant='subtitle2'
-                        >{(0.01 * data.tolerance)?.toFixed(2)}%</Typography>
+                        >{bpsToPercent(data.tolerance)?.toFixed(2)}%</Typography>
                     </InputAdornment>
                 }
                 />

@@ -3,7 +3,7 @@ const {SwapRouter} = require("@pancakeswap/smart-router/evm");
 import { TradeType, CurrencyAmount, Percent,} from '@pancakeswap/sdk';
 import _quoteProvider from './_quoteProvider';
 import _poolProvider from './_poolProvider';
-import { getAllPoolTypes, getSwapRouterAddr, fromVReadableAmount, gasPriceWei } from './_utils';
+import { getAllPoolTypes, getSwapRouterAddr, fromReadableAmount, gasPriceWei } from './_utils';
 
 const prepareTradeQuoteParamsConfig  = {
   gasPriceWei,
@@ -22,7 +22,7 @@ export const prepareTradeQuoteParams = ({amountIn, currencyIn, currencyOut, trad
 
   const params = [
     CurrencyAmount.fromRawAmount(currencyIn,
-      fromVReadableAmount( amountIn , currencyIn.decimals)
+      fromReadableAmount( amountIn , currencyIn.decimals)
         ),
     currencyOut,
     tradeType??TradeType.EXACT_INPUT,
@@ -40,15 +40,16 @@ export const prepareTradeCallData = ({
             options
     })=>{
   const _options = {}
-  _options.slippageTolerance = new Percent(Number(options.toleranceBips?? 1000), 10_000); //1bips
+  _options.slippageTolerance = new Percent(Number(options.toleranceBips?? 100), 10_000); //100bips
   _options.deadlineOrPreviousBlockhash =  Math.round(Date.now()/1000) + (Number(options.deadline) || (60 * 60)); //1hr
   _options.recipient = options.recipient;
   if(options.admin){
     _options.fee = {
       recipient: options.admin,
-      fee: new Percent(options.feeBips??1, 10_000) //1bips
+      fee: new Percent(options.feeBips??100, 10_000) //100bips
     };
   }
+  
   const chainId = _chainId || trade.inputAmount.currency.chainId || trade.outputAmount.currency.chainId;
   const callParams = SwapRouter.swapCallParameters(trade,  _options)
   const swapRouterAddress = getSwapRouterAddr(chainId);

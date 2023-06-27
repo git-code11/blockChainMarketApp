@@ -14,9 +14,11 @@ import usePromise from '../../hook/usePromise2';
 import { actions } from '../reducer';
 import { useDebounce } from 'use-debounce';
 import useSwapChainChanged from './useSwapChainChanged';
+import { parseEther } from 'ethers/lib/utils.js';
 
 
-const { getPoolTypes, amountFixed, Transformer } = SmartUtils;
+
+const { getPoolTypes, amountStr, Transformer } = SmartUtils;
 
 const quoteProvider = quoteProviders.onChain();
 const poolCache1 = new CandidatePoolCache();
@@ -80,6 +82,8 @@ export const useSerializeTrade = ()=>{
     return useCallback(Transformer.serializeTrade,[]);
 }
 
+
+
 const useUpdateCurrentTradeState = ()=>{
 
     const dispatch = useDispatch();
@@ -90,11 +94,11 @@ const useUpdateCurrentTradeState = ()=>{
         if(trade){
             dispatch(actions.tradeChange({
                 input:{
-                    amount:amountFixed(trade.inputAmount),
+                    amount:amountStr(trade.inputAmount),
                     currency:trade.inputAmount.currency.wrapped.address
                 },
                 output:{
-                    amount:amountFixed(trade.outputAmount),
+                    amount:amountStr(trade.outputAmount),
                     currency:trade.outputAmount.currency.wrapped.address
                 },
                 chainId:trade.inputAmount.currency.chainId,
@@ -114,7 +118,7 @@ const usePrepareQuoteParams = ({
 
     const _enabledQuote = useMemo(
         ()=>
-            Boolean(!isNaN(amountIn) && Number(amountIn) > 0 && currencyIn && currencyOut)
+            Boolean(amountIn && parseEther(amountIn) > 0 && currencyIn && currencyOut)
     ,[amountIn, currencyIn, currencyOut]);
 
     return useMemo(()=>
@@ -147,7 +151,6 @@ const useDebounceValue = ()=>{
     const currencyOut = useSwapCurrency(_currencyOut);
 
     const [amountIn] = useDebounce(input.amount, DEBOUNCE_TIME);
-
     return {amountIn, currencyIn, currencyOut}
 }
 
@@ -197,7 +200,7 @@ const useSwapTradeWrap = ()=>{
         }
     },[params]);
 
-    const outputValue = useMemo(()=>data?amountFixed(data.outputAmount):"0.0", [data]);
+    const outputValue = useMemo(()=>data?amountStr(data.outputAmount):"0.0", [data]);
     
     return {data, outputValue, exist, update, loading, error, params}
 }
@@ -222,7 +225,7 @@ export const useSwapTradeUpdated = ()=>{
     const trade = useSwapTrade();
     
     useEffect(()=>{
-        //console.log("calling trade update");
+        
         trade.update();
     },[trade.update]);
 

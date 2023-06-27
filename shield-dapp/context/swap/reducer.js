@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import _contract from "../../contract/address.json"
 import mainConfig from '../../mainConfig'
+import { formatEther, parseEther } from 'ethers/lib/utils.js';
 
 const FIXED_NO = 8;
 
@@ -8,9 +9,13 @@ const initialState = {
   status:"idle",
   error:null,
   chainId:mainConfig.mainActiveChain,
+  
+  raw:{
+    inputAmount:0
+  },
 
   input: {
-    amount:0,
+    amount:0n,
     currency:null
   },
 
@@ -20,7 +25,7 @@ const initialState = {
   },
 
   settings:{
-    tolerance: 10, //10bips 0.1%
+    tolerance: 1000, //10bips 0.1%
     deadline: 5, // 5seconds
     pool: { //enabled pool
       V2:true,
@@ -40,7 +45,7 @@ const initialState = {
 
   admin:{
     account:mainConfig.admin,//"0x47207ECD6a722547ec42ee899d2b8973f707090d",//test Admin
-    feeBips:mainConfig.swapFeeBps//10 // 0.1% or 10bps
+    feeBips:mainConfig.swapFeeBps// 0.1% == 100bps
   },
   
   dev:{
@@ -74,40 +79,58 @@ export const counterSlice = createSlice({
   initialState,
   reducers: {
     inputChange: (state, {payload}) => {
+      if(payload.amount !== undefined){
+        state.raw.inputAmount = payload.amount;
+        if(payload.amount && !isNaN(payload.amount)){
+          const newValue = formatEther(parseEther(payload.amount));//to normalize the value
+          if(newValue !== state.input.amount){
+            state.input.amount = newValue;
+            state.trade.value = "";
+            state.output.amount = 0;
+          }
+        }
+      }
+
+      if(payload.currency){
+        state.input.currency = payload.currency;
+        state.trade.value = "";
+        state.output.amount = 0;
+      }
+      
+/* 
       if(payload.amount){
         payload.amount = isNaN(payload.amount)||payload.amount.endsWith('.')||payload.amount.endsWith('0')?
                     payload.amount:
                     Number(Number(payload.amount).toFixed(FIXED_NO)).toString();
         if(state.input.amount===payload.amount)
           return;
-      }
+      } */
 
-      if(
+      /* if(
         (payload.amount && !isNaN(payload.amount) && 
           Number(payload.amount) !== Number(state.input.amount)) || 
             payload.currency){
         state.trade.value = "";
         state.output.amount = 0;
-      }
-      state.input = {...state.input, ...payload}
-
-      
+      } */
+      //state.input = {...state.input, ...payload}
     },
 
     outputChange: (state, {payload}) => {
       if(payload.currency){
         state.output.currency = payload.currency;
-
         state.trade.value = "";
         state.output.amount = 0;
       }
     },
 
     valuesReversed: (state) => {
+      state.raw.inputAmount = 0;
+
       const {input, output} = state;
       state.input = {
           currency: output.currency,
-          amount: output.amount
+          amount: 0//output.amount
       };
 
       state.output = {
@@ -138,17 +161,17 @@ export const counterSlice = createSlice({
         rule:Number(state.input.amount) === Number(payload.input.amount),
         data:[Number(state.input.amount).toString(), payload.input.amount]
       }); */
-         
-      if(
-          payload.input && payload.output &&
+      
+      
+      if( payload.input && payload.output &&
           state.input.currency === payload.input.currency &&
-          Number(state.input.amount) === Number(payload.input.amount) &&
+          state.input.amount === payload.input.amount &&
           state.output.currency === payload.output.currency){
             
             state.trade.chainId = payload.chainId;
             state.trade.value = payload.value;
 
-            state.output.amount = Number(Number(payload.output.amount).toFixed(FIXED_NO)).toString();
+            state.output.amount = payload.output.amount;/* Number(Number(payload.output.amount).toFixed(FIXED_NO)).toString() */;
           }
     },
     lockTrade:(state)=>{

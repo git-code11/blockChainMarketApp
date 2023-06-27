@@ -29,8 +29,8 @@ export default ({trade})=>{
     
     const insufficientBalance = useMemo(()=>
                 Boolean(trade.data) && Boolean(result) && 
-                !isNaN(Number(result.value.toBigInt())) && 
-                result.value.toBigInt() < trade.data.inputAmount.quotient,[trade, result])
+                Boolean(result.value) && 
+                result.value < trade.data.inputAmount.quotient,[trade, result])
 
     const {isConnected} = useAccount()
 

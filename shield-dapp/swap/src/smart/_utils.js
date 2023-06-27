@@ -133,6 +133,11 @@ export function amountFixed(amount, fixed=8){
   return Number(Number(toVReadableAmount(amount.quotient, amount.currency.decimals)).toFixed(fixed));
 }
 
+export function amountStr(amount){
+  return formatUnits(amount.quotient, amount.currency.decimals);
+}
+
+
 export const getTxExplorer = (tx, chainId)=>{
   const explorer = MAP_ID_CHAIN[chainId??tx.chainId]?.blockExplorers?.default;
   const hash = tx?.transactionHash;
