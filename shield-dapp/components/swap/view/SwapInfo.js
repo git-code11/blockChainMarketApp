@@ -71,7 +71,7 @@ export const SwapBasicInfo = ({trade})=>{
                     <TableCell align="right">
                         <Typography variant="subtitle2">
                         {
-                        _minimumAmountOut? `${_minimumAmountOut} ${maximumAmountIn.currency.symbol}`:"- - -"
+                        _minimumAmountOut? `${_minimumAmountOut} ${minimumAmountOut.currency.symbol}`:"- - -"
                         }
                         </Typography>
                     </TableCell>
