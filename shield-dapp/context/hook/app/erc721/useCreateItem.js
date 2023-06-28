@@ -1,4 +1,4 @@
-import useAppContractWrite_2 from "../../../wagmi_ethers/useAppContractWrite_2";
+import useAppContractWrite from "../../../wagmi_ethers/useAppContractWrite";
 import saleAbi from "../../../../contract/Sale.sol/MarketSales.json"
 import _contract from "../../../../contract/address.json"
 import { useContractRead } from "wagmi";
@@ -15,12 +15,12 @@ export default ({
         functionName:"mintFee",
     });
 
-    const method = useAppContractWrite_2({
+    const method = useAppContractWrite({
         address,
         abi:saleAbi.abi,
         functionName:"createItem",
         args,
-        //enabled:enabled && fee.isSuccess,
+        enabled:enabled && fee.isSuccess,
         overrides:{
             value:fee.data??0
         }
