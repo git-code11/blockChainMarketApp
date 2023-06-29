@@ -13,7 +13,7 @@ import {useAccount, useBalance, useContractRead} from "wagmi";
 import { formatEther } from "ethers/lib/utils.js";
 
 import saleAbi from "../../contract/Sale.sol/MarketSales.json";
-import _contract from "../../contract/address.json";
+import _contract from "../../contract/address.js";
 import { constants } from "ethers";
 
 import e_msg from "../../context/lib/e_msg";

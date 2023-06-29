@@ -1,6 +1,6 @@
 import {useContractRead, useAccount} from "wagmi"
 import tokenFactory from "../../../../../contract/TokenFactory.sol/TokenFactory.json";
-import _contract from "../../../../../contract/address.json"
+import _contract from "../../../../../contract/address.js"
 
 export default ({
     address=_contract.tokenFactory

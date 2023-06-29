@@ -15,7 +15,7 @@ import {useAccount, useContractReads} from "wagmi";
 import nftAbi from "../../../contract/NFT.sol/NFT.json";
 import saleAbi from "../../../contract/Sale.sol/MarketSales.json";
 import auctionAbi from "../../../contract/Auction.sol/MarketAuction.json";
-import _contract from "../../../contract/address.json";
+import _contract from "../../../contract/address.js";
 
 import { useIpfsData } from "../../../context/hook/ipfs";
 import useCurrency from "../../../context/hook/useCurrency";

@@ -12,7 +12,7 @@ import usePredictAmount,{predictAmountParams} from "../../../context/hook/app/fa
 import { useToken } from "wagmi";
 import e_msg from "../../../context/lib/e_msg";
 import useCreatePad, { prepareCreatePadParams } from "../../../context/hook/app/factory/launch/useCreatePad";
-import _contract from "../../../contract/address.json";
+import _contract from "../../../contract/address.js";
 import { parseAddress } from "../../../context/hook/app/factory/utils";
 import { useFormContext } from "react-hook-form";
 import { useDebounce } from "use-debounce";

@@ -1,6 +1,6 @@
 import useAppContractWrite from "../../../wagmi_ethers/useAppContractWrite";
 import auctionAbi from "../../../../contract/Auction.sol/MarketAuction.json"
-import _contract from "../../../../contract/address.json"
+import _contract from "../../../../contract/address.js"
 
 export default ({
     address=_contract.auction,

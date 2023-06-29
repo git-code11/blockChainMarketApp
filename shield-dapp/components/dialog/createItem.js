@@ -10,7 +10,7 @@ import { StepImage, StepSection } from "../../components/StepProcess";
 
 import {useIpfsStore} from "../../context/hook/ipfs";;
 
-import _contract from "../../contract/address.json";
+import _contract from "../../contract/address.js";
 import { BigNumber } from "ethers";
 
 import {constants} from "ethers";
@@ -45,11 +45,12 @@ export default ({modal, form})=>{
     //[creator, owner, cid, salePrice, saleCurrency(0x0 for native or erc20 addresses), duration]
     //it is believed that the saleCurrency has a decimal equal to ether (18)
     const toSaleArgs = useMemo(()=>
-                                [creatorAddr, ownerAddr, 
+                                [creatorAddr, ownerAddr,
+                                    formValue.category,
                                     cid,
                                     parseEther(formValue.sale.price.toString()),
                                     formValue.sale.currency, duration],
-                        [creatorAddr, ownerAddr, cid, form.sale, duration]);
+                        [creatorAddr, ownerAddr, cid, form.sale, formValue.category, duration]);
                                     
     //const [debouncedToSaleArgs] = useDebounce(toSaleArgs, 500);
     //no need for debounce due to no fast changing input

@@ -15,7 +15,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import CustomInput from "../CustomInput";
 
 import auctionAbi from "../../contract/Auction.sol/MarketAuction.json";
-import _contract from "../../contract/address.json";
+import _contract from "../../contract/address.js";
 import useCurrency from '../../context/hook/useCurrency';
 import { formatEther, parseEther } from 'ethers/lib/utils.js';
 

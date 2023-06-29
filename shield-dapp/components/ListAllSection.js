@@ -13,7 +13,7 @@ import Item from "./Item/Neutral";
 import { useContractRead, useContractReads } from 'wagmi';
 
 import nftAbi from '../contract/NFT.sol/NFT.json';
-import _contract from '../contract/address.json';
+import _contract from '../contract/address.js';
 
 import { useIpfsData } from '../context/hook/ipfs';
 

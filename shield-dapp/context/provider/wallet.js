@@ -15,7 +15,7 @@ const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
 
 // 2. Configure wagmi client
 const chains = ctxConfig.activeChains//[bscTestnet, bsc, goerli, mainnet];
-
+//console.log({chains})
 const { provider } = configureChains(chains, [w3mProvider({ projectId })])
 const wagmiClient = createClient({
   autoConnect: true,

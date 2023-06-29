@@ -1,12 +1,21 @@
 import {bscTestnet, bsc, mainnet, goerli} from 'wagmi/chains'
 
+
+const IS_PRODUCTION = process.env.NEXT_PUBLIC_ENV === "production";
+
 const CONFIG = {
-    activeChains:[/* bscTestnet,  goerli, */ bsc, mainnet],
+    activeChains:[...(IS_PRODUCTION?[]:[bscTestnet,  goerli]), bsc, mainnet],
     activeIdChains:{
-        //97:bscTestnet,
+        ...(
+            IS_PRODUCTION?
+            {}:
+            {
+                97:bscTestnet,
+                5:goerli
+            }
+        ),
         56:bsc,
         1:mainnet,
-        //5:goerli
     }
 }
 

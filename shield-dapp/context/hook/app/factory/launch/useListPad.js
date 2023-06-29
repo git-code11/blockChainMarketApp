@@ -1,6 +1,6 @@
 import { useContractRead, useAccount } from "wagmi";
 import padFactory from "../../../../../contract/PadFactory.sol/PadFactory.json";
-import _contract from "../../../../../contract/address.json"
+import _contract from "../../../../../contract/address.js"
 
 
 export const useListPadIds = ({

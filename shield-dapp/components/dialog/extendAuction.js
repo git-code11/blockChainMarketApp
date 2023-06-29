@@ -11,7 +11,7 @@ import Stack from "@mui/material/Stack";
 import {useContractRead} from "wagmi";
 
 import auctionAbi from "../../contract/Auction.sol/MarketAuction.json";
-import _contract from "../../contract/address.json";
+import _contract from "../../contract/address.js";
 import { useDebounce } from 'use-debounce';
 
 import e_msg from "../../context/lib/e_msg";
@@ -35,7 +35,7 @@ export default ({tokenId, toggle})=>{
     const _formValid = methods.formState.isValid;
     const {extendTime:_value} = methods.watch();
     const [[value, formValid]] = useDebounce([_value, _formValid], 500);
-    const timeDuration = useMemo(()=>value * 3600, [value]);
+    const timeDuration = useMemo(()=>value && Math.round(value * 3600), [value]);
 
     const {data:auction} = useContractRead({
         abi:auctionAbi.abi,

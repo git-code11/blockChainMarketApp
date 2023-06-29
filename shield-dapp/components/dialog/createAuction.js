@@ -6,7 +6,7 @@ import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
-import _contract from "../../contract/address.json";
+import _contract from "../../contract/address.js";
 
 
 import e_msg from "../../context/lib/e_msg";

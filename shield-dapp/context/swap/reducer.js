@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import _contract from "../../contract/address.json"
+import _contract from "../../contract/address.js"
 import mainConfig from '../../mainConfig'
 import { formatEther, parseEther } from 'ethers/lib/utils.js';
 
@@ -15,7 +15,7 @@ const initialState = {
   },
 
   input: {
-    amount:0n,
+    amount:0,
     currency:null
   },
 

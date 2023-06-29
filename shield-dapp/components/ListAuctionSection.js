@@ -15,7 +15,7 @@ import Item from "./Item/Auction";
 
 import auctionAbi from '../contract/Auction.sol/MarketAuction.json';
 import nftAbi from '../contract/NFT.sol/NFT.json';
-import _contract from '../contract/address.json';
+import _contract from '../contract/address.js';
 
 
 

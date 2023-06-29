@@ -11,12 +11,13 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import {useAccount} from "wagmi"
 
-import _contract from "../../contract/address.json";
+import _contract from "../../contract/address.js";
 
 import NFTCreateDialog from '../../components/dialog/createItem';
 
 import { constants } from "ethers";
 import exchangeCurrency from'../../currency-list';
+import categoryList from'../../category-list';
 
 import ModalProvider,{useModal} from "../../context/modal";
 
@@ -34,7 +35,8 @@ const schema = yup.object({
         price:yup.number().min(0).required(),
         currency:yup.string().required(),
     }).required(),
-    cid:yup.string()
+    category:yup.string().required('category required'),
+    cid:yup.string(),
 }).required();
 
 
@@ -105,7 +107,7 @@ const ContainerWrapper =  ({modal})=>{
         }
     },[methods.trigger, modal.toggle]);
 
-    const submitBtnDisabled = useMemo(()=>!(methods.formState.isDirty && methods.formState.isValid),[methods]);
+    //const submitBtnDisabled = useMemo(()=>!(methods.formState.isDirty && methods.formState.isValid),[methods]);
 
     return (
     <Container 
@@ -146,6 +148,18 @@ const ContainerWrapper =  ({modal})=>{
                     
                     <Grid>
                         <TextInput multiline rows={3}  label="Description" name="description"/>
+                    </Grid>
+
+                    <Grid>
+                        <TextInput label="Category" select name="category">
+                            {Object.entries(categoryList).map(
+                                    ([key, value])=>
+                                        <MenuItem key={value} value={value}>
+                                            {key}
+                                        </MenuItem>
+                                    )
+                            }
+                        </TextInput>
                     </Grid>
                     
 
@@ -212,7 +226,9 @@ const PageContainer =  ()=>{
                 currency:constants.AddressZero,
                 price:0,
             },
-            cid:""
+            category:"",
+            cid:"",
+            
         }
     });
 

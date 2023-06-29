@@ -1,6 +1,6 @@
 import useAppContractWrite_2 from "../../../wagmi_ethers/useAppContractWrite_2";
 import saleAbi from "../../../../contract/Sale.sol/MarketSales.json"
-import _contract from "../../../../contract/address.json"
+import _contract from "../../../../contract/address.js"
 import { useContractRead } from "wagmi";
 
 export default ({

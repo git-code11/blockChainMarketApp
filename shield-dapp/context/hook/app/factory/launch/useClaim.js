@@ -1,5 +1,5 @@
 import pad from "../../../../../contract/Pad.sol/LaunchPad.json";
-import _contract from "../../../../../contract/address.json"
+import _contract from "../../../../../contract/address.js"
 import useAppContractWrite_2 from "../../../../wagmi_ethers/useAppContractWrite_2";
 import { usePadInfoByAddress } from "./padInfo";
 import { useMemo } from "react";

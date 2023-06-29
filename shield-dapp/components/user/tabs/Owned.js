@@ -8,7 +8,7 @@ import { useContractRead, useContractReads } from "wagmi";
 import LazyScroll from "../../LazyScroll";
 import Item from '../item/Item';
 import nftAbi from "../../../contract/NFT.sol/NFT.json";
-import _contract from "../../../contract/address.json";
+import _contract from "../../../contract/address.js";
 import { useIpfsData } from "../../../context/hook/ipfs";
 
 import useUserId from "../../../context/hook/user/useId";

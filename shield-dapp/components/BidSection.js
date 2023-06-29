@@ -9,7 +9,7 @@ import ItemBid from "./Item/Bid";
 import { useContractRead } from 'wagmi';
 
 import saleAbi from '../contract/Sale.sol/MarketSales.json';
-import _contract from '../contract/address.json';
+import _contract from '../contract/address.js';
 
 import {temp_c, temp_p} from "../temp";
 

@@ -16,7 +16,7 @@ import useCurrency from '../context/hook/useCurrency';
 
 import saleAbi from '../contract/Sale.sol/MarketSales.json';
 import nftAbi from '../contract/NFT.sol/NFT.json';
-import _contract from '../contract/address.json';
+import _contract from '../contract/address.js';
 
 import { useIpfsData } from '../context/hook/ipfs';
 

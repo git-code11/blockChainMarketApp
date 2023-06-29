@@ -74,7 +74,7 @@ const MenuList = ()=>{
         <List sx={{"& .MuiListItemButton-root":{cursor:"pointer"}}}>
             <ListItemButton component={Link} href="/home">Home</ListItemButton>
             <Divider variant="middle"/>
-            <ListItemButton component={Link} href="/explore/0">Explore</ListItemButton>
+            <ListItemButton component={Link} href="/explore/0/0">Explore</ListItemButton>
             <Divider variant="middle"/> 
             <ListItemButton component={Link} href="/swap">Swap Exchange</ListItemButton>
             <Divider variant="middle"/>

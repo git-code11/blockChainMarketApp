@@ -1,6 +1,6 @@
 import { useContractRead } from "wagmi";
 import pad from "../../../../../contract/Pad.sol/LaunchPad.json";
-import _contract from "../../../../../contract/address.json"
+import _contract from "../../../../../contract/address.js"
 
 
 

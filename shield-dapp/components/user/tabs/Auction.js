@@ -10,7 +10,7 @@ import LazyScroll from "../../LazyScroll";
 import ItemAuctionBid from '../item/Auction';
 import nftAbi from "../../../contract/NFT.sol/NFT.json";
 import auctionAbi from "../../../contract/Auction.sol/MarketAuction.json";
-import _contract from "../../../contract/address.json";
+import _contract from "../../../contract/address.js";
 import { useIpfsData } from "../../../context/hook/ipfs";
 import e_msg from '../../../context/lib/e_msg';
 

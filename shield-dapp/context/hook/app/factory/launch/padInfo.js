@@ -1,7 +1,7 @@
 import { useAccount, useContractRead } from "wagmi";
 import padFactory from "../../../../../contract/PadFactory.sol/PadFactory.json";
 import pad from "../../../../../contract/Pad.sol/LaunchPad.json";
-import _contract from "../../../../../contract/address.json"
+import _contract from "../../../../../contract/address.js"
 import { formatEther, formatUnits} from "ethers/lib/utils.js";
 import { from_Bips, from_pBips } from "../utils";
 import { constants } from "ethers";

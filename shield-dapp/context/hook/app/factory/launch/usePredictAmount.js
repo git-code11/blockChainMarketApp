@@ -2,7 +2,7 @@
 
 import {useContractRead} from "wagmi"
 import padFactory from "../../../../../contract/PadFactory.sol/PadFactory.json";
-import _contract from "../../../../../contract/address.json"
+import _contract from "../../../../../contract/address.js"
 import {_1inputToOutputValueBps, to_pBips} from '../utils';
 import { parseEther } from "ethers/lib/utils.js";
 

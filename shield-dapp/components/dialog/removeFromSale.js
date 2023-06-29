@@ -11,7 +11,7 @@ import Stack from "@mui/material/Stack";
 import {useContractRead} from "wagmi";
 
 import saleAbi from "../../contract/Sale.sol/MarketSales.json";
-import _contract from "../../contract/address.json";
+import _contract from "../../contract/address.js";
 
 
 import e_msg from "../../context/lib/e_msg";

@@ -1,6 +1,6 @@
 import useAppContractWrite_2 from "../../../../wagmi_ethers/useAppContractWrite_2";
 import padFactory from "../../../../../contract/PadFactory.sol/PadFactory.json";
-import _contract from "../../../../../contract/address.json"
+import _contract from "../../../../../contract/address.js"
 import {_1inputToOutputValueBps, to_pBips} from '../utils';
 import { parseEther } from "ethers/lib/utils.js";
 

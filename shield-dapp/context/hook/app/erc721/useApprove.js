@@ -2,7 +2,7 @@ import { useContractRead } from "wagmi";
 import { BigNumber } from "ethers";
 import { useMemo } from "react";
 import useAppContractWrite from "../../../wagmi_ethers/useAppContractWrite";
-import _contract from "../../../../contract/address.json";
+import _contract from "../../../../contract/address.js";
 import nftAbi from "../../../../contract/NFT.sol/NFT.json";
 
 /**
