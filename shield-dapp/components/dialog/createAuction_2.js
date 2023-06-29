@@ -20,7 +20,7 @@ import { parseEther } from 'ethers/lib/utils.js';
 import {useDebounce} from 'use-debounce';
 
 import Switch from '@mui/material/Switch';
-import useApprovalForAll from '../../context/hook/app/erc721/useApprovalForAll';
+import useApprove from '../../context/hook/app/erc721/useApprove';
 import useCreateAuction from '../../context/hook/app/erc721/useCreateAuction';
 import TextField from '../ControlledTextField';
 
@@ -69,7 +69,7 @@ const prepareFormValue = (formValid, formValue)=>{
         const f_endTime = Math.round(Date.parse(formValue.endTime)/1000);
         const f_diffTime = formValue.scheduled?
                                 Math.abs(f_endTime - f_startTime):
-                                Math.round(formValue.diffTime*3600)//hrs to secs
+                                formValue.diffTime*3600//hrs to secs
         
         value = [ 
                 parseEther(formValue.reserve.toString()),
@@ -103,7 +103,8 @@ export default ({tokenId, toggle})=>{
     const [[formValue, formValid]] = useDebounce(_prepFormValue, 500);
 
 
-    const approve = useApprovalForAll({
+    const approve = useApprove({
+        item:tokenId,
         spender:_contract.auction,
         enabled:tokenIdIsValid
     });

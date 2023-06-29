@@ -8,10 +8,10 @@ export const addToSaleSchema = yup.object({
 
 
 export const createAuctionSchema = yup.object({
-    reserve: yup.number().positive().required("Set Reserve Price"),
+    reserve: yup.number().positive().moreThan(0).required("Set Reserve Price"),
     startTime: yup.date().required("Start Date Required"),
     endTime:yup.date().required("End Date Required"),
-    diffTime: yup.number().positive().required("invalid"),//for unscheduled mode
+    diffTime: yup.number().positive().moreThan(0).required("invalid"),//for unscheduled mode
     scheduled:yup.boolean().required()
 }).required();
 

@@ -6,7 +6,7 @@ import DisplayFaq from "../../components/DisplayFaq";
 
 //import SwipeableDisplay from "../../components/SwipeableDisplay";
 
-import ListPriceSection from '../../components/ListPriceSection';
+import AllListPriceSection from "../components/List/all/price";
 
 
 export default ()=>{
@@ -30,7 +30,7 @@ export default ()=>{
                     <DisplayFaq/>
                 </Box>
                 
-                <ListPriceSection/>
+                <AllListPriceSection/>
                 
             </Container>
  

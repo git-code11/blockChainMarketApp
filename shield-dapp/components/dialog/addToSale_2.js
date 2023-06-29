@@ -20,9 +20,9 @@ import { parseEther } from 'ethers/lib/utils.js';
 import exchangeCurrency from'../../currency-list';
 
 import {useDebounce} from 'use-debounce';
-
+import useApprove from '../../context/hook/app/erc721/useApprove';
 import useAddToMarket from '../../context/hook/app/erc721/useAddToMarket';
-import useApprovalForAll from '../../context/hook/app/erc721/useApprovalForAll';
+
 import TextField from '../ControlledTextField';
 import { addToSaleSchema } from "./data/schema";
 import { addToSaleDefValue } from "./data/defaultValues";
@@ -81,7 +81,8 @@ export default ({tokenId, toggle})=>{
 
     const [[formValue, formValid]] = useDebounce(_prepFormValue, 500);
 
-    const approve = useApprovalForAll({
+    const approve = useApprove({
+        item:tokenId,
         spender:_contract.sale,
         enabled:tokenIdIsValid
     });

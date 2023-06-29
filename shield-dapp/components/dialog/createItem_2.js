@@ -20,7 +20,8 @@ import e_msg from "../../context/lib/e_msg";
 
 //import { useDebounce } from "use-debounce";
 import useCreateItem from "../../context/hook/app/erc721/useCreateItem";
-import useApprovalForAll from '../../context/hook/app/erc721/useApprovalForAll';
+import useApprove from "../../context/hook/app/erc721/useApprove";
+
 
 export default ({modal, form})=>{
     const {address:ownerAddr} = useAccount();
@@ -73,9 +74,6 @@ export default ({modal, form})=>{
     
     //To Check for minted token Id
     //Another implementation would be to get token Id from the transaction reciept logs
-    console.log({rp:toSale.reciept});
-
-    //Token Transfer event is last in list
     const tokenId = useMemo(()=>
         (toSale.success && toSale.reciept)?BigNumber.from(toSale.reciept.logs[0].topics[3]):null
         ,[toSale.reciept, toSale.success]);
@@ -97,7 +95,8 @@ export default ({modal, form})=>{
     //if the sale Price > 0 then this item created need to approve the market
     const needApproval  = formValue.sale.price > 0 ;//&& toSale.success; 
     //Approval is enabled on if token
-    const approve = useApprovalForAll({
+    const approve = useApprove({
+        item:tokenId,
         spender:_contract.sale,
         enabled:needApproval && toSale.success && Boolean(tokenId)
     });
@@ -108,12 +107,12 @@ export default ({modal, form})=>{
             approve.write?.();
         }
     },[approve, toSale.success, needApproval]) */;
-    const approveBtnEnabled = needApproval && !(approve.isApproved /* || approve.success */) && toSale.success && Boolean(tokenId);
+    const approveBtnEnabled = needApproval && !(approve.isApproved || approve.success) && toSale.success && Boolean(tokenId);
 
 
     const hasLoading = ipfs.loading  || toSale.loading || approve.loading
 
-    const enablePreviewBtn = (toSale.success && (!needApproval || approve.isApproved));
+    const enablePreviewBtn = (approve.success || (!needApproval && toSale.success));
 
     //modal can only be toggled off only when upload is made
     return (
@@ -157,7 +156,7 @@ export default ({modal, form})=>{
                         <StepSection>
                             <StepImage
                                 loading={approve.loading}
-                                status={(toSale.success && approve.isApproved &&"success") || (Boolean(approve.error) && "error")}
+                                status={(approve.success &&"success") || (Boolean(approve.error) && "error")}
                             />
                             <Stack>
                                 <Typography>Give Market Permission</Typography>
@@ -179,7 +178,7 @@ export default ({modal, form})=>{
                         }
 
                         {approveBtnEnabled && 
-                            <Button disabled={approve.loading} onClick={()=>approve.write?.()}>Approve</Button>
+                            <Button disabled={approve.success||approve.loading} onClick={()=>approve.write?.()}>Approve</Button>
                         }
 
                         

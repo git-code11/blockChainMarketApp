@@ -12,8 +12,10 @@ import "hardhat/console.sol";
 
 import "./TransferHelper.sol";
 
-interface IToken is IERC721 {
-    function create(address creator, address owner, string memory cid) external returns(uint256);
+interface INFT is IERC721 {
+    function create(address creator, address owner, bytes32 cat, string memory cid) external returns(uint256);
+    function getItemCat(uint256 id) external returns(bytes32);
+    function updateAuction(address auction_) external;
 }
 
 contract MarketSales is Ownable{
@@ -21,7 +23,8 @@ contract MarketSales is Ownable{
     using EnumerableSet for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.AddressSet;
     
-    IToken public nft;
+    INFT public nft;
+    address public auction;
     
     struct ListPrice{
         address seller;//to check if seller has not transfer token to another
@@ -42,6 +45,8 @@ contract MarketSales is Ownable{
     //user Address to list of items
     mapping(address => EnumerableSet.UintSet) private ownedItemsForSale;
 
+    mapping(bytes32 => EnumerableSet.UintSet) private catItemsForSale;
+
     EnumerableSet.AddressSet private currencies;
 
     modifier permit(uint256 item){
@@ -52,7 +57,8 @@ contract MarketSales is Ownable{
 
     modifier approved(uint256 item){
         //1. Check For Market Approval on Item
-        require(nft.getApproved(item) == address(this), "Market require Approval from Owner");
+        //require(nft.getApproved(item) == address(this), "Market require Approval from Owner");
+        require(nft.isApprovedForAll(nft.ownerOf(item), address(this)), "allow market to manage");
         _;
     }
 
@@ -65,9 +71,22 @@ contract MarketSales is Ownable{
     }
 
     function updateNft(address nft_) external onlyOwner{
-        nft = IToken(nft_);
+        require(nft_ != address(0), 'nft = 0');
+        nft = INFT(nft_); 
+    }
+
+    function updateAuction(address auction_) external onlyOwner{
+        require(auction_ != address(0), 'auction = 0');
+        auction = auction_;
     }
     
+    function updateManager(address nft_, address auction_) external onlyOwner{
+        require(auction_ != address(0) && nft_ != address(0), 'auction = 0, || nft = 0');
+        auction = auction_;
+        nft = INFT(nft_);
+        nft.updateAuction(auction_);
+    }
+
     
     function _addToMarket(address owner, uint256 item, address currency, uint256 amount, uint256 deadline) internal {
         //1. Add to currencies list
@@ -81,6 +100,7 @@ contract MarketSales is Ownable{
         //3. Add Item to ForSale List
         allItemsForSale.add(item);
         ownedItemsForSale[owner].add(item);
+        catItemsForSale[nft.getItemCat(item)].add(item);
     }
 
      function addToMarket(uint256 item, address currency, uint256 amount, uint256 deadline) external permit(item) approved(item){
@@ -93,6 +113,7 @@ contract MarketSales is Ownable{
         //2. Remove From ForSale List
         allItemsForSale.remove(item);
         ownedItemsForSale[owner].remove(item);
+        catItemsForSale[nft.getItemCat(item)].remove(item);
     }
 
     function removeFromMarket(uint256 item) external permit(item) {
@@ -101,7 +122,7 @@ contract MarketSales is Ownable{
 
     function purchase(uint256 item) external payable approved(item){
         ListPrice storage sale = ItemForSale[item];
-        
+        //require(nft.ownerOf(item) != auction, "already auctioned");
         //1. Check for Abnormalities
         require(msg.sender != address(0), "Null address");
         require(allItemsForSale.contains(item) && nft.ownerOf(item) == sale.seller && 
@@ -152,6 +173,10 @@ contract MarketSales is Ownable{
         return ownedItemsForSale[owner].at(index);
     }
 
+    function queryCatByIndex(bytes32 cat, uint256 index) external view returns(uint256){
+        return catItemsForSale[cat].at(index);
+    }
+
     function allSize() external view returns(uint256){
         return allItemsForSale.length();
     }
@@ -160,18 +185,34 @@ contract MarketSales is Ownable{
         return ownedItemsForSale[owner].length();
     }
 
+    function catSize(bytes32 cat) external view returns(uint256){
+        return catItemsForSale[cat].length();
+    }
+
     function getAllItems() external view returns(uint256[] memory){
         return allItemsForSale.values();
     }
 
-    function getOwneditems(address owner) external view returns(uint256[] memory){
+    function getOwnedItems(address owner) external view returns(uint256[] memory){
         return ownedItemsForSale[owner].values();
     }
 
+    function getCatItems(bytes32 cat) external view returns(uint256[] memory){
+        return catItemsForSale[cat].values();
+    }
 
-    function createItem(address creator, address owner, string memory cid, uint256 amount, address currency, uint256 deadline) external payable returns(uint256){
+
+    function createItem(address creator, address owner, bytes32 cat, string memory cid, uint256 amount, address currency, uint256 deadline) external payable returns(uint256){
         //TODO: pay minting fee
-        uint256 item = nft.create(creator, owner, cid);
+        uint256 item = nft.create(creator, owner, cat, cid);
+       /*  //grant permission for sale
+        nft.grantPermission(owner, address(this), true);
+        //grant permission for auction
+        if(auction != address(0)){
+            nft.grantPermission(owner, auction, true);
+        }
+         */
+
         if(mintFee > 0){
             require(msg.value == mintFee, "Invalid minting fee");
             TransferHelper.safeTransferETH(this.owner(), mintFee);

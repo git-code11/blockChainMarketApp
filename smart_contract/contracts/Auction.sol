@@ -17,10 +17,15 @@ import "./IWETH.sol";
 
 //An Escrow Contract to hold the token for the duration of auction
 
+interface INFT is IERC721 {
+    function getItemCat(uint256 id) external returns(bytes32);
+}
+
+
 contract MarketAuction is Ownable, IERC721Receiver {
     using EnumerableSet for EnumerableSet.UintSet;
 
-    IERC721 public nft;
+    INFT public nft;
     IWETH public weth;
 
     struct Auction {
@@ -39,20 +44,17 @@ contract MarketAuction is Ownable, IERC721Receiver {
     uint16 public taxBps = 100;
 
     mapping(address => EnumerableSet.UintSet) private ownedItemsForAuction;
+    mapping(bytes32 => EnumerableSet.UintSet) private catItemsForAuction;
 
     EnumerableSet.UintSet private allItemsForAuction;
 
     mapping(uint256=>Auction) public auctions;
 
-    mapping(uint256=>address[]) bidders;
-
-    mapping(uint256=>uint256[]) bids;
-
     event AuctionEvent(uint256 item);
 
 
     constructor(address nft_, address weth_){
-        nft = IERC721(nft_);
+        nft = INFT(nft_);
         weth = IWETH(weth_);
     }
     
@@ -61,14 +63,14 @@ contract MarketAuction is Ownable, IERC721Receiver {
     }
 
     function updateNft(address nft_) external onlyOwner{
-        nft = IERC721(nft_);
+        nft = INFT(nft_);
     }
 
     function createAuction(uint256 item, uint256 reserve, /*address tokenType,*/ uint256[] memory time, bool scheduled) external {
         
         require(nft.ownerOf(item) == msg.sender, "Only Owner can add item to market");
-        require(nft.getApproved(item) == address(this), "Market require Approval from Owner");
-
+        //require(nft.getApproved(item) == address(this), "Auction require Approval from Owner");
+        require(nft.isApprovedForAll(nft.ownerOf(item), address(this)), "allow auction to manage");
         Auction storage acn = auctions[item];
         //require(acn.reserve == 0 || acn.price == 0, "on going auction");
         acn.scheduled = scheduled; 
@@ -84,7 +86,7 @@ contract MarketAuction is Ownable, IERC721Receiver {
 
         allItemsForAuction.add(item);
         ownedItemsForAuction[msg.sender].add(item);
-
+        catItemsForAuction[nft.getItemCat(item)].add(item);
         emit AuctionEvent(item);
     }
 
@@ -153,6 +155,7 @@ contract MarketAuction is Ownable, IERC721Receiver {
         
         allItemsForAuction.remove(item);
         ownedItemsForAuction[acn.creator].remove(item);
+        catItemsForAuction[nft.getItemCat(item)].remove(item);
         delete auctions[item];
 
         emit AuctionEvent(item);
@@ -166,6 +169,10 @@ contract MarketAuction is Ownable, IERC721Receiver {
         return ownedItemsForAuction[msg.sender].at(index);
     }
 
+    function queryCatByIndex(bytes32 cat, uint256 index) external view returns(uint256){
+        return catItemsForAuction[cat].at(index);
+    }
+
     function allSize() external view returns(uint256){
         return allItemsForAuction.length();
     }
@@ -174,12 +181,20 @@ contract MarketAuction is Ownable, IERC721Receiver {
         return ownedItemsForAuction[msg.sender].length();
     }
 
+    function catSize(bytes32 cat) external view returns(uint256){
+        return catItemsForAuction[cat].length();
+    }
+
     function getAllItems() external view returns(uint256[] memory){
         return allItemsForAuction.values();
     }
 
     function getOwnedItems() external view returns(uint256[] memory){
         return ownedItemsForAuction[msg.sender].values();
+    }
+
+    function getCatItems(bytes32 cat) external view returns(uint256[] memory){
+        return catItemsForAuction[cat].values();
     }
 
     /*

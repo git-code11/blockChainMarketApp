@@ -47,12 +47,12 @@ export default ({tokenId, toggle})=>{
 
     const {data:currency} = useCurrency();
     
-    const {amount:_value} = methods.getValues();
+    const {amount:_value} = methods.watch();
     const _isValid = methods.formState.isValid;
     
     const [[d_Value, isValid]] = useDebounce([_value, _isValid], 500);
-    const value = useMemo(()=>isValid && parseEther(d_Value.toString()),[isValid, d_Value]);
-
+    const value = useMemo(()=>isValid?parseEther(d_Value.toString()):undefined,[isValid, d_Value]);
+    
 
     const {data:auction} = useContractRead({
         abi:auctionAbi.abi,
@@ -65,16 +65,19 @@ export default ({tokenId, toggle})=>{
 
     const can_proceed = useMemo(()=>{
         if(balance && auction && value){
-            const _balance = balance.value;
-            const _reserve = auction.reserve;
-            const _price = auction.price;
-            //const _value = value;
-            return _balance >= value && _reserve <= value && _price < value;
+            const _balance = balance.value.toBigInt();
+            const _reserve = auction.reserve.toBigInt();
+            const _price = auction.price.toBigInt();
+            const _value = value.toBigInt();
+           
+            return _balance >= _value && _reserve <= _value && _price < _value;
         }
         return false;
     }
     ,[balance, auction, value]);
-        
+
+    //console.log({balance:balance?.value, value, auction:auction?.reserve, price:auction?.price, tokenId, can_proceed})
+    
     const placeBidEnabled = Boolean(tokenId) && can_proceed;
 
     const {error:_error, loading:_loading, ...bid} = usePlaceBid({
