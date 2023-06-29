@@ -32,13 +32,6 @@ const moreTokensBSC = [
         chainId:56
     },
     {
-        name:"Shido Inu",
-        symbol:"SHIDO",
-        decimals:18,
-        address:"0x733Af324146DCfe743515D8D77DC25140a07F9e0",
-        chainId:56
-    },
-    {
         name:"Binance-Peg BSC-USD",
         symbol:"BSC-USD",
         decimals:18,
