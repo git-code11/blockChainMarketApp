@@ -73,11 +73,11 @@ export default ({modal, form})=>{
     
     //To Check for minted token Id
     //Another implementation would be to get token Id from the transaction reciept logs
-    console.log({rp:toSale.reciept});
+    //console.log({rp:toSale.reciept});
 
     //Token Transfer event is last in list
     const tokenId = useMemo(()=>
-        (toSale.success && toSale.reciept)?BigNumber.from(toSale.reciept.logs[0].topics[3]):null
+        (toSale.success && toSale.reciept)?BigNumber.from(toSale.reciept.logs[toSale.reciept.logs.length - 1].topics[3]):null
         ,[toSale.reciept, toSale.success]);
     
     //const [tokenId, setTokenId] = useState(null);
