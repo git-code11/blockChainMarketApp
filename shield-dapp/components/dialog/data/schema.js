@@ -17,5 +17,5 @@ export const createAuctionSchema = yup.object({
 
 
 export const extendAuctionSchema = yup.object({
-    extendTime:yup.number().min(1).required()
+    extendTime:yup.number().moreThan(0).required()
 }).required();

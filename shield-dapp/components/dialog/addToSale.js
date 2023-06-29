@@ -57,7 +57,7 @@ const prepareFormValue = (formValid, formValue)=>{
         value = [
             formValue.currency,
             parseEther(formValue.amount.toString()),
-            formValue.duration && BigNumber.from(formValue.duration*3600)
+            formValue.duration && BigNumber.from(Math.round(formValue.duration*3600))
         ]
     }
     return [value, _formValid];
