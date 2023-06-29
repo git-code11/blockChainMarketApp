@@ -179,7 +179,7 @@ export default ({modal, form})=>{
                         }
 
                         {approveBtnEnabled && 
-                            <Button disabled={approve.loading} onClick={()=>approve.write?.()}>Approve</Button>
+                            <Button variant="outlined" disabled={approve.loading} onClick={()=>approve.write?.()}>Approve</Button>
                         }
 
                         

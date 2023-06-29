@@ -23,12 +23,14 @@ export default ({
     loading
     })=>{
 
-    const {name, capped, saleRate, launchSym, buySym, 
+    const {name, capped, saleRate, launchSym, buySym, preSaleCompleted,
         totalParticipant, startTime, endTime, tokenSold, tokenTotal, percent
     } = data;
 
+
     const currentTime = Math.round(Date.now()/1000);
     const started = currentTime > startTime;
+    const ended = currentTime > endTime || preSaleCompleted;
     const startFmtTime = useFmtTime(currentTime - startTime);
     const endFmtTime = useFmtTime(endTime - currentTime);
     const percentStr = isNaN(percent)?'':percent.toFixed(2);
@@ -70,7 +72,12 @@ export default ({
             <Divider/>
             <Stack direction="row" mt={1} justifyContent="space-between">
                 {
-                    started?
+                    ended?                  
+                    <Stack>
+                        <Typography fontWeight="bold" variant="body2">{loading?<Skeleton width={50}/>:"Sale Ends In:"}</Typography>
+                        <Typography fontFamily="monospace">{loading?<Skeleton width={50}/>:"00:00:00:00"}</Typography>
+                    </Stack>
+                    :(started?
                     <Stack>
                         <Typography fontWeight="bold" variant="body2">{loading?<Skeleton width={50}/>:"Sale Ends In:"}</Typography>
                         <Typography fontFamily="monospace">{loading?<Skeleton width={50}/>:endFmtTime}</Typography>
@@ -78,7 +85,7 @@ export default ({
                     <Stack>
                         <Typography fontWeight="bold" variant="body2">{loading?<Skeleton width={50}/>:"Sale Starts In:"}</Typography>
                         <Typography fontFamily="monospace">{loading?<Skeleton width={50}/>:startFmtTime}</Typography>
-                    </Stack>
+                    </Stack>)
                 }
 
                     <Stack alignItems="center">

@@ -37,15 +37,17 @@ async function main() {
   _result.nft = nft.address;
   await nft.deployTransaction.wait();
 
-  let tx = await sale.updateNft(_result.nft);
-  await tx.wait();
-
   console.log("Deploying Auction Contract...");
   factory = await ethers.getContractFactory('MarketAuction');
   const auction = await factory.deploy(_result.nft, info.weth);
   console.log("DEBUG:AUCTION", auction.address);
   _result.auction = auction.address;
   await auction.deployTransaction.wait();
+
+  console.log("Setting Up Managers");
+  console.log(_result);
+  let tx = await sale.updateManager(_result.nft, _result.auction);
+  await tx.wait();
 
   console.log({_result})
   

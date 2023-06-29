@@ -42,6 +42,8 @@ import Backdrop from '@mui/material/Backdrop';
 
 import TimeBox from '../../../components/TimeBox';
 
+import categoryList from '../../../category-list';
+
 
 const useAuctionClose = (startTime, diffTime)=>{
     const [closed] = useSetTimeout(
@@ -108,14 +110,23 @@ const ContainerWrapper =  ({tokenId})=>{
                 address:_contract.auction,
                 functionName:"auctions",
                 args:[tokenId]
+            },
+            {
+                abi:nftAbi.abi,
+                address:_contract.nft,
+                functionName:"getItemCat",
+                args:[tokenId]
             }
         ],
         enabled:Boolean(tokenId),
         watch:true
     });
 
-    const [uri, creator, owner, saleData, auctionData] = idata||[];
-
+    const [uri, creator, owner, saleData, auctionData, categoryId] = idata||[];
+    const category = useMemo(()=>categoryId && 
+        Object.keys(categoryList)[Object.values(categoryList).indexOf(categoryId)]
+    , [categoryId]);
+    //console.log({categoryId, categoryList, category})
     const {data:token} = useCurrency(saleData?.currency);
     const {data:native} = useCurrency();
     
@@ -167,7 +178,8 @@ const ContainerWrapper =  ({tokenId})=>{
     const allowedToCloseAuction = auctionClosed && auctionData && (auctionData.creator === user || 
         (auctionData.topBidder !== constants.AddressZero && auctionData.topBidder === user))
     
-    const allowedToExtendAuction = auctionData && !auctionData.scheduled && auctionData.creator === user;
+    const allowedToExtendAuction = auctionClosed && auctionData && !auctionData.scheduled && auctionData.creator === user;
+
 
     return (
             
@@ -290,6 +302,7 @@ const ContainerWrapper =  ({tokenId})=>{
             </Stack>
         }
 
+
         <Box>
             <Divider sx={{my:2}}/>
             <Typography>Tags</Typography>
@@ -297,6 +310,8 @@ const ContainerWrapper =  ({tokenId})=>{
                 <Chip sx={{fontSize:14}} label="#nft"/>
                 <Chip sx={{fontSize:14}} label="#blockchain"/>
                 <Chip sx={{fontSize:14}} label="#most featured"/>
+                {itemOnAuction && <Chip sx={{fontSize:14}} label="#Auction"/>}
+                {!isLoading && category && <Chip sx={{fontSize:14}} label={`#${category}`}/>}
             </Stack>
         </Box>
     </Stack>

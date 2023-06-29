@@ -6,7 +6,7 @@ import DisplayFaq from "../../components/DisplayFaq";
 
 //import SwipeableDisplay from "../../components/SwipeableDisplay";
 
-import AllListPriceSection from "../components/List/all/price";
+import AllListPriceSection from "../../components/List/all/price";
 
 
 export default ()=>{

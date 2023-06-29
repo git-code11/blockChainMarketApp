@@ -39,7 +39,7 @@ export default ()=>{
         const {address} = getAccount();
         const {chain} = getNetwork();
         const {nonce, sig} = (await getNonce(address))||{};
-        console.log({nonce, sig});
+        //console.log({nonce, sig});
         if(!nonce && !address){
             return;
         }

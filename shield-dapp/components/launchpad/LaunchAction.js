@@ -11,7 +11,7 @@ const CompleteAction = ({address})=>{
     });
 
     return (
-        <Stack spacing={2}>
+        <Stack spacing={1}>
             {complete.error &&
                 <Alert color="error">{e_msg(complete.error)}</Alert>
             }
@@ -39,7 +39,7 @@ const ClaimAction = ({address})=>{
     
     return (
 
-    <Stack spacing={2}>
+    <Stack spacing={1}>
         {claim.error &&
             <Alert color="error">{e_msg(claim.error)}</Alert>
         }
@@ -62,7 +62,7 @@ const ClaimAction = ({address})=>{
 export default ({address})=>{
 
     return (
-        <Stack spacing={4} justifyContent="center" direction="column" mt={2}>
+        <Stack spacing={1} justifyContent="center" direction="column" mt={2}>
             <CompleteAction address={address}/>
             <ClaimAction address={address}/>
         </Stack>
