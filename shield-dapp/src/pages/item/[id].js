@@ -306,7 +306,7 @@ const ContainerWrapper =  ({tokenId})=>{
         <Box>
             <Divider sx={{my:2}}/>
             <Typography>Tags</Typography>
-            <Stack direction="row" spacing={2} mt={1}>
+            <Stack direction="row" spacing={2} mt={1} flexWrap="wrap">
                 <Chip sx={{fontSize:14}} label="#nft"/>
                 <Chip sx={{fontSize:14}} label="#blockchain"/>
                 <Chip sx={{fontSize:14}} label="#most featured"/>
