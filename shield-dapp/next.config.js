@@ -2,6 +2,7 @@
 const nextConfig = {
   staticPageGenerationTimeout:120,
   reactStrictMode: true,
+  trailingSlash:true,
   webpack: (config, { isServer }) => {
     if (!isServer || true) {
         // don't resolve 'fs' module on the client to prevent this error on build --> Error: Can't resolve 'fs'
