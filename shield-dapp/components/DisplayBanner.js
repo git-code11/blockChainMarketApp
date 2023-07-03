@@ -68,7 +68,7 @@ const DisplayScreen = ()=>{
                 <Typography variant={isMd?"h5":"h6"}>
                     {BANNER_TEXT}
                 </Typography>
-                <Button sx={{alignSelf:"center"}} component={Link} href="/explore/0" size="large" color="primary" variant="contained">Explore</Button>
+                <Button sx={{alignSelf:"center"}} component={Link} href="/explore/0/0" size="large" color="primary" variant="contained">Explore</Button>
             </Stack>
         </Screen>
     );
