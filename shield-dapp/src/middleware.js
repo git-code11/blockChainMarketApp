@@ -6,7 +6,7 @@ export async function middleware(req) {
     
     if(req.nextUrl.pathname === "/"){
         return NextResponse.redirect(new URL('/home', req.url));
-    }else if(req.nextUrl.pathname === "/user/me"){
+    }else if(req.nextUrl.pathname === "/user/me" || req.nextUrl.pathname === "/user/me/"){
         const token = await getToken({ req });
         if(token){
             return NextResponse.redirect(new URL(`/user/${token.sub.uid}`, req.url));
