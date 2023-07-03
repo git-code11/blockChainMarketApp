@@ -22,7 +22,7 @@ export default ()=>{
     return (
         address?
             (
-            <CardActionArea component={Link} href="/user/me">
+            <CardActionArea component={Link} href={`/user/${address}`}>
                 <Stack p={1} direction="row" sx={{bgcolor:"primary.dark"}} justifyContent="space-between" alignItems="center">
                     <Avatar src={temp_c[2]}/>
                     <Box>
