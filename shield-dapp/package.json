@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "next-start": "next start",
-    "start":"NODE_ENV=production node server.js",
+    "start": "NODE_ENV=production node server.js",
     "lint": "next lint",
     "test": "pnpm mocha",
     "sbuild": "pnpm babel swap/src -d swap/dist -w"
@@ -57,11 +57,13 @@
     "use-debounce": "^9.0.4",
     "viem": "^0.3.37",
     "wagmi": "^0.12.1",
-    "yup": "^1.0.2"
+    "yup": "^1.0.2",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.22.5",
     "@babel/core": "^7.22.5",
+    "@babel/plugin-syntax-bigint": "^7.8.3",
     "@babel/preset-env": "^7.22.5",
     "@faker-js/faker": "^7.6.0",
     "babel-plugin-transform-import-meta": "^2.2.0",

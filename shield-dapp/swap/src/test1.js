@@ -1,4 +1,4 @@
-import { prepareTradeCallData, prepareTradeQuoteParams, quoteProviders,
+import { prepareTradeQuoteParams, quoteProviders,
     CandidatePoolCache, TradeCache,bestTrades, utils, TradeType, PoolType
 } from './smart'
 
@@ -6,12 +6,13 @@ import {SELECTED_CHAINID} from './constants'
 import {bscTestnetTokens } from "@pancakeswap/tokens";
 import {Native} from "@pancakeswap/sdk"
 
-import { createTransaction, sendTransaction, getWallet, approveAmount } from './libs/providers';
-import { fromReadableAmount, toReadableAmount } from './libs/conversion';
+import { toReadableAmount } from './libs/conversion';
 
-const poolCache = new CandidatePoolCache();
-const getBestTradeFunc = bestTrades.cache.main(poolCache);
-const tradeCache = new TradeCache(getBestTradeFunc);
+import { computeTradePriceBreakdown, computeSlippageAdjustedAmounts, formatExecutionPrice } from './smart/exchange';
+
+
+const getBestTradeFunc = bestTrades.api;
+
 
 const WBNB_TOKEN = Native.onChain(SELECTED_CHAINID);
 const USDT_TOKEN = bscTestnetTokens.usdt;
@@ -44,36 +45,21 @@ const main = async ()=>{
     `);
 
     const quote = prepareTradeQuoteParams(trade_params);
-    const trade = await tradeCache.getTrade({forceUpdate:false, args:quote});
+    const trade = await getBestTradeFunc(...quote);
     
     console.log("Trade Fetch Success");
     console.log("Input0 =>", toReadableAmount(trade.inputAmount.quotient), trade.inputAmount.currency.symbol);
     console.log("Output0 =>", toReadableAmount(trade.outputAmount.quotient), trade.outputAmount.currency.symbol);
 
-    const calldata = prepareTradeCallData({trade, options});
-    console.log("Fetch CallData Success")
+    console.log("FormatExecution Price");
+    console.log(formatExecutionPrice(trade, false));
+
+    console.log("Slippage = 100Bps = 1%");
+    console.log(computeSlippageAdjustedAmounts(trade, 100));
     
-    if(currencyIn.isToken){
-      console.log("Approving Contract to spend token");
-      const _amount = fromReadableAmount( amountIn , currencyIn.decimals);
-      const data = await approveAmount(currencyIn.address, getWallet(), calldata.to, _amount);
-      console.log("approve Success", data)
-    }
-    
-    console.log("Creating  Transaction");
-    const tradeTX = await createTransaction(
-      {
-        from: getWallet().address,
-        to: calldata.to,
-        data:calldata.data,
-        value:calldata.value
-      }
-    );
-    
-    console.log("Executing Transaction");
-    const result = tradeTX && (await sendTransaction(getWallet(), tradeTX));
-    console.log("Transaction", result);
-    console.log("Completed");
+    console.log("Price Breakdown");
+    console.log(computeTradePriceBreakdown(trade));
+
 }
 
 main();
