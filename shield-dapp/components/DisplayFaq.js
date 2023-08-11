@@ -18,7 +18,7 @@ const FaqData = [
     },
     {
         text1:"Sell Your NFT's",
-        text2:"Publish your NFT project and share across social media, let the world knows you have arrived.",
+        text2:"Publish your NFT project and share across social media, let the world know you have arrived.",
         icon:"/images/icon/share.png"
     }
 ]
