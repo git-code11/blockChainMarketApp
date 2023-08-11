@@ -1,6 +1,6 @@
-import {useState} from "react";
+import {useState, createContext, useContext, useCallback} from "react";
 
-import Link from "next/link";
+import NLink from "next/link";
 import { Box, Stack, Avatar,styled, IconButton, Typography} from "@mui/material";
 
 import {CloseRounded, MenuRounded} from "@mui/icons-material"
@@ -29,8 +29,12 @@ const Drawer = styled(MuiDrawer)(()=>({
     }
 }));
 
-export default ()=>{
-    const [open, setOpen] = useState(false);
+const drawerContext = createContext();
+const useDrawer = ()=>useContext(drawerContext);
+
+
+const NavBarUI = ()=>{
+    const {open, setOpen} = useDrawer();
 
     return (
         <Box>
@@ -63,6 +67,31 @@ export default ()=>{
             </Drawer>
             <VerifyWalletModal/>
         </Box>
+    )
+}
+
+
+
+
+export default ()=>{
+    const [open, setOpen] = useState(false);
+
+    return (
+        <drawerContext.Provider value={{open, setOpen}}>
+            <NavBarUI/>
+        </drawerContext.Provider>
+    )
+}
+
+const Link = (props)=>{
+    const {setOpen} = useDrawer();
+
+    const onClick = useCallback(()=>{
+        setOpen(false);
+    },[]);
+
+    return (
+        <NLink {...props} onClick={onClick}/>
     )
 }
 
