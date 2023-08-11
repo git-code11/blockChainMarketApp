@@ -1,4 +1,4 @@
-import {useState, createContext, useContext, useCallback, forwardRef} from "react";
+import {useState, createContext, useContext, forwardRef} from "react";
 
 import NLink from "next/link";
 import { Box, Stack, Avatar,styled, IconButton, Typography} from "@mui/material";
@@ -86,9 +86,9 @@ export default ()=>{
 const Link = forwardRef((props, ref)=>{
     const {setOpen} = useDrawer();
 
-    const onClick = useCallback(()=>{
+    const onClick = ()=>{
         setOpen(false);
-    },[]);
+    };
 
     return (
         <NLink {...props} ref={ref} onClick={onClick}/>
