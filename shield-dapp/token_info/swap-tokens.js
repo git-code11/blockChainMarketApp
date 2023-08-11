@@ -44,7 +44,10 @@ export const getWrapTokens = (tks=[])=>{
             cache = {};
             tks.reduce((acc, tk)=>{
                 //console.log({acc,tk});
-                acc[tk.symbol.toLowerCase()] = getWrap(tk);
+                const _tkSym = tk.symbol.toLowerCase();
+                if(!acc[_tkSym]){
+                    acc[_tkSym] = getWrap(tk);
+                }
                 return acc;
             },cache);
         }

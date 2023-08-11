@@ -1,11 +1,12 @@
-import { Currency, CurrencyAmount, TradeType, Percent, ONE_HUNDRED_PERCENT, Token, Price, ZERO } from '@pancakeswap/sdk'
-import { SmartRouterTrade, SmartRouter } from '@pancakeswap/smart-router/evm'
-import { FeeAmount } from '@pancakeswap/v3-sdk'
+import { Currency, CurrencyAmount, /* TradeType,  */Percent, ONE_HUNDRED_PERCENT, /* Token, Price, */ ZERO } from '@pancakeswap/sdk'
+
+/* import { FeeAmount } from '@pancakeswap/v3-sdk' */
 import { formatPrice } from './formatFractions'
 
+const {SmartRouter } = require('@pancakeswap/smart-router/evm')
 
 
-import { BIPS_BASE, INPUT_FRACTION_AFTER_FEE } from '../mm/constant'
+import { BIPS_BASE, INPUT_FRACTION_AFTER_FEE } from './constant'
 
 
 

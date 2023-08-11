@@ -96,12 +96,12 @@ export default ()=>{
     const onSearchChange = useCallback(e=>setSearchText(e.target.value),[setSearchText]);
 
     const currencyListAddress = useMemo(()=>{
-        const _searchText = searchText.trim()
+        const _searchText = searchText.toLowerCase().trim()
         if(_searchText)
             return Object.values(__currencyList).filter(d=>
-                d.address.search(searchText) !== -1 ||
-                d.name.search(searchText) !== -1 ||
-                d.symbol.search(searchText) !== -1
+                d.address.toLowerCase().search(_searchText) !== -1 ||
+                d.name.toLowerCase().search(_searchText) !== -1 ||
+                d.symbol.toLowerCase().search(_searchText) !== -1
             ).map(d=>d.address);
         else
             return __currencyListAddress;
@@ -126,7 +126,7 @@ export default ()=>{
             <Stack>
                 <Typography color="grey.400" fontWeight="bold" variant="subtitle1" mb={1}>Common Base</Typography>
                 <Stack direction="row" flexWrap="wrap" gap={1}>
-                    {__currencyListAddress.slice(0, 5).map(address=><TokenChip key={address} address={address}/>)}
+                    {__currencyListAddress.slice(0, 6).map(address=><TokenChip key={address} address={address}/>)}
                 </Stack>
             </Stack>
             <Divider/>
