@@ -13,8 +13,9 @@ const action = async message=>{
     }
 
     const wallet_provider = signer.provider.provider;
+    console.log({wallet_provider})
     let signature;
-    if(wallet_provider.isWalletConnect){
+    if(wallet_provider.isWalletConnect && false){
         const connector = wallet_provider.connector;
         signature = await connector.signPersonalMessage([message, address]);
     }else{
