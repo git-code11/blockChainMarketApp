@@ -19,7 +19,7 @@ export default (trade) =>{
     const minimumAmountOut = useMemo(()=>trade && SmartUtils.minimumAmountOut(trade, slippage),[trade, slippage]);
     const maximumAmountIn = useMemo(()=>trade && SmartUtils.maximumAmountIn(trade, slippage),[trade, slippage])
     const {data:tokenRisk, error} = useSwapTokenRisk(trade && trade.outputAmount.currency);
-    console.log({tokenRisk, error})
+    
     return ({
         slippage,
         executionPrice,

@@ -5,6 +5,7 @@ import ContextProvider from "../../context/provider";
 import NavBar from "../../components/NavBar";
 import '../../node_modules/sal.js/dist/sal.css';
 import LoadingScreen from '../../components/LoadingScreen';
+import GTagScript from '../../components/GTagScript';
 
 
 export default function App({ Component, pageProps }) {
@@ -20,6 +21,7 @@ export default function App({ Component, pageProps }) {
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="manifest" href="/site.webmanifest"></link>
       </Head>
+      <GTagScript/>
       <ContextProvider pageProps={pageProps}>
         <LoadingScreen/>
         <NavBar/>
