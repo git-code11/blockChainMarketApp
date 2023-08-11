@@ -112,7 +112,7 @@ const SwapFieldBase = ({currency, value, disabled, onInput, onSelect, endIcon})=
                             textAlign:"end",
                             color:"basic.light",
                             "&.Mui-disabled":{
-                                "-webkit-text-fill-color":"unset"
+                                "WebkitTextFillColor":"unset"
                             }
                         }
                     }}

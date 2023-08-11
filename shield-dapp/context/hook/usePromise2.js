@@ -1,9 +1,9 @@
-import {useState, useCallback, useMemo} from 'react';
+import {useState, useCallback, useMemo, useRef} from 'react';
 
 
 const PREFIX = "promiseReqID"
 
-export const useCallStackId = ()=>{
+/* export const useCallStackId = ()=>{
     const session = useMemo(()=>{
         let reqId = 0;
         
@@ -19,7 +19,22 @@ export const useCallStackId = ()=>{
     },[]);
 
     return session;
+} */
+
+export const useCallStackId = ()=>{
+    const reqId = useRef(0);    
+    
+    function update(){
+        reqId.current = PREFIX + Date.now() + Math.round(Math.random()*53332);
+        return reqId.current;
+    }
+    function verify(value){
+        return value === reqId.current;
+    }
+
+    return {update, verify}
 }
+
 
 export default (_func, wait=true)=>{
     const [value, setValue] = useState(null);
@@ -27,7 +42,6 @@ export default (_func, wait=true)=>{
     const [error, setError] = useState(null);
 
     const session = useCallStackId();
-    
 
     const reset = useCallback((wait=true)=>{
         if(loading && wait)

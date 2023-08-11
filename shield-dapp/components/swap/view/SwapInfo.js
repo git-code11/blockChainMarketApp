@@ -10,13 +10,15 @@ import { ExpandMore } from "@mui/icons-material";
 import useSwapInfo from '../../../context/swap/hooks/useSwapInfo';
 import { amountFixed } from '../../../swap/src/smart/_utils';
 
+
 const {PoolType, RouteType} = require("@pancakeswap/smart-router/evm");
 
 const POOL_MAP = Object.keys(PoolType).reduce((acc, key)=>({...acc, [PoolType[key]]:key}),{});
 const ROUTE_MAP = Object.keys(RouteType).reduce((acc, key)=>({...acc, [RouteType[key]]:key}),{});
 
 export const SwapBasicInfo = ({trade})=>{
-    const {slippage, minimumAmountOut, maximumAmountIn, executionPrice} = useSwapInfo(trade.data);
+    const {slippage, minimumAmountOut, maximumAmountIn, executionPrice, tokenRisk} = useSwapInfo(trade.data);
+    
     
     const _executionPrice = useMemo(()=>
         executionPrice && Number(executionPrice.adjustedForDecimals.toFixed(8)),
@@ -89,6 +91,20 @@ export const SwapBasicInfo = ({trade})=>{
                         </Typography>
                     </TableCell>
                 </TableRow>
+
+                <TableRow>
+                    <TableCell>
+                        <Typography>Token Risk</Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                        <Typography>
+                        {
+                        tokenRisk? `${tokenRisk?.riskStr}%`:"- - -"
+                        }
+                        </Typography>
+                    </TableCell>
+                </TableRow>
+
             </TableBody>
         </Table>
     );

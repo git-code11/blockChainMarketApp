@@ -6,6 +6,7 @@ import { Percent } from '@pancakeswap/sdk';
 import {
     utils as SmartUtils
 } from "../../../swap/src/smart";
+import useSwapTokenRisk from './useSwapTokenRisk';
 
 const _selector = createSelector(state=>state.swap.settings,
     settings=>({tolerance:settings.tolerance})
@@ -17,12 +18,13 @@ export default (trade) =>{
     const slippage = useMemo(()=>new Percent(tolerance, 10_000),[tolerance]);
     const minimumAmountOut = useMemo(()=>trade && SmartUtils.minimumAmountOut(trade, slippage),[trade, slippage]);
     const maximumAmountIn = useMemo(()=>trade && SmartUtils.maximumAmountIn(trade, slippage),[trade, slippage])
-    
-
+    const {data:tokenRisk, error} = useSwapTokenRisk(trade && trade.outputAmount.currency);
+    console.log({tokenRisk, error})
     return ({
         slippage,
         executionPrice,
         minimumAmountOut,
-        maximumAmountIn
+        maximumAmountIn,
+        tokenRisk 
     });
 }

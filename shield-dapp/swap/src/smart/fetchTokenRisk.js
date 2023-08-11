@@ -11,6 +11,10 @@ export const zRiskTokenData = zObject({
   scanned_ts: zString(),
 })
 
+const TOKN_RISK_LABEL = [
+  "unknown", "very low", "low", "medium", "high", "very high"
+];
+
 export const TOKEN_RISK = {
   UNKNOWN: -1,
   VERY_LOW: 0,
@@ -27,6 +31,8 @@ export const TOKEN_RISK_MAPPING = {
   '2/5': TOKEN_RISK.HIGH,
   '1/5': TOKEN_RISK.VERY_HIGH,
 }
+
+
 
 /* export interface RiskTokenInfo {
   address: string
@@ -52,11 +58,14 @@ export const fetchRiskToken = async (address, chainId) => {
   const data = zRiskTokenData.parse(riskApi.data)
   // eslint-disable-next-line camelcase
   const { band, scanned_ts } = data
-
+  const riskLevel = TOKEN_RISK_MAPPING[band]
+  const riskStr = TOKN_RISK_LABEL[riskLevel+1]??""
+  
   return {
     address,
     chainId,
-    riskLevel: TOKEN_RISK_MAPPING[band],
+    riskLevel,
+    riskStr,
     scannedTs: parseInt(scanned_ts, 10),
   }
 }
