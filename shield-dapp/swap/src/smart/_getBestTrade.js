@@ -6,7 +6,14 @@ import axios from 'axios';
 
 const {SmartRouter} = require("@pancakeswap/smart-router/evm");
 
-const QUOTING_API = "https://swap-quoting.pancakeswap.com/quoting-service/v0/quote";
+//
+/**
+ * Fetching latest QuotingAPI from process.env.NEXT_PUBLIC_QUOTING_API
+ * Located at 
+ * https://github.com/pancakeswap/pancake-frontend/blob/develop/apps/web/.env
+ */
+
+const QUOTING_API = process.env.NEXT_PUBLIC_QUOTING_API || "https://swap-quoting.pancakeswap.com/quoting-service";
 const __getBestTradeApi = async (
   amount,
   currency,
@@ -20,7 +27,6 @@ const __getBestTradeApi = async (
   const candidatePools = await poolProvider.getCandidatePools(amount.currency, currency, {
     protocols: allowedPoolTypes,
   })
-
 
  /*  const serverRes = await fetch(`${QUOTING_API}`, {
     method: 'POST',
@@ -44,7 +50,7 @@ const __getBestTradeApi = async (
   })
   const serializedRes = await serverRes.json() */
   
-  const serverRes = await axios.post(`${QUOTING_API}`, 
+  const serverRes = await axios.post(`${QUOTING_API}/v0/quote`, 
     {
       chainId: currency.chainId,
       currency: SmartRouter.Transformer.serializeCurrency(currency),
@@ -61,7 +67,7 @@ const __getBestTradeApi = async (
     },
     {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
     }
   );

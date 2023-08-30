@@ -5,7 +5,7 @@ const devConfig = {
     admin:"0x6592b3ae337bD50010FBc63907FB2dC92a450502",
     swapFeeBps:100,
     mainActiveChain:97,
-    gtagID:"G-77XKE6BYNF"
+    gtagID:process.env.NEXT_PUBLIC_GTAG
 }
 
 
@@ -13,7 +13,7 @@ const prodConfig = {
     admin:"0x4733190cC4208aE26512b4F941895F1c25A2Bd50",
     swapFeeBps:100,
     mainActiveChain:56,
-    gtagID:"G-77XKE6BYNF"
+    gtagID:process.env.NEXT_PUBLIC_GTAG
 }
 
 const config = IS_PRODUCTION ? prodConfig : devConfig;
